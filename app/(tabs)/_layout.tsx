@@ -1,10 +1,9 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
+import { Tabs } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
+import { HapticTab } from '@/components/haptic-tab';
+import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,23 +11,37 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          borderTopWidth: 0,
+          elevation: 10,
+          height: 60,
+          paddingBottom: 8,
+        },
         tabBarButton: HapticTab,
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+        name="home/index"
+        options={{ title: 'Home', tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} /> }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
+        name="academics/index"
+        options={{ title: 'Academics', tabBarIcon: ({ color, size }) => <MaterialIcons name="school" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="welfare/index"
+        options={{ title: 'Welfare', tabBarIcon: ({ color, size }) => <FontAwesome5 name="hands-helping" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="store/index"
+        options={{ title: 'Store', tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} /> }}
+      />
+      <Tabs.Screen
+        name="profile/index"
+        options={{ title: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} /> }}
       />
     </Tabs>
   );
