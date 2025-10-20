@@ -5,7 +5,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function AuthLayout() {
   const colorScheme = useColorScheme();
-
+  //layout routing for auth screen 
   return (
     <Stack
       screenOptions={{
@@ -17,11 +17,15 @@ export default function AuthLayout() {
     >
       <Stack.Screen
         name="index"
-        options={{ title: 'Welcome', headerShown: false }}
+        options={{ headerShown: false }}
+      />
+            <Stack.Screen
+        name="welcome"
+        options={{  headerShown: false }}
       />
       <Stack.Screen
         name="login"
-        options={{ title: 'Login' }}
+        options={{ headerShown:false }}
       />
       <Stack.Screen
         name="signup"
@@ -29,7 +33,7 @@ export default function AuthLayout() {
       />
             <Stack.Screen
         name="forgotPassword"
-        options={{ title: 'Sign Up' }}
+        options={{ headerShown:false }}
       />
     </Stack>
   );
