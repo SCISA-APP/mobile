@@ -38,12 +38,20 @@ const index = () => {
         <ScrollView>
           <View >
             <View style={academicsStyles.categories} >
+              <View style={{flex:1}}>
               <CustomButton label={"Notes& P.Qs"} onPress={()=>{console.log("notes and p.qs")}} />
+                </View>
+                <View style={{flex:1}}>
               <CustomButton  label={"Timetable"} onPress={()=>{console.log("Timetable")}}/> 
+                </View>
             </View>
             <View style={academicsStyles.categories} >
+               <View style={{flex:1}}>
               <CustomButton label={"Exam Allocation"} onPress={()=>{console.log("Exam Allocation")}} />
+                </View >
+                <View style={{flex:1}}>
               <CustomButton label={"Lectures"} onPress={()=>{console.log("Lectures")}} />
+                </View>
             </View>
           </View>
           <Text>Academics Screen</Text>

@@ -47,8 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    // width: '100%',  //change to flex:1 to allow equal spacing in row
-    alignSelf: 'stretch',
+    width: '100%',  //change to flex:1 to allow equal spacing in row
     // flex: 1,
   },
   label: {
