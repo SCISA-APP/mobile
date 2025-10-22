@@ -23,7 +23,7 @@ const WelcomeScreen = () => {
           await AsyncStorage.setItem('hasOpenedBefore', 'true');
           router.replace('/(auth)/welcome'); // 🆕 First time
         } else {
-          router.replace('/(auth)/login'); // 🔐 Not signed in
+          router.replace('/(auth)/login'); 
         }
       } catch (error) {
         console.error('Error checking user state:', error);
