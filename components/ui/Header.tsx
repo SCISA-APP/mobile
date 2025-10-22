@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell } from 'lucide-react-native';
-import { HeaderProps, HeaderActionProps, HeaderGreetingProps } from '@/types/components/header';
 import { Colors } from '@/constants/theme';
+import { HeaderActionProps, HeaderGreetingProps, HeaderProps } from '@/types/components/header';
+import { Bell } from 'lucide-react-native';
+import React from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export const HeaderGreeting: React.FC<HeaderGreetingProps> = ({
   name = 'User',

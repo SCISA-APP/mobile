@@ -1,14 +1,24 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import Header from "@/components/ui/Header";
+import React from "react";
+import { ScrollView, StyleSheet, Text } from "react-native";
+import { academicsStyles } from "./styles";
+const PageTitle = ({ title }: { title: string }) => {
+  return <Text style={academicsStyles.title}>{title}</Text>;
+};
 
 const index = () => {
   return (
-    <View>
+    <ScrollView>
+      <Header
+        showGreeting={false}
+        leftComponent={<PageTitle title={"Academics"} />}
+      />
+
       <Text>index</Text>
-    </View>
-  )
-}
+    </ScrollView>
+  );
+};
 
-export default index
+export default index;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
