@@ -1,17 +1,28 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors } from '@/constants/theme';
 import { HapticTab } from '@/components/haptic-tab';
-import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import Header from '@/components/ui/Header';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import React from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const renderHeader = (title?: string) => (
+    <Header 
+      title={title}
+      showGreeting={!title}
+      showNotification={true}
+      showProfile={true}
+      onNotificationPress={() => console.log('Notification pressed')}
+      onProfilePress={() => console.log('Profile pressed')}
+    />
+  );
+
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
@@ -21,27 +32,60 @@ export default function TabLayout() {
           paddingBottom: 8,
         },
         tabBarButton: HapticTab,
+        header: ({ route, options }) => {
+          const title = options.title || '';
+          return renderHeader(title !== 'Home' ? title : undefined);
+        },
       }}
     >
       <Tabs.Screen
         name="home/index"
-        options={{ title: 'Home', tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} /> }}
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
       />
       <Tabs.Screen
         name="academics/index"
-        options={{ title: 'Academics', tabBarIcon: ({ color, size }) => <MaterialIcons name="school" size={size} color={color} /> }}
+        options={{
+          title: 'Academics',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="school" size={size} color={color} />
+          ),
+          headerShown: false,
+        }}
       />
       <Tabs.Screen
         name="welfare/index"
-        options={{ title: 'Welfare', tabBarIcon: ({ color, size }) => <FontAwesome5 name="hands-helping" size={size} color={color} /> }}
+        options={{
+          title: 'Welfare',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="hands-helping" size={size} color={color} />
+          ),
+          headerShown: false,
+        }}
       />
       <Tabs.Screen
         name="store/index"
-        options={{ title: 'Store', tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} /> }}
+        options={{
+          title: 'Store',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cart" size={size} color={color} />
+          ),
+          headerShown: false,
+        }}
       />
       <Tabs.Screen
         name="profile/index"
-        options={{ title: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} /> }}
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+          headerShown: false,
+        }}
       />
     </Tabs>
   );
