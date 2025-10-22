@@ -4,10 +4,72 @@ This directory contains reusable UI components for the mobile application.
 
 ## Table of Contents
 
+- [Header](#header)
 - [EventList](#eventlist)
 - [ListComponent](#listcomponent)
 - [Type Definitions](#type-definitions)
 - [Installation](#installation)
+
+## Header
+
+A customizable header component that can display a title, greeting, and action buttons.
+
+### Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `title` | `string` | No | - | Main title to display in the header |
+| `subtitle` | `string` | No | - | Subtitle text to display below the title |
+| `leftComponent` | `ReactNode` | No | - | Custom left component to render |
+| `rightComponent` | `ReactNode` | No | - | Custom right component to render |
+| `style` | `StyleProp<ViewStyle>` | No | - | Custom styles for the header container |
+| `showGreeting` | `boolean` | No | `true` | Whether to show the greeting and user name |
+| `showNotification` | `boolean` | No | `true` | Whether to show the notification icon |
+| `showProfile` | `boolean` | No | `true` | Whether to show the profile icon |
+| `onNotificationPress` | `() => void` | No | `() => {}` | Callback when notification icon is pressed |
+| `onProfilePress` | `() => void` | No | `() => {}` | Callback when profile icon is pressed |
+
+### Usage Example
+
+```tsx
+import Header from '@/components/ui/Header';
+
+// Basic usage with just a title
+<Header title="Dashboard" />
+
+// With greeting and custom actions
+<Header 
+  showGreeting={true}
+  onNotificationPress={() => console.log('Notification pressed')}
+  onProfilePress={() => console.log('Profile pressed')}
+/>
+
+// Fully customized with custom components
+<Header
+  leftComponent={<CustomLeftComponent />}
+  rightComponent={<CustomRightComponent />}
+  style={{ backgroundColor: '#f5f5f5' }}
+/>
+```
+
+### Subcomponents
+
+#### HeaderGreeting
+
+Displays a greeting message with the current time of day.
+
+**Props:**
+- `name`: `string` - User's name to display
+- `showTime`: `boolean` - Whether to show the time-based greeting
+
+#### HeaderAction
+
+A button with an icon, optionally with a badge.
+
+**Props:**
+- `icon`: `ReactNode` - Icon to display
+- `onPress`: `() => void` - Callback when pressed
+- `badge?`: `number` - Optional badge count to display
 
 ## EventList
 

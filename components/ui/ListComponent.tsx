@@ -1,23 +1,98 @@
-import { AnnouncementItem } from "@/types";
-import React, { memo } from "react";
-import { Dimensions, FlatList, Image, ImageStyle, StyleProp, Text, TextStyle, View, ViewStyle } from "react-native";
+import { memo } from "react";
+import { 
+  Dimensions, 
+  FlatList, 
+  Image, 
+  StyleProp, 
+  Text, 
+  TouchableOpacity, 
+  View, 
+  StyleSheet 
+} from "react-native";
+import { ListComponentProps } from "@/types/props";
+import colors from "@/constants/colors";
 
 const { width } = Dimensions.get("window");
 
-interface ListComponentProps {
-  headerTitle: string;
-  data: AnnouncementItem[];
-  onPressItem?: (item: AnnouncementItem) => void;
-  emptyTitle?: string;
-  emptyDescription?: string;
-  style?: StyleProp<ViewStyle>;
-  headerStyle?: StyleProp<TextStyle>;
-  itemStyle?: StyleProp<ViewStyle>;
-  imageStyle?: StyleProp<ImageStyle>;
-  titleStyle?: StyleProp<TextStyle>;
-  descriptionStyle?: StyleProp<TextStyle>;
-  dateStyle?: StyleProp<TextStyle>;
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: colors.text.primary,
+    marginHorizontal: 16,
+    marginTop: 10,
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 60,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    marginBottom: 18,
+    shadowColor: colors.black,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    overflow: "hidden",
+  },
+  fullImage: {
+    width: "100%",
+    height: width * 0.5,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  contentContainer: {
+    flexDirection: "row",
+    padding: 12,
+    alignItems: "flex-start",
+  },
+  thumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text.primary,
+    marginBottom: 6,
+  },
+  description: {
+    color: colors.text.secondary,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  date: {
+    color: colors.primary,
+    fontWeight: "600",
+    marginTop: 8,
+    fontSize: 12,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 80,
+  },
+  emptyTitle: {
+    color: colors.primary,
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  emptyDescription: {
+    color: colors.gray[600],
+    fontSize: 14,
+    marginTop: 4,
+  },
+});
 
 const ListComponent = memo<ListComponentProps>(function ListComponent({ 
   headerTitle, 
@@ -34,18 +109,10 @@ const ListComponent = memo<ListComponentProps>(function ListComponent({
   dateStyle
 }) {
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={styles.container}>
       {/* Header */}
       {headerTitle && (
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "700",
-            color: "#000",
-            marginHorizontal: 16,
-            marginTop: 10,
-          }}
-        >
+        <Text style={[styles.header, headerStyle]}>
           {headerTitle}
         </Text>
       )}
@@ -55,103 +122,60 @@ const ListComponent = memo<ListComponentProps>(function ListComponent({
         data={data}
         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          padding: 16,
-          paddingBottom: 60,
-        }}
+        contentContainerStyle={[styles.listContent, style]}
         renderItem={({ item }) => (
-          <View
-            style={{
-              backgroundColor: "white",
-              borderRadius: 16,
-              marginBottom: 18,
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 4,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 2,
-              overflow: "hidden",
-            }}
+          <TouchableOpacity 
+            style={[styles.card, itemStyle]} 
+            onPress={() => onPressItem?.(item)}
+            activeOpacity={0.8}
           >
             {/* Full-width Image (main image style) */}
             {'image' in item && item.image && !item.thumbnail && (
               <Image
                 source={{ uri: item.image }}
-                style={[{
-                  width: "100%",
-                  height: width * 0.5,
-                  borderTopLeftRadius: 16,
-                  borderTopRightRadius: 16,
-                }, imageStyle]}
+                style={[styles.fullImage, imageStyle]}
                 resizeMode="cover"
               />
             )}
 
-            <View
-              style={{
-                flexDirection: item.thumbnail ? "row" : "column",
-                padding: 12,
-                alignItems: "flex-start",
-              }}
-            >
-              {/* Case 2: Thumbnail image (side image style) */}
+            <View style={[
+              styles.contentContainer,
+              item.thumbnail && { flexDirection: 'row' }
+            ]}>
+              {/* Thumbnail image (side image style) */}
               {'thumbnail' in item && item.thumbnail && (
                 <Image
                   source={{ uri: item.thumbnail }}
-                  style={[{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 12,
-                    marginRight: 10,
-                  }, imageStyle]}
+                  style={[styles.thumbnail, imageStyle]}
                   resizeMode="cover"
                 />
               )}
 
               {/* Text Content */}
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "700",
-                    color: "#000",
-                    marginBottom: 6,
-                  }}
-                >
+              <View style={styles.textContainer}>
+                <Text style={[styles.title, titleStyle]}>
                   {item.title}
                 </Text>
                 <Text
-                  style={{
-                    color: "#555",
-                    fontSize: 14,
-                    lineHeight: 20,
-                  }}
+                  style={[styles.description, descriptionStyle]}
                   numberOfLines={item.thumbnail ? 3 : 4}
                 >
                   {item.description}
                 </Text>
-
-                <Text
-                  style={{
-                    color: "#007AFF",
-                    fontWeight: "600",
-                    marginTop: 8,
-                    fontSize: 12,
-                  }}
-                >
+                <Text style={[styles.date, dateStyle]}>
                   {item.date || "Today"}
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={() => (
-          <View style={{ alignItems: "center", marginTop: 80 }}>
-            <Text style={{ color: "#007AFF", fontWeight: "700", fontSize: 16 }}>
-              No posts yet
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>
+              {emptyTitle}
             </Text>
-            <Text style={{ color: "gray", fontSize: 14, marginTop: 4 }}>
-              Check back later for announcements
+            <Text style={styles.emptyDescription}>
+              {emptyDescription}
             </Text>
           </View>
         )}
