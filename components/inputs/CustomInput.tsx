@@ -6,6 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInputProps,
+  ViewStyle,
+  TextStyle,
+  StyleProp,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '@/constants/colors';
@@ -14,6 +17,7 @@ interface CustomInputProps extends TextInputProps {
   placeholder: string;
   icon?: keyof typeof Ionicons.glyphMap;
   secure?: boolean;
+  style?: StyleProp<TextStyle>;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -21,6 +25,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   icon,
   secure,
   value,
+  style,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -33,37 +38,37 @@ const CustomInput: React.FC<CustomInputProps> = ({
       duration: 180,
       useNativeDriver: false,
     }).start();
-  }, [isFocused, value]);
+  }, [animatedValue, isFocused, value]);
 
-  const labelStyle = {
-    position: 'absolute' as const,
+  const labelStyle: TextStyle = {
+    position: 'absolute',
     left: icon ? 42 : 12,
     top: animatedValue.interpolate({
       inputRange: [0, 1],
-      outputRange: [18, -8], // float above input
-    }),
+      outputRange: [18, -8],
+    }) as unknown as number, // TypeScript workaround
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [16, 12],
-    }),
-    color: animatedValue.interpolate
-      ? animatedValue.interpolate({
-          inputRange: [0, 1],
-          outputRange: [colors.muted, colors.primary],
-        })
-      : colors.muted,
+    }) as unknown as number,
+    color: colors.primaryDark,
     backgroundColor: colors.background,
     paddingHorizontal: 2,
-    zIndex: 5, // make sure label is above the TextInput
+    zIndex: 5,
   };
 
   return (
     <View style={styles.container}>
       {icon && (
-        <Ionicons name={icon} size={20} color={colors.muted} style={styles.leftIcon} />
+        <Ionicons
+          name={icon}
+          size={20}
+          color={colors.primaryDark}
+          style={styles.leftIcon}
+        />
       )}
 
-      <Animated.Text style={labelStyle}>{placeholder}</Animated.Text>
+      <Animated.Text style={[labelStyle]}>{placeholder}</Animated.Text>
 
       <TextInput
         {...rest}
@@ -73,8 +78,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
           {
             paddingLeft: icon ? 40 : 12,
             paddingRight: secure ? 40 : 12,
-            paddingTop: 5, // extra top padding for the floating label
+            paddingTop: 5,
           },
+          style,
         ]}
         secureTextEntry={!showPassword}
         onFocus={() => setIsFocused(true)}
@@ -90,7 +96,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
           <Ionicons
             name={showPassword ? 'eye-off-outline' : 'eye-outline'}
             size={20}
-            color={colors.muted}
+            color={colors.primaryDark}
           />
         </TouchableOpacity>
       )}
@@ -103,7 +109,12 @@ export default CustomInput;
 const ICON_SIZE = 20;
 const INPUT_HEIGHT = 50;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+  container: ViewStyle;
+  input: TextStyle;
+  leftIcon: TextStyle,
+  rightIcon: ViewStyle
+}>({
   container: {
     marginVertical: 10,
     position: 'relative',
@@ -112,21 +123,23 @@ const styles = StyleSheet.create({
     height: INPUT_HEIGHT,
     backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: colors.muted,
+    borderColor: colors.primaryDark,
     borderRadius: 12,
     fontSize: 16,
-    color: colors.text,
+    color: colors.primaryDark,
   },
   leftIcon: {
     position: 'absolute',
     left: 12,
-    top: (INPUT_HEIGHT - ICON_SIZE) / 2, // centers icon vertically
+    top: (INPUT_HEIGHT - ICON_SIZE) / 2,
     zIndex: 2,
   },
   rightIcon: {
     position: 'absolute',
     right: 12,
-    top: (INPUT_HEIGHT - ICON_SIZE) / 2, // centers icon vertically
+    top: (INPUT_HEIGHT - ICON_SIZE) / 2,
     zIndex: 2,
   },
+
 });
+
