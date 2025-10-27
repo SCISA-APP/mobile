@@ -1,18 +1,132 @@
 import { memo } from "react";
-import { 
-  Dimensions, 
-  FlatList, 
-  Image, 
-  StyleProp, 
-  Text, 
-  TouchableOpacity, 
-  View, 
-  StyleSheet 
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
 } from "react-native";
-import { ListComponentProps } from "@/types/props";
+import { MessageCircle } from "lucide-react-native"; // comment icon
+import { useRouter } from "expo-router";
 import colors from "@/constants/colors";
+import { ListComponentProps } from "@/types/props";
+import { AnnouncementItem } from "@/types/models";
 
 const { width } = Dimensions.get("window");
+
+const ListComponent = memo<ListComponentProps>(function ListComponent({
+  headerTitle,
+  data,
+  onPressItem,
+  emptyTitle = "No posts yet",
+  emptyDescription = "Check back later for announcements",
+  style,
+  headerStyle,
+  itemStyle,
+  imageStyle,
+  titleStyle,
+  descriptionStyle,
+  dateStyle,
+}) {
+  const router = useRouter();
+
+  const handlePress = (item: AnnouncementItem) => {
+    if (onPressItem) {
+      onPressItem(item);
+      return;
+    }
+
+    router.push({
+      pathname: "/(standalone)/post/[post_id]",
+      params: {
+        post_id: item.id.toString(),
+        title: item.title,
+        description: item.description,
+        image: item.image,
+        date: item.date,
+        NumComments: item.Num_comments || 0,
+      },
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      {headerTitle && (
+        <Text style={[styles.header, headerStyle]}>{headerTitle}</Text>
+      )}
+
+      {/* Main Feed */}
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.listContent, style]}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[styles.card, itemStyle]}
+            onPress={() => handlePress(item)}
+            activeOpacity={0.85}
+          >
+            {/* Image */}
+            {item.image && (
+              <Image
+                source={{ uri: item.image }}
+                style={[styles.image, imageStyle]}
+                resizeMode="cover"
+              />
+            )}
+
+            {/* Text and Metadata */}
+            <View style={styles.textWrapper}>
+              <Text style={[styles.title, titleStyle]} numberOfLines={1}>
+                {item.title}
+              </Text>
+
+              <Text
+                style={[styles.description, descriptionStyle]}
+                numberOfLines={2}
+              >
+                {item.description}
+              </Text>
+
+              <View style={styles.footerRow}>
+                <Text style={[styles.date, dateStyle]}>
+                  {item.date || "Today"}
+                </Text>
+
+                <View style={styles.commentContainer}>
+                  <MessageCircle
+                    color={colors.primary}
+                    size={18}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text style={styles.commentCount}>
+                    {item.commentCount || 0}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>{emptyTitle}</Text>
+            <Text style={styles.emptyDescription}>{emptyDescription}</Text>
+          </View>
+        )}
+        initialNumToRender={5}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        removeClippedSubviews
+        updateCellsBatchingPeriod={50}
+        scrollEnabled={false}
+      />
+    </View>
+  );
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -31,38 +145,28 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    marginBottom: 18,
-    shadowColor: colors.black,
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    borderRadius: 18,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
     overflow: "hidden",
+    backdropFilter: "blur(10px)", // glassmorphism feel
   },
-  fullImage: {
+  image: {
     width: "100%",
-    height: width * 0.5,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    height: width * 0.45,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
   },
-  contentContainer: {
-    flexDirection: "row",
-    padding: 12,
-    alignItems: "flex-start",
-  },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-  textContainer: {
-    flex: 1,
+  textWrapper: {
+    padding: 14,
   },
   title: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
     color: colors.text.primary,
     marginBottom: 6,
@@ -71,12 +175,30 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontSize: 14,
     lineHeight: 20,
+    marginBottom: 10,
+  },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   date: {
     color: colors.primary,
     fontWeight: "600",
-    marginTop: 8,
-    fontSize: 12,
+    fontSize: 13,
+  },
+  commentContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(128,0,32,0.08)", // soft wine tint
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  commentCount: {
+    color: colors.primary,
+    fontWeight: "600",
+    fontSize: 13,
   },
   emptyContainer: {
     alignItems: "center",
@@ -92,103 +214,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
-});
-
-const ListComponent = memo<ListComponentProps>(function ListComponent({ 
-  headerTitle, 
-  data, 
-  onPressItem,
-  emptyTitle = "No posts yet",
-  emptyDescription = "Check back later for announcements",
-  style,
-  headerStyle,
-  itemStyle,
-  imageStyle,
-  titleStyle,
-  descriptionStyle,
-  dateStyle
-}) {
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      {headerTitle && (
-        <Text style={[styles.header, headerStyle]}>
-          {headerTitle}
-        </Text>
-      )}
-
-      {/* Main Feed */}
-      <FlatList
-        data={data}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.listContent, style]}
-        renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={[styles.card, itemStyle]} 
-            onPress={() => onPressItem?.(item)}
-            activeOpacity={0.8}
-          >
-            {/* Full-width Image (main image style) */}
-            {'image' in item && item.image && !item.thumbnail && (
-              <Image
-                source={{ uri: item.image }}
-                style={[styles.fullImage, imageStyle]}
-                resizeMode="cover"
-              />
-            )}
-
-            <View style={[
-              styles.contentContainer,
-              item.thumbnail && { flexDirection: 'row' }
-            ]}>
-              {/* Thumbnail image (side image style) */}
-              {'thumbnail' in item && item.thumbnail && (
-                <Image
-                  source={{ uri: item.thumbnail }}
-                  style={[styles.thumbnail, imageStyle]}
-                  resizeMode="cover"
-                />
-              )}
-
-              {/* Text Content */}
-              <View style={styles.textContainer}>
-                <Text style={[styles.title, titleStyle]}>
-                  {item.title}
-                </Text>
-                <Text
-                  style={[styles.description, descriptionStyle]}
-                  numberOfLines={item.thumbnail ? 3 : 4}
-                >
-                  {item.description}
-                </Text>
-                <Text style={[styles.date, dateStyle]}>
-                  {item.date || "Today"}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>
-              {emptyTitle}
-            </Text>
-            <Text style={styles.emptyDescription}>
-              {emptyDescription}
-            </Text>
-          </View>
-        )}
-        // ⚡ Optimization settings
-        initialNumToRender={5}
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        removeClippedSubviews
-        updateCellsBatchingPeriod={50}
-        scrollEnabled={false}
-      />
-    </View>
-  );
 });
 
 export default ListComponent;

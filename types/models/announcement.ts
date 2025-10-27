@@ -1,7 +1,15 @@
-import { EventItem } from './event';
+import { EventItem } from "./event";
 
 export interface AnnouncementItem extends EventItem {
   thumbnail?: string;
-  // Explicitly include image as it's used in ListComponent
   image?: string;
+  Num_comments?: number;
+  comments?: Comment[];
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  createdAt: Date;
 }
