@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   FlatList,
@@ -26,6 +27,7 @@ import Screen from '../../../assets/categoryicon/monitor.png';
 import Dumbell from '../../../assets/categoryicon/sports.png';
 
 
+
 // --- Type Definitions ---
 
 type Category = {
@@ -37,7 +39,7 @@ type Category = {
 type Product = {
   id: string;
   title: string;
-  image: ImageSourcePropType;
+  image: string ;
   currentPrice: number;
   rating: number;
   discount?: number; // Optional property
@@ -60,7 +62,7 @@ const featuredProducts: Product[] = [
   {
     id: 'f1',
     title: 'ch Series 7 with EC...',
-    image: { uri: 'https://images.pexels.com/photos/5054541/pexels-photo-5054541.jpeg' },
+    image: 'https://images.pexels.com/photos/5054541/pexels-photo-5054541.jpeg' ,
     discount: 20,
     currentPrice: 199.99,
     originalPrice: 249.99,
@@ -69,7 +71,7 @@ const featuredProducts: Product[] = [
   {
     id: 'f2',
     title: 'Noise-Cancelling He...',
-    image: { uri: 'https://images.pexels.com/photos/776998/pexels-photo-776998.jpeg' },
+    image:  'https://images.pexels.com/photos/776998/pexels-photo-776998.jpeg' ,
     currentPrice: 129.00,
     rating: 4.8,
   },
@@ -79,7 +81,7 @@ const limitedTimeDeals: Product[] = [
   {
     id: 'l1',
     title: 'ed Smart Kitchen...',
-    image: { uri: 'https://images.pexels.com/photos/6824660/pexels-photo-6824660.jpeg' },
+    image:  'https://images.pexels.com/photos/6824660/pexels-photo-6824660.jpeg',
     discount: 25,
     currentPrice: 79.50,
     originalPrice: 99.00,
@@ -88,7 +90,7 @@ const limitedTimeDeals: Product[] = [
   {
     id: 'l2',
     title: 'le Running Sneak...',
-    image: { uri: 'https://images.pexels.com/photos/28879459/pexels-photo-28879459.jpeg' },
+    image:  'https://images.pexels.com/photos/28879459/pexels-photo-28879459.jpeg',
     currentPrice: 85.00,
     rating: 4.7,
   },
@@ -98,7 +100,7 @@ const newArrivals: Product[] = [
   {
     id: 'n1',
     title: 't Automatic Coffee...',
-    image: { uri: 'https://images.pexels.com/photos/30946799/pexels-photo-30946799.jpeg' },
+    image:  'https://images.pexels.com/photos/30946799/pexels-photo-30946799.jpeg',
     discount: 17,
     currentPrice: 349.00,
     originalPrice: 420.00,
@@ -107,7 +109,7 @@ const newArrivals: Product[] = [
   {
     id: 'n2',
     title: 'e Outdoor Travel Ba...',
-    image: { uri: 'https://images.pexels.com/photos/16359255/pexels-photo-16359255.jpeg' },
+    image:'https://images.pexels.com/photos/16359255/pexels-photo-16359255.jpeg',
     currentPrice: 59.99,
     rating: 4.3,
   },
@@ -160,10 +162,25 @@ type ProductCardProps = {
 
 // Renamed 'index' to 'ProductCard' as it's the standard convention
 const ProductCard = ({ product }: ProductCardProps): React.JSX.Element => {
+  const router = useRouter();
+  
+    //  Navigation Handler
+    const handlePress = () => {
+      // Navigates to app/product/[id].tsx (assuming your dynamic screen is setup there)
+      router.push(
+        `/product/${product.id}?name=${encodeURIComponent(
+          product.title
+        )}&id=${encodeURIComponent(product.id)}&price=${
+          product.currentPrice
+        }&image=${encodeURIComponent(
+          product.image
+        )}&description=${encodeURIComponent(product.rating || "")}`
+      );
+    };
   return (
-    <View style={styles.productCard}>
+    <TouchableOpacity style={styles.productCard} onPress={handlePress}>
       <View style={styles.productImageContainer}>
-        <Image source={product.image} style={styles.productImage} />
+        <Image source={{ uri: product.image }} style={styles.productImage} />
         {product.discount && (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>-{product.discount}%</Text>
@@ -187,7 +204,7 @@ const ProductCard = ({ product }: ProductCardProps): React.JSX.Element => {
           <Text style={styles.ratingText}>({product.rating})</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -195,24 +212,38 @@ const ProductCard = ({ product }: ProductCardProps): React.JSX.Element => {
 
 const App = (): React.JSX.Element => {
   // --- Render Functions for FlatLists ---
+  const router = useRouter();
 
   const renderCategoryItem = ({
-    item,
-  }: ListRenderItemInfo<Category>): React.JSX.Element => (
-    <TouchableOpacity style={styles.categoryItem}>
-      <View style={styles.categoryIconCircle}>
-        <Image source={item.icon} style={{ width: 20, height: 20 }} />
-      
-      </View>
-      <Text style={styles.categoryText}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+      item,
+    }: ListRenderItemInfo<Category>): React.JSX.Element => {
+        
+        //  NAVIGATION HANDLER: Uses router.push() with the dynamic URL
+        const handleCategoryPress = () => {
+            // Target file: app/category/[name].tsx
+            // URL: /category/Fashion, /category/Home & Kitchen, etc.
+            router.push(`/category/${item.name}`); 
+        };
 
-  const renderProductItem = ({
-    item,
-  }: ListRenderItemInfo<Product>): React.JSX.Element => (
-    <ProductCard product={item} />
-  );
+        return (
+            <TouchableOpacity 
+                style={styles.categoryItem}
+                // 💡 ATTACH HANDLER TO ONPRESS
+                onPress={handleCategoryPress}
+            >
+              <View style={styles.categoryIconCircle}>
+                <Image source={item.icon} style={{ width: 20, height: 20 }} />
+              </View>
+              <Text style={styles.categoryText}>{item.name}</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderProductItem = ({
+      item,
+    }: ListRenderItemInfo<Product>): React.JSX.Element => (
+      <ProductCard product={item} />
+    );
 
   return (
     <SafeAreaView style={styles.safeArea}>
