@@ -19,7 +19,7 @@ const NotesCard: React.FC<NotesCardProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.heading}>Introduction to Programming</Text>
+        <Text style={styles.heading}>{topic}</Text>
         <View >
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{"Lecture Notes"}</Text>
@@ -30,12 +30,12 @@ const NotesCard: React.FC<NotesCardProps> = ({
         <ClipboardList  color={colors.text.secondary} size={18} />
         
         <Text style={styles.text} numberOfLines={3}>
-         {"Comprehensive notes covering fundamental programming concepts, including variables, control structures, functions, and basic data structures."}
+         {description}
         </Text>
       </View>
       <View style={styles.bottom}>
-       <Text style={{fontWeight:"bold"}}>{"CS101"}</Text>
-       <Text style={styles.text}>{"Year 1"}</Text>
+       <Text style={{fontWeight:"bold"}}>{courseCode}</Text>
+       <Text style={styles.text}>{`Year ${year}`}</Text>
       </View>
       <View>
         <CustomButton label="View details" onPress={()=>{console.log("view details")}} />
