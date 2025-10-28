@@ -1,3 +1,4 @@
+import NotesCard from "@/components/academics/NotesCard";
 import CustomButton from "@/components/buttons/CustomButton";
 import CustomInput from "@/components/inputs/CustomInput";
 import Dropdown from "@/components/inputs/Dropdown";
@@ -55,6 +56,9 @@ const index = () => {
             </View>
           </View>
           <Text>Academics Screen</Text>
+          <View>
+            <NotesCard/>
+          </View>
         </ScrollView>
       </View>
     </View>
