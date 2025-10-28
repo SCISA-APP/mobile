@@ -51,7 +51,7 @@ function findCourseAndYear(
   })
 
   setData(filteredData)
-}, [course, year, search]) // include search dependency
+}, [course, year, search]) 
 
 
   return (
