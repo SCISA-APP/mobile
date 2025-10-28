@@ -15,7 +15,7 @@ export const academicsStyles = StyleSheet.create({
       },
       categories:{
         flexDirection:'row',
-        justifyContent:'space-between',
+        // justifyContent:'space-between',
         marginVertical:4,
         gap:8,
       },

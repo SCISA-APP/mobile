@@ -14,56 +14,56 @@ export const courses = [
   "Astronomy",
   "Marine Science",
 ]
-// export const courses = [
-//   {
-//     name: "Biological Sciences",
-//     courseCode: "BIO101",
-//   },
-//   {
-//     name: "Chemistry",
-//     courseCode: "CHM101",
-//   },
-//   {
-//     name: "Computer Science",
-//     courseCode: "CSC101",
-//   },
-//   {
-//     name: "Environmental Science",
-//     courseCode: "ENV101",
-//   },
-//   {
-//     name: "Mathematics",
-//     courseCode: "MTH101",
-//   },
-//   {
-//     name: "Physics",
-//     courseCode: "PHY101",
-//   },
-//   {
-//     name: "Statistics",
-//     courseCode: "STA101",
-//   },
-//   {
-//     name: "Geology",
-//     courseCode: "GEO101",
-//   },
-//   {
-//     name: "Biochemistry",
-//     courseCode: "BCH101",
-//   },
-//   {
-//     name: "Microbiology",
-//     courseCode: "MIC101",
-//   },
-//   {
-//     name: "Astronomy",
-//     courseCode: "AST101",
-//   },
-//   {
-//     name: "Marine Science",
-//     courseCode: "MNS101",
-//   },
-// ]
+export const coursesValue = [
+  {
+    name: "Biological Sciences",
+    value: "BIO",
+  },
+  {
+    name: "Chemistry",
+    value: "CHM",
+  },
+  {
+    name: "Computer Science",
+    value: "CSC",
+  },
+  {
+    name: "Environmental Science",
+    value: "ENV",
+  },
+  {
+    name: "Mathematics",
+    value: "MTH",
+  },
+  {
+    name: "Physics",
+    value: "PHY",
+  },
+  {
+    name: "Statistics",
+    value: "STA",
+  },
+  {
+    name: "Geology",
+    value: "GEO",
+  },
+  {
+    name: "Biochemistry",
+    value: "BCH",
+  },
+  {
+    name: "Microbiology",
+    value: "MIC",
+  },
+  {
+    name: "Astronomy",
+    value: "AST",
+  },
+  {
+    name: "Marine Science",
+    value: "MNS",
+  },
+]
 
 
 export const years = [
@@ -73,6 +73,14 @@ export const years = [
   "Year 4",
   "Year 5",
   "Year 6",
+]
+export const yearsValue = [
+  {name:"Year 1", value:1},
+  {name:"Year 2", value:2},
+  {name:"Year 3", value:3}, 
+  {name:"Year 4", value:4},
+  {name:"Year 5", value:5},
+  {name:"Year 6", value:6},
 ]
 
 export const courseTopics = [

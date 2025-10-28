@@ -8,7 +8,7 @@ interface NotesCardProps {
   topic?: string;
   description?: string;
   courseCode?: string;
-  year?: number;
+  year?: number | string;
 }
 const NotesCard: React.FC<NotesCardProps> = ({
   topic,

@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons"
 import { Picker } from "@react-native-picker/picker"
 import React, { useState } from "react"
 import {
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native"
 
 const INPUT_HEIGHT = 50
