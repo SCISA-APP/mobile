@@ -1,7 +1,17 @@
-import { EventItem } from "@/types";
+import { EventItem } from "@/types/models/event";
 import { useRouter } from "expo-router";
 import React, { memo } from "react";
-import { Dimensions, FlatList, ImageStyle, StyleProp, Text, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  ImageStyle,
+  StyleProp,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 type Router = {
@@ -25,9 +35,9 @@ interface EventListProps {
   dateStyle?: StyleProp<TextStyle>;
 }
 
-const EventListComponent = ({ 
-  headerTitle, 
-  data, 
+const EventListComponent = ({
+  headerTitle,
+  data,
   onPressItem,
   emptyTitle = "No upcoming events",
   emptyDescription,
@@ -37,7 +47,7 @@ const EventListComponent = ({
   imageStyle,
   titleStyle,
   descriptionStyle,
-  dateStyle
+  dateStyle,
 }: EventListProps) => {
   const router = useRouter() as unknown as Router;
 
@@ -46,9 +56,9 @@ const EventListComponent = ({
       onPressItem(item);
       return;
     }
-    
+
     router.push({
-      pathname: "/(standalone)/[event_id]",
+      pathname: "/(standalone)/event/[event_id]",
       params: {
         event_id: item.id.toString(),
         title: item.title,
@@ -90,9 +100,7 @@ const EventListComponent = ({
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() =>
-              handlePress(item)
-            }
+            onPress={() => handlePress(item)}
             style={{
               backgroundColor: "white",
               borderRadius: 16,
@@ -172,6 +180,6 @@ const EventListComponent = ({
 };
 
 const EventList = memo(EventListComponent);
-EventList.displayName = 'EventList';
+EventList.displayName = "EventList";
 
 export default EventList;

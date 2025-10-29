@@ -6,10 +6,10 @@ export default function EventsLayout() {
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: "white" },
-        headerTintColor: "#610b0c",
+        headerTintColor: "#000",
         headerTitleAlign: "center",
         title: "Details",
-        headerBackButtonMenuEnabled: true
+        headerBackButtonMenuEnabled: true,
       }}
     />
   );
