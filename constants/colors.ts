@@ -1,4 +1,5 @@
 export interface AppColors {
+  muted: string | number;
   // Primary Colors
   primary: string;
   primaryLight: string;
