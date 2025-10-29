@@ -7,6 +7,9 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ViewStyle,
+  TextStyle,
+  ImageStyle
 } from 'react-native';
 import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
@@ -19,20 +22,19 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-const handleLogin = async () => {
-  if (!email || !password) {
-    alert('Please enter both email and password');
-    return;
-  }
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert('Please enter both email and password');
+      return;
+    }
 
-  console.log('Logging in with:', { email, password });
+    console.log('Logging in with:', { email, password });
 
-  // Wait 4 seconds before navigating
-  await new Promise(resolve => setTimeout(resolve, 4000));
+    // Simulate delay
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-  // Navigate to home screen
-  router.push('/home');
-};
+    router.push('/home');
+  };
 
   return (
     <KeyboardAvoidingView
@@ -73,10 +75,8 @@ const handleLogin = async () => {
           </TouchableOpacity>
         </View>
 
-        {/* 🔹 Modular Button */}
         <CustomButton label="Login" onPress={handleLogin} />
 
-        {/* 🔹 Sign up text */}
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Do not have an account? </Text>
           <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
@@ -90,7 +90,20 @@ const handleLogin = async () => {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({
+// --- STYLES ---
+const styles = StyleSheet.create<{
+  container: ViewStyle;
+  inner: ViewStyle;
+  gif: ImageStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  inputContainer: ViewStyle;
+  forgotContainer: ViewStyle;
+  forgotText: TextStyle;
+  signupContainer: ViewStyle;
+  signupText: TextStyle;
+  signupLink: TextStyle;
+}>({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -109,11 +122,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.black,
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.muted,
+    color: colors.primaryDark, // see next fix
     fontSize: 15,
     textAlign: 'center',
     marginBottom: 24,
@@ -127,7 +140,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   forgotText: {
-    color: colors.muted,
+    color: colors.primaryDark, // see next fix
     fontSize: 14,
   },
   signupContainer: {
@@ -135,7 +148,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   signupText: {
-    color: colors.muted,
+    color: colors.primaryDark, // see next fix
     fontSize: 14,
   },
   signupLink: {
@@ -144,3 +157,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
