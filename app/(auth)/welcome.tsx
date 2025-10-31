@@ -8,6 +8,8 @@ import {
   Dimensions,
   TouchableOpacity,
   SafeAreaView,
+  ListRenderItemInfo,
+  ViewStyle, TextStyle, ImageStyle 
 } from 'react-native';
 import SafeGif from '../../assets/images/Safe.gif';
 import ShopGif from '../../assets/images/Shop.gif';
@@ -18,32 +20,39 @@ import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
-const slides = [
-    { 
-    id: '3', 
-    image: LearnGif, 
-    title: 'Learn On Your Terms', 
-    description: 'Courses, learning materials, and resources whenever you need them, anywhere.' 
+// Define a type for each slide
+interface Slide {
+  id: string;
+  image: any; // Can refine to ImageSourcePropType if needed
+  title: string;
+  description: string;
+}
+
+const slides: Slide[] = [
+  {
+    id: '3',
+    image: LearnGif,
+    title: 'Learn On Your Terms',
+    description: 'Courses, learning materials, and resources whenever you need them, anywhere.',
   },
-  { 
-    id: '2', 
-    image: ShopGif, 
-    title: 'Shop Smart', 
-    description: 'Exclusive deals on SCISA gear, student discounts, and campus essentials.' 
+  {
+    id: '2',
+    image: ShopGif,
+    title: 'Shop Smart',
+    description: 'Exclusive deals on SCISA gear, student discounts, and campus essentials.',
   },
-    { 
-    id: '1', 
-    image: SafeGif, 
-    title: 'Stay Safe as a SCISAN', 
-    description: 'Real-time alerts and resources to keep you secure on campus and beyond.' 
+  {
+    id: '1',
+    image: SafeGif,
+    title: 'Stay Safe as a SCISAN',
+    description: 'Real-time alerts and resources to keep you secure on campus and beyond.',
   },
 ];
 
-
 const WelcomeScreen = () => {
   const router = useRouter();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const flatListRef = useRef<FlatList<Slide>>(null);
 
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
@@ -58,7 +67,7 @@ const WelcomeScreen = () => {
     router.push('/(auth)/login');
   };
 
-  const renderItem = ({ item }: any) => (
+  const renderItem = ({ item }: ListRenderItemInfo<Slide>) => (
     <View style={styles.slide}>
       <Image source={item.image} style={styles.image} resizeMode="contain" />
       <Text style={styles.title}>{item.title}</Text>
@@ -104,7 +113,18 @@ const WelcomeScreen = () => {
 
 export default WelcomeScreen;
 
-const styles = StyleSheet.create({
+type Styles = {
+  container: ViewStyle;
+  header: ViewStyle;
+  skipText: TextStyle;
+  slide: ViewStyle;
+  image: ImageStyle;
+  title: TextStyle;
+  description: TextStyle;
+  buttonContainer: ViewStyle;
+};
+
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -115,9 +135,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  skipButton: {
-    padding: 8,
   },
   skipText: {
     color: colors.primary,
@@ -138,13 +155,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.black,
     textAlign: 'center',
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: colors.muted,
+    color: colors.black,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 16,
