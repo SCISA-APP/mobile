@@ -4,14 +4,14 @@ import IconFontAwesome from "@expo/vector-icons/FontAwesome";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // Get screen width for two-column layout (from previous response)
@@ -265,7 +265,7 @@ const CategoryDetailScreen = (): React.JSX.Element => {
         </View>
 
         <View style={styles.filterBar}>
-          <TouchableOpacity style={styles.filterButton}>
+          <TouchableOpacity style={styles.filterButton} onPress={() => router.push('/category/filter')}>
             <IconFeather name="filter" size={16} color="#333" />
             <Text style={styles.filterText}>Filter</Text>
           </TouchableOpacity>

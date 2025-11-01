@@ -82,6 +82,17 @@ export default function RootLayout() {
             headerShown: false,
           }} 
         />
+       < Stack.Screen 
+          name="category/filter" 
+        
+          options={{
+            headerBackVisible: false,
+            headerBackTitle: ' ',
+            headerShown: true,
+            gestureEnabled: false,
+          }} 
+        />
+
       </Stack>
     </ThemeProvider>
   );
