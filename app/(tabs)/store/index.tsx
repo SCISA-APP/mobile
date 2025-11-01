@@ -228,7 +228,7 @@ const App = (): React.JSX.Element => {
         return (
             <TouchableOpacity 
                 style={styles.categoryItem}
-                // 💡 ATTACH HANDLER TO ONPRESS
+                //  ATTACH HANDLER TO ONPRESS
                 onPress={handleCategoryPress}
             >
               <View style={styles.categoryIconCircle}>

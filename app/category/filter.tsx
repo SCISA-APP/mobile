@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-// 🎯 Import the Slider component
+// Import the Slider component
 import Slider from '@react-native-community/slider';
 
 // --- Reusable Components for Filters (No Change) ---
@@ -72,7 +72,7 @@ export default function FiltersScreen() {
     // State to manage selected filters (Simplified for demonstration)
     const [selectedBrands, setSelectedBrands] = useState<string[]>(['Nike']);
     
-    // 🎯 Use a single state variable for the slider's max value
+    //  Use a single state variable for the slider's max value
     const INITIAL_MIN_PRICE = 50;
     const MAX_PRICE_LIMIT = 300; // Define a hard limit for the slider
     const [currentMaxPrice, setCurrentMaxPrice] = useState<number>(200);
@@ -90,7 +90,7 @@ export default function FiltersScreen() {
 
     const handleReset = () => {
         setSelectedBrands([]);
-        // 🎯 Reset the slider value
+        // Reset the slider value
         setCurrentMaxPrice(MAX_PRICE_LIMIT);
         setSelectedSize('');
         setSelectedColor('');
@@ -106,7 +106,7 @@ export default function FiltersScreen() {
         // router.back(); 
     };
 
-    // 🎯 Dynamically calculate display values
+    // Dynamically calculate display values
     const priceMinDisplay = `$${INITIAL_MIN_PRICE}`;
     const priceMaxDisplay = `$${currentMaxPrice}`;
 
@@ -141,7 +141,7 @@ export default function FiltersScreen() {
                     </View>
                 </View>
                 
-                {/* 🎯 Price Filter Section (Updated with Slider) */}
+                {/*  Price Filter Section (Updated with Slider) */}
                 <View style={styles.filterSection}>
                     <View style={styles.sectionHeader}>
                         <Text style={styles.sectionTitle}>Price</Text>
@@ -154,7 +154,7 @@ export default function FiltersScreen() {
                         <Text style={styles.priceRangeText}>{priceMaxDisplay}</Text>
                     </View>
                     
-                    {/* 🎯 Functional Price Slider */}
+                    {/*  Functional Price Slider */}
                     <View style={styles.sliderContainer}>
                         <Slider
                             style={styles.slider}

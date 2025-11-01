@@ -1,6 +1,6 @@
 import IconFeather from "@expo/vector-icons/Feather";
 import IconFontAwesome from "@expo/vector-icons/FontAwesome";
-// 💡 1. Import useRouter
+//  1. Import useRouter
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -150,7 +150,7 @@ const Rating = ({ rating }: RatingProps): React.JSX.Element => {
   return <View style={styles.ratingContainer}>{stars}</View>;
 };
 
-// 💡 ProductGridCard now accepts the router and is an TouchableOpacity
+// ProductGridCard now accepts the router and is an TouchableOpacity
 const ProductGridCard = ({
   product,
 }: {
@@ -226,7 +226,7 @@ const ProductGridCard = ({
 // ------------------------------------------------------------------
 
 const CategoryDetailScreen = (): React.JSX.Element => {
-  // 💡 2. Initialize the router
+  //  2. Initialize the router
   const router = useRouter();
 
   // 1. Get the parameter passed from the home screen URL
@@ -280,7 +280,7 @@ const CategoryDetailScreen = (): React.JSX.Element => {
         <View style={styles.productGrid}>
           {/* In a real app, you'd filter productData based on categoryName */}
           {categoryProducts.map((product) => (
-            // 💡 3. Pass the router to the ProductGridCard
+            // 3. Pass the router to the ProductGridCard
             <ProductGridCard key={product.id} product={product} />
           ))}
         </View>
