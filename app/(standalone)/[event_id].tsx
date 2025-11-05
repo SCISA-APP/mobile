@@ -20,7 +20,7 @@ export default function OccasionDetail() {
       <Animated.View entering={FadeInUp.duration(600)}>
         {image && (
           <Image
-            source={{ uri: image }}
+            source={{ uri: image as string }}
             style={{
               width: "100%",
               height: 240,

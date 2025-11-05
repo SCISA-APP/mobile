@@ -10,8 +10,8 @@ import {
   View,
 } from 'react-native';
 
-import { Category } from '@/types/models/shop/categoryShop';
 import categoryData from '@/assets/data/shop/shopCategoryData';
+import { Category } from '@/types/models/shop/categoryShop';
 
 const ShopByCategory = (): React.JSX.Element => {
   const router = useRouter();
@@ -20,7 +20,7 @@ const ShopByCategory = (): React.JSX.Element => {
     item,
   }: ListRenderItemInfo<Category>): React.JSX.Element => {
     const handleCategoryPress = () => {
-      router.push(`/category/${item.name}`);
+      router.push(`/(standalone)/category/${item.name}`);
     };
 
     return (
