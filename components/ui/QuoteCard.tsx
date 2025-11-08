@@ -26,7 +26,7 @@ const QuoteCard = ({ item }) => {
     <View style={styles.quoteCardContainer}>
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
         <LinearGradient colors={item.gradient} style={styles.quoteCard}>
-          <ThemedText style={styles.quoteText}>"{item.q}"</ThemedText>
+          <ThemedText style={styles.quoteText}>&quot;{item.q}&quot;</ThemedText>
           <ThemedText style={styles.quoteAuthor}>- {item.a}</ThemedText>
           <ThemedText style={styles.watermark}>scisa_quotes</ThemedText>
         </LinearGradient>

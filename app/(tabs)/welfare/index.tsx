@@ -1,9 +1,10 @@
-
-
 import colors from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+
 
 const WelfareScreen = () => {
   const router = useRouter();
@@ -22,8 +23,11 @@ const WelfareScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View  style={[styles.header,{backgroundColor: colors.primary}]}>
-        <Text type="title" style={styles.headerText}>Welfare Hub</Text>
+      <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <Text  style={styles.headerText}>Welfare Space</Text>
+        <TouchableOpacity style={styles.bookingsIcon} onPress={() => router.push('/(tabs)/welfare/screens/bookings')}>
+          <Ionicons name="calendar-outline" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
@@ -34,7 +38,7 @@ const WelfareScreen = () => {
           >
             {quote ? (
               <>
-                <Text style={styles.quoteText}>"{quote.q}"</Text>
+                <Text style={styles.quoteText}>&quot;{quote.q}&quot;</Text>
                 <Text style={styles.quoteAuthor}>- {quote.a}</Text>
               </>
             ) : (
@@ -45,17 +49,25 @@ const WelfareScreen = () => {
 
         <View style={styles.counselorSection}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors')}>
-              <View style={styles.counselorCard}>
-                <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.counselorImage} />
+            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors?type=Peer')}>
+              <ImageBackground 
+                source={require('@/assets/images/studentCounsel.jpg')} 
+                style={styles.counselorCard}
+                imageStyle={{ borderRadius: 15 }}
+              >
+                <View style={styles.cardOverlay} />
                 <Text style={styles.counselorCardTitle}>Student Peer Counselor</Text>
-              </View>
+              </ImageBackground>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors')}>
-              <View style={styles.counselorCard}>
-                <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.counselorImage} />
+            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors?type=Departmental')}>
+              <ImageBackground 
+                source={require('@/assets/images/counselor.jpg')} 
+                style={styles.counselorCard}
+                imageStyle={{ borderRadius: 15 }}
+              >
+                <View style={styles.cardOverlay} />
                 <Text style={styles.counselorCardTitle}>Professional Counselor</Text>
-              </View>
+              </ImageBackground>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -63,7 +75,7 @@ const WelfareScreen = () => {
         <View style={styles.mentalHealthSection}>
           <Text type="subtitle" style={styles.mentalHealthTitle}>Your Mental Health Matters</Text>
           <Text style={styles.mentalHealthText}>
-            Taking care of your mental health is just as important as taking care of your physical health. It's okay to not be okay, and it's okay to ask for help. Our counselors are here to support you through any challenges you may be facing.
+            Taking care of your mental health is just as important as taking care of your physical health. It&apos;s okay to not be okay, and it&apos;s okay to ask for help. Our counselors are here to support you through any challenges you may be facing.
           </Text>
         </View>
       </ScrollView>
@@ -84,12 +96,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerText: {
     color: 'white',
-    textAlign: 'center',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  bookingsIcon: {
+    // No styles needed here for now
   },
   content: {
     flex: 1,
@@ -117,26 +134,23 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   counselorCard: {
-    width: 200,
+    width: 300,
+    height: 200,
     marginHorizontal: 10,
     borderRadius: 15,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'flex-end',
+    padding: 15,
   },
-  counselorImage: {
-    width: '100%',
-    height: 120,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+  cardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 15,
   },
   counselorCardTitle: {
-    padding: 15,
-    textAlign: 'center',
+    color: 'white',
+    fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   mentalHealthSection: {
     padding: 20,

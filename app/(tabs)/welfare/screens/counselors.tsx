@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image } from 'react-native';
-import React from 'react';
-import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
-import colors from '@/constants/colors';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const counselors = [
   {
@@ -45,28 +45,56 @@ const counselors = [
 
 const CounselorsScreen = () => {
   const router = useRouter();
+  const { type } = useLocalSearchParams();
 
-  const renderCounselor = ({ item }) => (
-    <TouchableOpacity onPress={() => router.push(`/welfare/screens/${item.id}?counselor=${JSON.stringify(item)}`)}>
-      <View style={styles.counselorItem}>
+  const filteredCounselors = counselors.filter(c => c.type === type);
+  const title = type === 'Peer' ? 'Peer Counselors' : 'Professional Counselors';
+
+  const renderCounselor = ({ item }) => {
+    const handlePress = () => {
+      if (item.type === 'Peer') {
+        router.push({
+          pathname: `/welfare/screens/student-counselor/${item.id}`,
+          params: { student_counselor: JSON.stringify(item) },
+        });
+      } else {
+        router.push({
+          pathname: `/welfare/screens/counselor/${item.id}`,
+          params: { counselor: JSON.stringify(item) },
+        });
+      }
+    };
+
+    return (
+      <TouchableOpacity onPress={handlePress} style={styles.counselorCard}>
         <Image source={{ uri: item.image }} style={styles.counselorImage} />
         <View style={styles.counselorInfo}>
           <ThemedText style={styles.counselorName}>{item.name}</ThemedText>
-          <ThemedText>{item.type} Counselor</ThemedText>
+          <ThemedText style={styles.counselorDepartment}>{item.department}</ThemedText>
+          <View style={styles.specialtiesContainer}>
+            {item.specialties.map((specialty, index) => (
+              <View key={index} style={styles.specialtyBadge}>
+                <ThemedText style={styles.specialtyText}>{specialty}</ThemedText>
+              </View>
+            ))}
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Counselors</ThemedText>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{title}</Text>
+      </View>
       <FlatList
-        data={counselors}
+        data={filteredCounselors}
         renderItem={renderCounselor}
         keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -75,32 +103,42 @@ export default CounselorsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  header: {
+    backgroundColor: 'white',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9ECEF',
+    alignItems: 'center',
   },
   title: {
-    textAlign: 'center',
-    marginBottom: 20,
-    color: colors.primary,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#343A40',
   },
-  counselorItem: {
+  listContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  counselorCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
   },
   counselorImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 15,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
   },
   counselorInfo: {
     flex: 1,
@@ -108,6 +146,28 @@ const styles = StyleSheet.create({
   counselorName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#343A40',
+  },
+  counselorDepartment: {
+    fontSize: 14,
+    color: '#6C757D',
+    marginTop: 4,
+  },
+  specialtiesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  specialtyBadge: {
+    backgroundColor: '#E9ECEF',
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  specialtyText: {
+    fontSize: 12,
+    color: '#495057',
   },
 });
