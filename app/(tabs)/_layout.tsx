@@ -1,13 +1,15 @@
 import { HapticTab } from '@/components/haptic-tab';
 import Header from '@/components/ui/Header';
-import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const renderHeader = (title?: string) => (
     <Header 
@@ -23,15 +25,73 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: isDark ? '#FFFFFF' : '#000000',
+        tabBarInactiveTintColor: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)',
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          backgroundColor: 'transparent',
           borderTopWidth: 0,
-          elevation: 10,
-          height: 60,
-          paddingBottom: 8,
+          height: Platform.OS === 'ios' ? 88 : 72,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+          paddingTop: 0,
+          paddingHorizontal: 12,
+          position: 'absolute',
+          ...Platform.select({
+            ios: {
+              shadowColor: 'transparent',
+            },
+            android: {
+              elevation: 0,
+            },
+          }),
+        },
+        tabBarBackground: () => (
+          <View style={styles.tabBarContainer}>
+            <View style={styles.dockContainer}>
+              <BlurView
+                intensity={isDark ? 45 : 40}
+                tint={isDark ? 'dark' : 'light'}
+                style={styles.blurContainer}
+              >
+                <View style={[
+                  styles.glassOverlay,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(50, 50, 55, 0.4)' 
+                      : 'rgba(255, 255, 255, 0.3)',
+                  }
+                ]} />
+              </BlurView>
+            </View>
+          </View>
+        ),
+        tabBarItemStyle: {
+          paddingVertical: 0,
+          marginHorizontal: 0,
+          height: 64,
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          letterSpacing: -0.1,
+          marginTop: 4,
+          marginBottom: 0,
+          includeFontPadding: false,
         },
         tabBarButton: HapticTab,
+        headerShown: true,
+        headerTransparent: true,
+        headerBlurEffect: isDark ? 'systemThickMaterialDark' : 'systemThickMaterialLight',
+        headerStyle: {
+          backgroundColor: 'transparent',
+        },
+        headerTitleStyle: {
+          fontSize: 34,
+          fontWeight: '700',
+          color: isDark ? '#FFFFFF' : '#000000',
+        },
         header: ({ route, options }) => {
           const title = options.title || '';
           return renderHeader(title !== 'Home' ? title : undefined);
@@ -42,8 +102,25 @@ export default function TabLayout() {
         name="home/index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.tabItemContainer}>
+              {focused && (
+                <View style={[
+                  styles.activeBackground,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(255, 255, 255, 0.18)' 
+                      : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]} />
+              )}
+              <Ionicons 
+                name={focused ? "home" : "home-outline"} 
+                size={26} 
+                color={color}
+                style={styles.icon}
+              />
+            </View>
           ),
         }}
       />
@@ -51,8 +128,25 @@ export default function TabLayout() {
         name="academics/index"
         options={{
           title: 'Academics',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="school" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.tabItemContainer}>
+              {focused && (
+                <View style={[
+                  styles.activeBackground,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(255, 255, 255, 0.18)' 
+                      : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]} />
+              )}
+              <MaterialIcons 
+                name="school" 
+                size={26} 
+                color={color}
+                style={styles.icon}
+              />
+            </View>
           ),
           headerShown: false,
         }}
@@ -61,8 +155,25 @@ export default function TabLayout() {
         name="welfare/index"
         options={{
           title: 'Welfare',
-          tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="hands-helping" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.tabItemContainer}>
+              {focused && (
+                <View style={[
+                  styles.activeBackground,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(255, 255, 255, 0.18)' 
+                      : 'rgba(82, 23, 138, 0.1)',
+                  }
+                ]} />
+              )}
+              <FontAwesome5 
+                name="hands-helping" 
+                size={22} 
+                color={color}
+                style={styles.icon}
+              />
+            </View>
           ),
           headerShown: false,
         }}
@@ -71,8 +182,25 @@ export default function TabLayout() {
         name="store/index"
         options={{
           title: 'Store',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.tabItemContainer}>
+              {focused && (
+                <View style={[
+                  styles.activeBackground,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(255, 255, 255, 0.18)' 
+                      : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]} />
+              )}
+              <Ionicons 
+                name={focused ? "cart" : "cart-outline"} 
+                size={26} 
+                color={color}
+                style={styles.icon}
+              />
+            </View>
           ),
           headerShown: false,
         }}
@@ -81,8 +209,25 @@ export default function TabLayout() {
         name="profile/index"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.tabItemContainer}>
+              {focused && (
+                <View style={[
+                  styles.activeBackground,
+                  {
+                    backgroundColor: isDark 
+                      ? 'rgba(255, 255, 255, 0.18)' 
+                      : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]} />
+              )}
+              <Ionicons 
+                name={focused ? "person" : "person-outline"} 
+                size={26} 
+                color={color}
+                style={styles.icon}
+              />
+            </View>
           ),
           headerShown: false,
         }}
@@ -90,3 +235,55 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    position: 'absolute',
+    bottom: 18,
+    left: 0,
+    right: 0,
+    height: '100%',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 12,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 10,
+  },
+  dockContainer: {
+    height: Platform.OS === 'ios' ? 64 : 60,
+    borderRadius: 28,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  blurContainer: {
+    flex: 1,
+    borderRadius: 28,
+    overflow: 'hidden',
+  },
+  glassOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 28,
+    borderWidth: 0.5,
+    borderColor: 'rgba(119, 73, 73, 0.25)',
+  },
+  tabItemContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    position: 'relative',
+  },
+  activeBackground: {
+    position: 'absolute',
+    width: 60,
+    height: 53,
+    borderRadius: 18,
+    top: '60%',
+    marginTop: -19,
+  },
+  icon: {
+    zIndex: 1,
+  },
+});

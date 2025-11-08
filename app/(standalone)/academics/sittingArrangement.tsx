@@ -1,14 +1,20 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import UpcomingFeature from '@/components/empty/upcomingFeature';
 
-const sittingArrangement = () => {
+const SittingArrangement = () => {
   return (
-    <View>
-      <Text>sittingArrangement</Text>
+    <View style={styles.container}>
+      <UpcomingFeature title="Exam Sitting Arrangement" />
     </View>
-  )
-}
+  );
+};
 
-export default sittingArrangement
+export default SittingArrangement;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+});

@@ -1,12 +1,12 @@
-// components/headers/Header.tsx
+// components/headers/StoreHeader.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-interface HeaderProps {
+interface StoreHeaderProps {
   title: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<StoreHeaderProps> = ({ title }) => {
   return (
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>{title}</Text>
@@ -17,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',

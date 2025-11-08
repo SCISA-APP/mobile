@@ -1,8 +1,8 @@
-import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, StatusBar } from 'react-native';
-import { useRouter } from 'expo-router';
 import { academicsButtonsData } from '@/assets/data/academics/AcademicButton';
 import Header from '@/components/headers/header';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Dimensions, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const buttonWidth = (width - 60) / 2;
