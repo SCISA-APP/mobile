@@ -79,7 +79,7 @@ export default function ProductDetailScreen() {
 
           {hasDiscount && (
             <Text style={styles.discountText}>
-              Save {product.discount}%!
+              Save {product.discount?.toString()}%!
             </Text>
           )}
 

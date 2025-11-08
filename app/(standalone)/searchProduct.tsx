@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
-import { exampleProduct } from '@/assets/data/shop/product';
+import { exampleProducts } from '@/assets/data/shop/product';
 import ProductCard from '@/components/cards/productCard';
 import SearchEmptyState from '@/components/empty/SearchEmptyState';
 
@@ -11,19 +11,15 @@ import EmptyGif from '@/assets/images/Empty.gif';
 const SearchProduct = () => {
   const [query, setQuery] = useState('');
 
-  // Filter products based on query
-  const filteredProducts = exampleProduct
-    ? [exampleProduct].filter(product =>
-        product.title.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
+  const filteredProducts = exampleProducts.filter(product =>
+    product.title.toLowerCase().includes(query.toLowerCase()) || 
+    product.description.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
-      {/* Search bar */}
       <ProductSearchBar value={query} onChangeText={setQuery} />
 
-      {/* Render empty state or filtered products */}
       {query.trim() === '' ? (
         <SearchEmptyState
           message="Search for a product..."
@@ -45,6 +41,7 @@ const SearchProduct = () => {
     </View>
   );
 };
+
 
 export default SearchProduct;
 

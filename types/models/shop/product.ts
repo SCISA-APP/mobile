@@ -3,6 +3,8 @@ import { Rating } from "./rating";
 export type Product = {
   id: string;
   sellerId: string;
+  description: string;
+  category: string;
   title: string;
   image: string;         // Primary image
   images?: string[];     // Optional additional images

@@ -15,6 +15,7 @@ import { Product } from '@/types/models/shop/product';
 import { exampleProducts as featuredProducts } from '@/assets/data/shop/product';
 
 import ShopByCategory from '@/components/buttons/shopByCategory';
+import Header from '@/components/headers/header';
 import ProductCard from '@/components/cards/productCard';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
 import CategoryHeader from '@/components/buttons/CategoryHeader';
@@ -57,7 +58,7 @@ const App = (): React.JSX.Element => {
       {/* --- Fixed Header --- */}
       <View style={styles.fixedHeader}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>SCISA Store</Text>
+          <Header title="SCISA Store" />
         </View>
         <ProductSearchBar onPress={() => router.push('/searchProduct')} />
       </View>

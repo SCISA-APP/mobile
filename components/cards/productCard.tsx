@@ -34,7 +34,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <Image source={{ uri: product.image }} style={styles.productImage} />
         {hasDiscount && (
           <View style={styles.discountBadge}>
-            <Text style={styles.discountText}>-{product.discount}%</Text>
+            <Text style={styles.discountText}>-{product.discount?.toString()}%</Text>
           </View>
         )}
       </View>
