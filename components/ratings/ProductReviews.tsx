@@ -23,13 +23,6 @@ const ProductReviews = ({ ratings, averageRating }: ProductReviewsProps) => {
         </TouchableOpacity>
       </View>
 
-      {/* Summary */}
-      <View style={styles.ratingSummary}>
-        <Rating rating={averageRating} size={18} />
-        <Text style={styles.ratingSummaryText}>
-          {averageRating.toFixed(1)} out of 5 stars
-        </Text>
-      </View>
 
       {/* Individual Reviews */}
       {ratings?.map((r) => (

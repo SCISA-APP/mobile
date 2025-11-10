@@ -57,7 +57,7 @@ const App = (): React.JSX.Element => {
 
       {/* --- Fixed Header --- */}
       <View style={styles.fixedHeader}>
-        <View style={styles.header}>
+        <View >
           <Header title="SCISA Store" />
         </View>
         <ProductSearchBar onPress={() => router.push('/searchProduct')} />
@@ -124,12 +124,11 @@ const styles = StyleSheet.create({
   fixedHeader: {
     backgroundColor: '#ffffff',
     paddingHorizontal: 20,
-    paddingTop: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,
   },
-  header: { paddingBottom: 10 },
+
   headerTitle: { fontSize: 24, fontWeight: '700', color: '#111' },
   stickyCategories: {
     position: 'absolute',

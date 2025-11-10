@@ -1,11 +1,12 @@
 import { HapticTab } from '@/components/haptic-tab';
 import Header from '@/components/ui/Header';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { BlurView } from 'expo-blur';
+import colors from '@/constants/colors';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -25,7 +26,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: isDark ? '#FFFFFF' : '#000000',
+        tabBarActiveTintColor: colors.primaryDark,
         tabBarInactiveTintColor: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)',
         tabBarStyle: {
           backgroundColor: 'transparent',
@@ -104,16 +105,6 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.tabItemContainer}>
-              {focused && (
-                <View style={[
-                  styles.activeBackground,
-                  {
-                    backgroundColor: isDark 
-                      ? 'rgba(255, 255, 255, 0.18)' 
-                      : 'rgba(0, 0, 0, 0.1)',
-                  }
-                ]} />
-              )}
               <Ionicons 
                 name={focused ? "home" : "home-outline"} 
                 size={26} 
@@ -130,22 +121,11 @@ export default function TabLayout() {
           title: 'Academics',
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.tabItemContainer}>
-              {focused && (
-                <View style={[
-                  styles.activeBackground,
-                  {
-                    backgroundColor: isDark 
-                      ? 'rgba(255, 255, 255, 0.18)' 
-                      : 'rgba(0, 0, 0, 0.1)',
-                  }
-                ]} />
-              )}
-              <MaterialIcons 
-                name="school" 
-                size={26} 
-                color={color}
-                style={styles.icon}
-              />
+     <Ionicons
+  name={focused ? "school" : "school-outline"}
+  size={26}
+  color={color}
+/>
             </View>
           ),
           headerShown: false,
@@ -157,21 +137,11 @@ export default function TabLayout() {
           title: 'Welfare',
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.tabItemContainer}>
-              {focused && (
-                <View style={[
-                  styles.activeBackground,
-                  {
-                    backgroundColor: isDark 
-                      ? 'rgba(255, 255, 255, 0.18)' 
-                      : 'rgba(82, 23, 138, 0.1)',
-                  }
-                ]} />
-              )}
               <FontAwesome5 
                 name="hands-helping" 
                 size={22} 
                 color={color}
-                style={styles.icon}
+                style={[styles.icon, { fontWeight: focused ? '900' : '400' }]}
               />
             </View>
           ),
@@ -184,16 +154,6 @@ export default function TabLayout() {
           title: 'Store',
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.tabItemContainer}>
-              {focused && (
-                <View style={[
-                  styles.activeBackground,
-                  {
-                    backgroundColor: isDark 
-                      ? 'rgba(255, 255, 255, 0.18)' 
-                      : 'rgba(0, 0, 0, 0.1)',
-                  }
-                ]} />
-              )}
               <Ionicons 
                 name={focused ? "cart" : "cart-outline"} 
                 size={26} 
@@ -211,16 +171,6 @@ export default function TabLayout() {
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
             <View style={styles.tabItemContainer}>
-              {focused && (
-                <View style={[
-                  styles.activeBackground,
-                  {
-                    backgroundColor: isDark 
-                      ? 'rgba(255, 255, 255, 0.18)' 
-                      : 'rgba(0, 0, 0, 0.1)',
-                  }
-                ]} />
-              )}
               <Ionicons 
                 name={focused ? "person" : "person-outline"} 
                 size={26} 
@@ -274,14 +224,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     position: 'relative',
-  },
-  activeBackground: {
-    position: 'absolute',
-    width: 60,
-    height: 53,
-    borderRadius: 18,
-    top: '60%',
-    marginTop: -19,
   },
   icon: {
     zIndex: 1,
