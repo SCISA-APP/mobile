@@ -33,7 +33,7 @@ const ConcernDetailsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
+        <View style={styles.card}>
           <ThemedText type="title" style={styles.title}>{concern.title}</ThemedText>
           <View style={styles.metaContainer}>
             <ThemedText style={styles.category}>{concern.category}</ThemedText>
@@ -42,11 +42,11 @@ const ConcernDetailsScreen = () => {
             </View>
           </View>
           <ThemedText style={styles.date}>{new Date(concern.date).toLocaleString()}</ThemedText>
-        </View>
-
-        <View style={styles.descriptionContainer}>
-          <ThemedText type="subtitle">Details</ThemedText>
-          <ThemedText style={styles.description}>{concern.description}</ThemedText>
+          <View style={styles.separator} />
+          <View style={styles.descriptionContainer}>
+            <ThemedText type="subtitle">Details</ThemedText>
+            <ThemedText style={styles.description}>{concern.description}</ThemedText>
+          </View>
         </View>
 
         {concern.isAnonymous && (
@@ -69,12 +69,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  header: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
   title: {
     marginBottom: 10,
   },
@@ -86,7 +80,7 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 16,
-    color: colors.gray,
+    color: '#000',
   },
   statusBadge: {
     borderRadius: 12,
@@ -100,16 +94,15 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 14,
-    color: colors.gray,
+    color: '#000',
   },
   descriptionContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
+    marginTop: 10,
   },
   description: {
     marginTop: 10,
     lineHeight: 22,
+    color: '#000',
   },
   anonymousBanner: {
     marginTop: 20,
@@ -120,5 +113,16 @@ const styles = StyleSheet.create({
   anonymousText: {
     color: colors.warning,
     textAlign: 'center',
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 15,
   },
 });

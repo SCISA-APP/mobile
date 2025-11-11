@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, View, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import colors from '../../constants/colors';
@@ -31,7 +31,7 @@ const WelcomeScreen = () => {
     };
 
     checkUserState();
-  }, []);
+  }, [router]);
 
   return (
     <View style={styles.container}>

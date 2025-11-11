@@ -1,8 +1,9 @@
-import { ThemedText } from '@/components/themed-text';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import colors from '@/constants/colors';
 
 const counselors = [
   {
@@ -36,7 +37,6 @@ const counselors = [
     id: '4',
     name: 'Dr. Michael Brown',
     type: 'Departmental',
-    department: 'Student Affairs',
     image: 'https://randomuser.me/api/portraits/men/62.jpg',
     bio: 'Dr. Brown is a student affairs professional who is dedicated to helping students succeed. He is a great resource for any student who is struggling.',
     specialties: ['Career Counseling', 'Academic Advising'],
@@ -48,7 +48,7 @@ const CounselorsScreen = () => {
   const { type } = useLocalSearchParams();
 
   const filteredCounselors = counselors.filter(c => c.type === type);
-  const title = type === 'Peer' ? 'Peer Counselors' : 'Professional Counselors';
+  // const title = type === 'Peer' ? 'Peer Counselors' : 'Professional Counselors'; // No longer needed as header is removed
 
   const renderCounselor = ({ item }) => {
     const handlePress = () => {
@@ -69,25 +69,23 @@ const CounselorsScreen = () => {
       <TouchableOpacity onPress={handlePress} style={styles.counselorCard}>
         <Image source={{ uri: item.image }} style={styles.counselorImage} />
         <View style={styles.counselorInfo}>
-          <ThemedText style={styles.counselorName}>{item.name}</ThemedText>
-          <ThemedText style={styles.counselorDepartment}>{item.department}</ThemedText>
+          <Text style={styles.counselorName}>{item.name}</Text>
+          <Text style={styles.counselorDepartment}>{item.department}</Text>
           <View style={styles.specialtiesContainer}>
             {item.specialties.map((specialty, index) => (
               <View key={index} style={styles.specialtyBadge}>
-                <ThemedText style={styles.specialtyText}>{specialty}</ThemedText>
+                <Text style={styles.specialtyText}>{specialty}</Text>
               </View>
             ))}
           </View>
         </View>
+        <Ionicons name="chevron-forward" size={24} color={colors.gray} />
       </TouchableOpacity>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-      </View>
       <FlatList
         data={filteredCounselors}
         renderItem={renderCounselor}
@@ -103,41 +101,24 @@ export default CounselorsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.background,
   },
-  header: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9ECEF',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#343A40',
-  },
+  // Removed header styles as per request
   listContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 10, // Adjusted padding
   },
   counselorCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
+    // Removed background, border, shadow, and elevation
+    paddingVertical: 10, // Adjusted padding
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    marginVertical: 5, // Adjusted margin
   },
   counselorImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     marginRight: 16,
   },
   counselorInfo: {
@@ -146,11 +127,11 @@ const styles = StyleSheet.create({
   counselorName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#343A40',
+    color: '#000',
   },
   counselorDepartment: {
     fontSize: 14,
-    color: '#6C757D',
+    color: '#000',
     marginTop: 4,
   },
   specialtiesContainer: {
@@ -159,15 +140,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   specialtyBadge: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    // Removed background and border radius
+    paddingVertical: 2, // Adjusted padding
+    paddingHorizontal: 6, // Adjusted padding
     marginRight: 8,
-    marginBottom: 8,
+    marginBottom: 4, // Adjusted margin
   },
   specialtyText: {
     fontSize: 12,
-    color: '#495057',
+    color: '#000', // Colder text color
   },
 });

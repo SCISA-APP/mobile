@@ -1,5 +1,5 @@
-import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, Image } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bell } from 'lucide-react-native';
 import { HeaderProps, HeaderActionProps, HeaderGreetingProps } from '@/types/components/header';

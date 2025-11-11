@@ -33,7 +33,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
       duration: 180,
       useNativeDriver: false,
     }).start();
-  }, [isFocused, value]);
+  }, [isFocused, value, animatedValue]);
 
   const labelStyle = {
     position: 'absolute' as const,

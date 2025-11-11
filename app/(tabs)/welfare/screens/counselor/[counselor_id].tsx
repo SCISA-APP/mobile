@@ -1,5 +1,4 @@
 import { ThemedText } from '@/components/themed-text';
-import colors from '@/constants/colors';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, Image, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -57,7 +56,7 @@ const ProfessionalCounselorDetailsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.contentContainer}>
+        <View style={styles.bioContainer}>
           {renderContent()}
         </View>
       </ScrollView>
@@ -77,7 +76,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     height: 120 + (StatusBar.currentHeight || 0),
-    backgroundColor: '#4A90E2', // A light blue color
+    backgroundColor: '#5A7AB0', // primaryLight
     paddingTop: StatusBar.currentHeight || 0,
   },
   profilePic: {
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: 130 + (StatusBar.currentHeight || 0),
-    backgroundColor: colors.primary,
+    backgroundColor: '#2B4C83', // primary
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
   },
   department: {
     fontSize: 16,
-    color: 'gray',
+    color: '#000',
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -129,17 +128,17 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: colors.primary,
+    borderBottomColor: '#2B4C83', // primary
   },
   tabText: {
     fontSize: 16,
-    color: 'gray',
+    color: '#000',
   },
   activeTabText: {
-    color: colors.primary,
+    color: '#2B4C83', // primary
     fontWeight: 'bold',
   },
-  contentContainer: {
+  bioContainer: {
     padding: 20,
   },
   bio: {
@@ -150,13 +149,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   specialty: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#5A7AB0', // primaryLight
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 20,
     margin: 5,
   },
   specialtyText: {
-    color: 'white',
+    color: '#2B4C83', // primary
   },
 });

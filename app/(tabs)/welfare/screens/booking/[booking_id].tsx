@@ -43,25 +43,29 @@ const BookingDetailsScreen = () => {
         </View>
       </View>
       <View style={styles.detailsContainer}>
-        <View style={styles.detailItem}>
-          <Ionicons name="calendar-outline" size={24} color={colors.primary} />
-          <View style={styles.detailTextContainer}>
-            <ThemedText style={styles.detailLabel}>Date & Time</ThemedText>
-            <ThemedText style={styles.detailValue}>{booking.date} at {booking.time}</ThemedText>
+        <View style={styles.card}>
+          <View style={styles.detailItem}>
+            <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+            <View style={styles.detailTextContainer}>
+              <ThemedText style={styles.detailLabel}>Date & Time</ThemedText>
+              <ThemedText style={styles.detailValue}>{booking.date} at {booking.time}</ThemedText>
+            </View>
           </View>
-        </View>
-        <View style={styles.detailItem}>
-          <Ionicons name="location-outline" size={24} color={colors.primary} />
-          <View style={styles.detailTextContainer}>
-            <ThemedText style={styles.detailLabel}>Location</ThemedText>
-            <ThemedText style={styles.detailValue}>{booking.location}</ThemedText>
+          <View style={styles.separator} />
+          <View style={styles.detailItem}>
+            <Ionicons name="location-outline" size={24} color={colors.primary} />
+            <View style={styles.detailTextContainer}>
+              <ThemedText style={styles.detailLabel}>Location</ThemedText>
+              <ThemedText style={styles.detailValue}>{booking.location}</ThemedText>
+            </View>
           </View>
-        </View>
-        <View style={styles.detailItem}>
-          <Ionicons name="document-text-outline" size={24} color={colors.primary} />
-          <View style={styles.detailTextContainer}>
-            <ThemedText style={styles.detailLabel}>Notes</ThemedText>
-            <ThemedText style={styles.detailValue}>{booking.notes}</ThemedText>
+          <View style={styles.separator} />
+          <View style={styles.detailItem}>
+            <Ionicons name="document-text-outline" size={24} color={colors.primary} />
+            <View style={styles.detailTextContainer}>
+              <ThemedText style={styles.detailLabel}>Notes</ThemedText>
+              <ThemedText style={styles.detailValue}>{booking.notes}</ThemedText>
+            </View>
           </View>
         </View>
       </View>
@@ -92,7 +96,7 @@ const styles = StyleSheet.create({
   counselorName: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: colors.text,
+    color: '#000',
   },
   statusBadge: {
     borderRadius: 12,
@@ -109,30 +113,37 @@ const styles = StyleSheet.create({
   detailsContainer: {
     padding: 20,
   },
-  detailItem: {
+  card: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
   },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
   detailTextContainer: {
     marginLeft: 16,
   },
   detailLabel: {
     fontSize: 14,
-    color: colors.text,
+    color: '#000',
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
-    color: colors.text,
+    color: '#000',
     fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 8,
   },
 });

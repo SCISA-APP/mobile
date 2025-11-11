@@ -66,7 +66,7 @@ const ConcernsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <ThemedText style={styles.title}>My Concerns</ThemedText>
+        <ThemedText style={styles.title}>Reported Concerns</ThemedText>
       </View>
       <FlatList
         data={concerns}

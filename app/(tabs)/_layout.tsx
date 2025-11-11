@@ -1,13 +1,10 @@
 import { HapticTab } from "@/components/haptic-tab";
 import Header from "@/components/ui/Header";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import React from "react";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
 
   const bellPress = () => {
@@ -32,9 +29,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
           borderTopWidth: 0,
           elevation: 10,
           height: 60,

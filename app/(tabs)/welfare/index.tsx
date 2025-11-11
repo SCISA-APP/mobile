@@ -1,5 +1,4 @@
 import colors from '@/constants/colors';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,13 +22,6 @@ const WelfareScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: colors.primary }]}>
-        <Text  style={styles.headerText}>Welfare Space</Text>
-        <TouchableOpacity style={styles.bookingsIcon} onPress={() => router.push('/(tabs)/welfare/screens/bookings')}>
-          <Ionicons name="calendar-outline" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView style={styles.content}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/quotes')}>
           <View
@@ -72,6 +64,10 @@ const WelfareScreen = () => {
           </ScrollView>
         </View>
 
+        <TouchableOpacity style={styles.reportButton} onPress={() => router.push('/(tabs)/welfare/screens/concern')}>
+          <Text style={styles.reportButtonText}>Report a Concern</Text>
+        </TouchableOpacity>
+
         <View style={styles.mentalHealthSection}>
           <Text type="subtitle" style={styles.mentalHealthTitle}>Your Mental Health Matters</Text>
           <Text style={styles.mentalHealthText}>
@@ -89,24 +85,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  bookingsIcon: {
-    // No styles needed here for now
   },
   content: {
     flex: 1,
@@ -151,6 +129,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  reportButton: {
+    backgroundColor: colors.primary,
+    padding: 15,
+    borderRadius: 10,
+    margin: 20,
+    alignItems: 'center',
+  },
+  reportButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   mentalHealthSection: {
     padding: 20,

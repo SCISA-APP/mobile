@@ -1,30 +1,16 @@
-import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import colors from '@/constants/colors';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import colors from '@/constants/colors';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-// Light theme only
-const AppTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: colors.primary,
-    background: colors.background,
-    card: colors.white,
-    text: colors.text.primary,
-    border: colors.gray[200],
-    notification: colors.error,
-  },
-};
 
 export default function RootLayout() {
   return (
-    <ThemeProvider value={AppTheme}>
+<> 
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -61,6 +47,6 @@ export default function RootLayout() {
           }} 
         />
       </Stack>
-    </ThemeProvider>
+      </> 
   );
 }
