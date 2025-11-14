@@ -121,32 +121,42 @@ const App = (): React.JSX.Element => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#ffffff' },
+
   fixedHeader: {
     backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,
+    paddingHorizontal: 16, 
+    paddingTop: 12,
   },
 
   headerTitle: { fontSize: 24, fontWeight: '700', color: '#111' },
-  stickyCategories: {
-    position: 'absolute',
-    top: 110,
-    left: 0,
-    right: 0,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    zIndex: 999,
-  },
+
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
-  section: { marginVertical: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#111' },
-  productListContent: { paddingTop: 4 },
+
+  scrollContent: {  
+    paddingTop: 20, 
+    paddingBottom: 40,
+    paddingHorizontal: 16, // added horizontal padding for all scroll content
+  },
+
+  section: { 
+    marginVertical: 12,
+  },
+
+  sectionTitle: { 
+    fontSize: 18, 
+    fontWeight: '600', 
+    color: '#111',
+    marginBottom: 8,
+  },
+
+  productListContent: { 
+    paddingTop: 4,
+    paddingHorizontal: 4, // small padding for horizontal FlatLists
+  },
+
   dealsSectionBackground: {
     backgroundColor: '#f0f5ff',
     borderRadius: 16,
@@ -154,5 +164,6 @@ const styles = StyleSheet.create({
     marginHorizontal: -5,
   },
 });
+
 
 export default App;

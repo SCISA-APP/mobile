@@ -51,17 +51,17 @@ const CartCard = ({ product, initialQuantity = 1, onRemove, onQuantityChange }: 
         </Text>
 
         <View style={styles.priceRow}>
-          <Text style={styles.priceText}>${totalPrice}</Text>
+          <Text style={styles.priceText}>GHC {totalPrice}</Text>
           {hasDiscount && (
             <Text style={styles.originalPrice}>
-              ${(product.price * quantity).toFixed(2)}
+              GHC {(product.price * quantity).toFixed(2)}
             </Text>
           )}
         </View>
 
         {hasDiscount && (
           <Text style={styles.discountText}>
-            You save ${savedAmount.toFixed(2)}!
+            You save GHC {savedAmount.toFixed(2)}!
           </Text>
         )}
 

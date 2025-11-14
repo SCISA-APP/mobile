@@ -1,15 +1,48 @@
-// components/headers/StoreHeader.tsx
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface StoreHeaderProps {
   title: string;
 }
 
 const Header: React.FC<StoreHeaderProps> = ({ title }) => {
+  const router = useRouter();
+  const [isShopOwner, setIsShopOwner] = useState(false);
+
+  useEffect(() => {
+    const fetchUserStatus = async () => {
+      try {
+        const userJson = await AsyncStorage.getItem('@user_info');
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          setIsShopOwner(user.isShopOwner ?? false);
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    };
+    fetchUserStatus();
+  }, []);
+
+  const handlePress = () => {
+    if (isShopOwner) {
+      router.push('/(standalone)/myShop');
+    } else {
+      router.push('/(standalone)/becomeAnOwner');
+    }
+  };
+
   return (
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>{title}</Text>
+
+      <TouchableOpacity onPress={handlePress}>
+        <Text style={styles.subButtonText}>
+          {isShopOwner ? 'My Store' : 'Become a Seller'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -17,16 +50,23 @@ const Header: React.FC<StoreHeaderProps> = ({ title }) => {
 const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,
+    flexDirection: 'row',
+    justifyContent: 'space-between', // title left, button right
+    alignItems: 'center', // vertically center items
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: '#111',
+  },
+  subButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0052cc',
   },
 });
 
