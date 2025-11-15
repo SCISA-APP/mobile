@@ -21,7 +21,7 @@ const AcademicResources = () => {
         if (!storedUser) return;
 
         const user = JSON.parse(storedUser);
-        const program = "physics";
+        const program = user.program?.toLowerCase();
 
         // find the department object that matches the user's program
         const department = Object.values(academicData).find(

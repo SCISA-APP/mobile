@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import {
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   View,
   KeyboardAvoidingView,
   Platform,
@@ -60,105 +60,122 @@ const Step2Documents: React.FC<Step2Props> = ({ onNext }) => {
     }
   };
 
+  const renderContent = () => (
+    <View style={styles.contentContainer}>
+      {/* Store Details */}
+      <Text style={styles.sectionTitle}>Store Details</Text>
+      <CustomInput
+        placeholder="Store Name"
+        value={storeName}
+        onChangeText={setStoreName}
+      />
+      <CustomInput
+        placeholder="Shop Description"
+        value={shopDescription}
+        onChangeText={setShopDescription}
+        multiline
+        style={{ height: 100, textAlignVertical: 'top' }}
+      />
+
+      {/* Documents */}
+      <Text style={styles.sectionTitle}>Documents</Text>
+      <View style={styles.row}>
+        <View style={styles.halfWidth}>
+          <SingleImagePicker
+            placeholder="Student ID"
+            imageUri={studentId}
+            onImageSelected={setStudentId}
+          />
+        </View>
+        <View style={styles.halfWidth}>
+          <SingleImagePicker
+            placeholder="National ID"
+            imageUri={nationalId}
+            onImageSelected={setNationalId}
+          />
+        </View>
+      </View>
+
+      {/* Payment Details */}
+<Text style={styles.sectionTitle}>Payment Details</Text>
+
+{/* Highest dropdown at the top */}
+<View style={{ zIndex: 3000 }}>
+  <CustomDropdown
+    placeholder="Select Payment Type"
+    data={['Bank', 'Mobile Money']}
+    value={paymentType}
+    onValueChange={setPaymentType}
+  />
+</View>
+
+{paymentType === 'Bank' && (
+  <>
+    <View style={{ zIndex: 2000 }}>
+      <CustomDropdown
+        placeholder="Select Bank"
+        data={['GCB', 'Ecobank', 'Zenith', 'Stanbic', 'Absa', 'Universal']}
+        value={bankName}
+        onValueChange={setBankName}
+      />
+    </View>
+
+    <CustomInput
+      placeholder="Account Number"
+      value={accountNumber}
+      onChangeText={setAccountNumber}
+      keyboardType="numeric"
+    />
+    <CustomInput
+      placeholder="Account Name"
+      value={accountName}
+      onChangeText={setAccountName}
+    />
+  </>
+)}
+
+{paymentType === 'Mobile Money' && (
+  <>
+    <View style={{ zIndex: 2000 }}>
+      <CustomDropdown
+        placeholder="Select Provider"
+        data={['MTN', 'AirtelTigo', 'Telecel']}
+        value={mobileProvider}
+        onValueChange={setMobileProvider}
+      />
+    </View>
+
+    <CustomInput
+      placeholder="Account Number"
+      value={accountNumber}
+      onChangeText={setAccountNumber}
+      keyboardType="numeric"
+    />
+    <CustomInput
+      placeholder="Account Name"
+      value={accountName}
+      onChangeText={setAccountName}
+    />
+  </>
+)}
+
+      {/* Bottom Padding */}
+      <View style={{ height: 100 }} />
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
+      <FlatList
+        data={[{ key: 'content' }]}
+        renderItem={renderContent}
+        keyExtractor={(item) => item.key}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
-      >
-        {/* Store Details */}
-        <Text style={styles.sectionTitle}>Store Details</Text>
-        <CustomInput
-          placeholder="Store Name"
-          value={storeName}
-          onChangeText={setStoreName}
-        />
-        <CustomInput
-          placeholder="Shop Description"
-          value={shopDescription}
-          onChangeText={setShopDescription}
-          multiline
-          style={{ height: 100, textAlignVertical: 'top' }}
-        />
-
-        {/* Documents */}
-        <Text style={styles.sectionTitle}>Documents</Text>
-        <View style={styles.row}>
-          <View style={styles.halfWidth}>
-            <SingleImagePicker
-              placeholder="Student ID"
-              imageUri={studentId}
-              onImageSelected={setStudentId}
-            />
-          </View>
-          <View style={styles.halfWidth}>
-            <SingleImagePicker
-              placeholder="National ID"
-              imageUri={nationalId}
-              onImageSelected={setNationalId}
-            />
-          </View>
-        </View>
-
-        {/* Payment Details */}
-        <Text style={styles.sectionTitle}>Payment Details</Text>
-        <CustomDropdown
-          placeholder="Select Payment Type"
-          data={['Bank', 'Mobile Money']}
-          value={paymentType}
-          onValueChange={setPaymentType}
-        />
-
-        {paymentType === 'Bank' && (
-          <>
-            <CustomDropdown
-              placeholder="Select Bank"
-              data={['GCB', 'Ecobank', 'Zenith', 'Stanbic', 'Absa', 'Universal']}
-              value={bankName}
-              onValueChange={setBankName}
-            />
-            <CustomInput
-              placeholder="Account Number"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              keyboardType="numeric"
-            />
-            <CustomInput
-              placeholder="Account Name"
-              value={accountName}
-              onChangeText={setAccountName}
-            />
-          </>
-        )}
-
-        {paymentType === 'Mobile Money' && (
-          <>
-            <CustomDropdown
-              placeholder="Select Provider"
-              data={['MTN', 'AirtelTigo', 'Telecel']}
-              value={mobileProvider}
-              onValueChange={setMobileProvider}
-            />
-            <CustomInput
-              placeholder="Account Number"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              keyboardType="numeric"
-            />
-            <CustomInput
-              placeholder="Account Name"
-              value={accountName}
-              onChangeText={setAccountName}
-            />
-          </>
-        )}
-
-        {/* Bottom Padding */}
-        <View style={{ height: 100 }} />
-      </ScrollView>
+      />
 
       {/* Bottom Button */}
       <View style={styles.bottomButton}>
@@ -175,6 +192,8 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 20,
     backgroundColor: '#fff',
+  },
+  contentContainer: {
     overflow: 'visible',
   },
   sectionTitle: {

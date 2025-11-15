@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Image } from 'react-native'
 import React from 'react'
-import CustomButton from '@/components/buttons/CustomButton';
+import CustomButton from '@/components/buttons/CustomButton'
+import Complete from "../../../assets/images/Complete.gif"
 
 interface Step3Props {
   onFinish: () => void;
@@ -10,6 +11,8 @@ const Step3Success: React.FC<Step3Props> = ({ onFinish }) => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        <Image source={Complete} style={styles.image} />
+
         <Text style={styles.title}>Success!</Text>
         <Text style={styles.subtitle}>
           Your documents have been submitted successfully.
@@ -34,6 +37,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center', // make image and text centered
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
   },
   title: {
     fontSize: 22,
