@@ -9,24 +9,32 @@ import colors from '@/constants/colors';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const router = useRouter();
+  const isDark = colorScheme === "dark";
+
+  const bellPress = () => {
+    router.push("/(standalone)/notification");
+  };
+
+  const profilePress = () => {
+    router.push("/profile"); // fixed
+  };
 
   const renderHeader = (title?: string) => (
-    <Header 
+    <Header
       title={title}
       showGreeting={!title}
       showNotification={true}
       showProfile={true}
-      onNotificationPress={() => console.log('Notification pressed')}
-      onProfilePress={() => console.log('Profile pressed')}
+      onNotificationPress={bellPress}
+      onProfilePress={profilePress}
     />
   );
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primaryDark,
-        tabBarInactiveTintColor: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)',
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarStyle: {
   backgroundColor: isDark ? '#000000' : '#FFFFFF',
   borderTopWidth: 1,
@@ -42,26 +50,26 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: '600',
+          fontWeight: "600",
           letterSpacing: -0.1,
           marginTop: 4,
         },
         tabBarButton: HapticTab,
         headerShown: true,
         headerTransparent: true,
-        headerBlurEffect: isDark ? 'systemThickMaterialDark' : 'systemThickMaterialLight',
         headerStyle: {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent"
         },
         headerTitleStyle: {
           fontSize: 34,
-          fontWeight: '700',
-          color: isDark ? '#FFFFFF' : '#000000',
+          fontWeight: "700",
+          color: isDark ? "#FFFFFF" : "#000000"
         },
+
         header: ({ route, options }) => {
-          const title = options.title || '';
-          return renderHeader(title !== 'Home' ? title : undefined);
-        },
+          const title = options.title || "";
+          return renderHeader(title !== "Home" ? title : undefined);
+        }
       }}
     >
       <Tabs.Screen
@@ -77,6 +85,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="academics/index"
         options={{
@@ -88,9 +97,10 @@ export default function TabLayout() {
               color={color}
             />
           ),
-          headerShown: false,
+          headerShown: false
         }}
       />
+
       <Tabs.Screen
         name="welfare/index"
         options={{
@@ -102,9 +112,10 @@ export default function TabLayout() {
               color={color}
             />
           ),
-          headerShown: false,
+          headerShown: false
         }}
       />
+
       <Tabs.Screen
         name="store/index"
         options={{
@@ -116,9 +127,10 @@ export default function TabLayout() {
               color={color}
             />
           ),
-          headerShown: false,
+          headerShown: false
         }}
       />
+
       <Tabs.Screen
         name="profile/index"
         options={{
@@ -130,7 +142,7 @@ export default function TabLayout() {
               color={color}
             />
           ),
-          headerShown: false,
+          headerShown: false
         }}
       />
     </Tabs>
