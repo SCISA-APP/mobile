@@ -58,7 +58,7 @@ const App = (): React.JSX.Element => {
       {/* --- Fixed Header --- */}
       <View style={styles.fixedHeader}>
         <View >
-          <Header title="SCISA Store" />
+          <Header title="SCISA Store" showStoreButton={true} />
         </View>
         <ProductSearchBar onPress={() => router.push('/searchProduct')} />
       </View>

@@ -5,13 +5,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface StoreHeaderProps {
   title: string;
+  showStoreButton?: boolean; // ✅ new optional prop
 }
 
-const Header: React.FC<StoreHeaderProps> = ({ title }) => {
+const Header: React.FC<StoreHeaderProps> = ({ title, showStoreButton }) => {
   const router = useRouter();
   const [isShopOwner, setIsShopOwner] = useState(false);
 
   useEffect(() => {
+    if (!showStoreButton) return; // skip fetching if button is hidden
+
     const fetchUserStatus = async () => {
       try {
         const userJson = await AsyncStorage.getItem('@user_info');
@@ -24,7 +27,7 @@ const Header: React.FC<StoreHeaderProps> = ({ title }) => {
       }
     };
     fetchUserStatus();
-  }, []);
+  }, [showStoreButton]);
 
   const handlePress = () => {
     if (isShopOwner) {
@@ -38,11 +41,13 @@ const Header: React.FC<StoreHeaderProps> = ({ title }) => {
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>{title}</Text>
 
-      <TouchableOpacity onPress={handlePress}>
-        <Text style={styles.subButtonText}>
-          {isShopOwner ? 'My Store' : 'Become a Seller'}
-        </Text>
-      </TouchableOpacity>
+      {showStoreButton && (
+        <TouchableOpacity onPress={handlePress}>
+          <Text style={styles.subButtonText}>
+            {isShopOwner ? 'My Store' : 'Become a Seller'}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -55,8 +60,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,
     flexDirection: 'row',
-    justifyContent: 'space-between', // title left, button right
-    alignItems: 'center', // vertically center items
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 24,
