@@ -14,11 +14,11 @@ import { useRouter } from 'expo-router';
 import { Product } from '@/types/models/shop/product';
 import { exampleProducts as featuredProducts } from '@/assets/data/shop/product';
 
-import ShopByCategory from '@/components/buttons/shopByCategory';
+// import ShopByCategory from '@/components/buttons/shopByCategory';
 import Header from '@/components/headers/header';
 import ProductCard from '@/components/cards/productCard';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
-import CategoryHeader from '@/components/buttons/CategoryHeader';
+// import CategoryHeader from '@/components/buttons/CategoryHeader';
 import FloatingCartButton from '@/components/buttons/FloatingCartButton'; // <-- import it here
 
 const App = (): React.JSX.Element => {
@@ -47,9 +47,9 @@ const App = (): React.JSX.Element => {
     }
   );
 
-  const handleCategoryLayout = (event: any) => {
-    categoryOffsetY.current = event.nativeEvent.layout.y;
-  };
+  // const handleCategoryLayout = (event: any) => {
+  //   categoryOffsetY.current = event.nativeEvent.layout.y;
+  // };
 
   return (
     <SafeAreaView style={styles.safeArea}>
