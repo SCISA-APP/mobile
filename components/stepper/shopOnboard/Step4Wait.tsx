@@ -8,7 +8,8 @@ const Step4Wait = () => {
       <Image source={WaitProcess} style={styles.image} />
       <Text style={styles.title}>Your information is being processed</Text>
       <Text style={styles.subtitle}>
-        You will be notified once your seller request has been accepted.
+        You will be notified once your seller request has been accepted. Then you can
+        add your products to start selling 
       </Text>
     </View>
   )
