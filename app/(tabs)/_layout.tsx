@@ -7,7 +7,6 @@ import { Platform} from 'react-native';
 import { useRouter ,Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const isDark = colorScheme === "dark";
 
@@ -101,7 +100,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="welfare/index"
+        name="welfare"
         options={{
           title: 'Welfare',
           tabBarIcon: ({ color, focused }) => (
