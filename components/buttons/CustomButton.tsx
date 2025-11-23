@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from 'react-native';
 import colors from '@/constants/colors';
+import React, { useState } from 'react';
+import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface CustomButtonProps {
   label: string;
   onPress: (event: GestureResponderEvent) => Promise<void> | void;
+  style?:object;// optional style prop
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress }) => {
@@ -46,7 +47,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
+    width: '100%',  //change to flex:1 to allow equal spacing in row
+    // flex: 1,
   },
   label: {
     color: colors.background,
