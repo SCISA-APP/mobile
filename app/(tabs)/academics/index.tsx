@@ -1,137 +1,100 @@
-import NotesCard from "@/components/academics/NotesCard";
-import NotFound from "@/components/academics/NotFound";
-import CustomButton from "@/components/buttons/CustomButton";
-import CustomInput from "@/components/inputs/CustomInput";
-import Dropdown from "@/components/inputs/Dropdown";
-import Header from "@/components/ui/Header";
-import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { academicsStyles } from "./styles";
-import { courses, coursesValue, courseTopics, years, yearsValue } from "./temp";
-const PageTitle = ({ title }: { title: string }) => {
-  return <Text style={academicsStyles.title}>{title}</Text>;
-};
-type CourseTopic = {
-  topic?: string;
-  description?: string;
-  courseCode?: string;
-  year?: number | string;
-};
+import { academicsButtonsData } from '@/assets/data/academics/AcademicButton';
+import Header from '@/components/headers/header';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Dimensions, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const index = () => {
-  const [course, setCourse] = React.useState<string>("");
-  const [year, setYear] = React.useState<string>("");
-  const [data, setData] = React.useState<CourseTopic[]>(courseTopics);
-  const [search,setSearch] = React.useState<string>("");
+const { width } = Dimensions.get('window');
+const buttonWidth = (width - 60) / 2;
 
-function findCourseAndYear(
-  courseName: string,
-  yearName: string,
-) {
-  const courseObj = coursesValue.find(c => c.name === courseName) || null
-  const yearObj = yearsValue.find(y => y.name === yearName) || null
-
-  return { courseCode:courseObj?.value, year:yearObj?.value }
-}
-
-  useEffect(() => {
-  const { courseCode, year: yearValue } = findCourseAndYear(course, year)
-
-  const filteredData = courseTopics.filter(item => {
-    const matchesCourse = courseCode ? item.courseCode.startsWith(courseCode) : true
-    const matchesYear = yearValue ? item.year === yearValue : true
-
-    const searchLower = search.toLowerCase()
-    const matchesSearch = search.trim()
-      ? item.topic.toLowerCase().includes(searchLower) ||
-        item.description.toLowerCase().includes(searchLower)
-      : true
-
-    return matchesCourse && matchesYear && matchesSearch
-  })
-
-  setData(filteredData)
-}, [course, year, search]) 
-
+const index: React.FC = () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const router = useRouter();
 
   return (
-  <View style={{ flex: 1 }}>
-    <Header
-      showGreeting={false}
-      leftComponent={<PageTitle title={"Academics"} />}
-    />
-    <View style={[academicsStyles.mainBody, { flex: 1 }]}>
-      <CustomInput placeholder={"Search lectures..."} icon={"search"} value={search}
-            onChangeText={setSearch} />
-      <View style={academicsStyles.categories}>
-        
-        <Dropdown
-          data={courses}
-          value={course}
-          onChange={setCourse}
-          placeholder="All Courses"
-        />
-        <View style={{ flex: 0.5 }}>
-        <Dropdown
-          data={years}
-          value={year}
-          onChange={setYear}
-          placeholder="All Years"
-        />
-        </View>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Ensure status bar style matches background */}
+      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+      
+      <Header title="SCISA Academics" />
+      
+      <View style={styles.gridContainer}>
+        {academicsButtonsData.map((btn, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.buttonWrapper}
+            onPress={() => router.push(btn.route as const)}
+            activeOpacity={0.8}
+          >
+            <ImageBackground 
+              source={btn.image} 
+              style={styles.image} 
+              imageStyle={styles.imageStyle}
+            >
+              <View style={styles.overlay}>
+                <Text style={styles.buttonText}>{btn.title}</Text>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
+        ))}
       </View>
-
-      <ScrollView contentContainerStyle={{ paddingBottom: 50 }}>
-        <View>
-          <View style={academicsStyles.categories}>
-            <View style={{ flex: 1 }}>
-              <CustomButton
-                label={"Notes& P.Qs"}
-                onPress={() => console.log("notes and p.qs")}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <CustomButton
-                label={"Timetable"}
-                onPress={() => console.log("Timetable")}
-              />
-            </View>
-          </View>
-
-          <View style={academicsStyles.categories}>
-            <View style={{ flex: 1 }}>
-              <CustomButton
-                label={"Exam Allocation"}
-                onPress={() => console.log("Exam Allocation")}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <CustomButton
-                label={"Lectures"}
-                onPress={() => console.log("Lectures")}
-              />
-            </View>
-          </View>
-        </View>
-
-        <View style={{ marginTop: 16 }}>
-          {data.length>0?data?.map((item, index) => (
-            <NotesCard
-              key={index}
-              topic={item.topic}
-              description={item.description}
-              courseCode={item.courseCode}
-              year={item.year}
-            />
-          )):<NotFound />}
-        </View>
-      </ScrollView>
-    </View>
-  </View>
-);
-
+    </SafeAreaView>
+  );
 };
 
 export default index;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+    marginHorizontal: 10,
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 10,
+    paddingTop: 10,
+  },
+  buttonWrapper: {
+    width: buttonWidth,
+    height: 160,
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  image: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  imageStyle: {
+    borderRadius: 16,
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 40, 85, 0.45)',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: 12,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 19,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+});
