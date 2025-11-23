@@ -20,7 +20,6 @@ import {
 import { BlurView } from "expo-blur";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const isDark = colorScheme === "dark";
 
@@ -46,9 +45,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
           borderTopWidth: 0,
           height: Platform.OS === "ios" ? 88 : 72,
           paddingBottom: Platform.OS === "ios" ? 24 : 12,
@@ -140,7 +137,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="welfare/index"
+        name="welfare"
         options={{
           title: "Welfare",
           tabBarIcon: ({ color, size }) => (
