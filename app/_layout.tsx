@@ -1,4 +1,5 @@
 import colors from '@/constants/colors';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
@@ -40,13 +41,47 @@ export default function RootLayout() {
             gestureEnabled: false,
           }} 
         />
+         <Stack.Screen 
+          name="category" 
+        
+          options={{
+            headerBackVisible: false,
+            headerBackTitle: ' ',
+            headerShown: false,
+            gestureEnabled: false,
+          }} 
+        />
+
+        <Stack.Screen 
+          name="product" 
+        
+          options={{
+            headerBackVisible: false,
+            headerBackTitle: ' ',
+            headerShown: false,
+            gestureEnabled: false,
+          }} 
+        />
+
         <Stack.Screen 
           name="(standalone)" 
           options={{ 
             headerShown: false,
           }} 
         />
+       < Stack.Screen 
+          name="category/filter" 
+        
+          options={{
+            headerBackVisible: false,
+            headerBackTitle: ' ',
+            headerShown: true,
+            gestureEnabled: false,
+          }} 
+        />
+
       </Stack>
       </> 
   );
+  
 }
