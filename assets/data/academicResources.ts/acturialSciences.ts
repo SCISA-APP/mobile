@@ -4,7 +4,7 @@ export const actuarialScience = {
   years: [
     {
       year: 1,
-      link: 'https://driv e.google.com/drive/folders/1uqGeiMfNecCswi-5BDO_AGpHqF7ceX7y',
+      link: 'https://drive.google.com/drive/folders/1uqGeiMfNecCswi-5BDO_AGpHqF7ceX7y',
     },
     {
       year: 2,

@@ -6,9 +6,10 @@ import Rating from '../ratings/Rating';
 
 type ProductCardProps = {
   product: Product;
+  cardWidth?: number; // dynamically set width
 };
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, cardWidth }: ProductCardProps) => {
   const router = useRouter();
 
   const averageRating =
@@ -29,7 +30,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <TouchableOpacity style={styles.productCard} onPress={handlePress}>
+    <TouchableOpacity style={[styles.productCard, { width: cardWidth }]} onPress={handlePress}>
       <View style={styles.productImageContainer}>
         <Image source={{ uri: product.image }} style={styles.productImage} />
         {hasDiscount && (
@@ -59,7 +60,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 };
 
 const styles = StyleSheet.create({
-  productCard: { width: 150, marginRight: 16 },
+  productCard: { marginBottom: 12 },
   productImageContainer: { position: 'relative', marginBottom: 8 },
   productImage: { width: '100%', height: 150, borderRadius: 12, backgroundColor: '#f0f0f0' },
   discountBadge: {

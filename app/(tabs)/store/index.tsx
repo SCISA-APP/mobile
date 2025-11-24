@@ -1,55 +1,19 @@
-import React, { useRef, useState } from 'react';
-import {
-  Animated,
-  FlatList,
-  ListRenderItemInfo,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-
-import { Product } from '@/types/models/shop/product';
+import React, { useRef } from 'react';
+import { Animated, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import { exampleProducts as featuredProducts } from '@/assets/data/shop/product';
-
-import ShopByCategory from '@/components/buttons/shopByCategory';
 import Header from '@/components/headers/header';
-import ProductCard from '@/components/cards/productCard';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
-import CategoryHeader from '@/components/buttons/CategoryHeader';
-import FloatingCartButton from '@/components/buttons/FloatingCartButton'; // <-- import it here
+import FloatingCartButton from '@/components/buttons/FloatingCartButton';
+import ProductSection from '@/components/section/ProductSection';
 
 const App = (): React.JSX.Element => {
   const scrollY = useRef(new Animated.Value(0)).current;
-  const [showCategories, setShowCategories] = useState(true);
-  const categoryOffsetY = useRef(0);
-  const router = useRouter();
-
-  const renderProductItem = ({
-    item,
-  }: ListRenderItemInfo<Product>): React.JSX.Element => (
-    <ProductCard product={item} />
-  );
+  // const [showCategories, setShowCategories] = useState(true);
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    {
-      useNativeDriver: false,
-      listener: (event: any) => {
-        const currentOffset = event.nativeEvent.contentOffset.y;
-        
-        if (currentOffset > categoryOffsetY.current && !showCategories) {
-          setShowCategories(true);
-        }
-      },
-    }
+    { useNativeDriver: false }
   );
-
-  const handleCategoryLayout = (event: any) => {
-    categoryOffsetY.current = event.nativeEvent.layout.y;
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -57,10 +21,8 @@ const App = (): React.JSX.Element => {
 
       {/* --- Fixed Header --- */}
       <View style={styles.fixedHeader}>
-        <View >
-          <Header title="SCISA Store" />
-        </View>
-        <ProductSearchBar onPress={() => router.push('/searchProduct')} />
+        <Header title="SCISA Store" showStoreButton={true} />
+        <ProductSearchBar onPress={() => {}} />
       </View>
 
       {/* --- Scrollable Content --- */}
@@ -71,46 +33,24 @@ const App = (): React.JSX.Element => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {/* <View style={styles.section} onLayout={handleCategoryLayout}>
-          <CategoryHeader title="Shop by Category" />
-          <ShopByCategory />
-        </View> */}
+        <ProductSection
+          title="Featured Products"
+          data={featuredProducts}
+          viewMoreRoute="(standalone)/category/ProductListScreen"
+        />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Products</Text>
-          <FlatList
-            data={featuredProducts}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            renderItem={renderProductItem}
-            contentContainerStyle={styles.productListContent}
-          />
-        </View>
+        <ProductSection
+          title="Limited Time Deals"
+          data={featuredProducts}
+          viewMoreRoute="(standalone)/category/ProductListScreen"
+          backgroundColor="#f0f5ff"
+        />
 
-        <View style={[styles.section, styles.dealsSectionBackground]}>
-          <Text style={styles.sectionTitle}>Limited Time Deals</Text>
-          <FlatList
-            data={featuredProducts}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            renderItem={renderProductItem}
-            contentContainerStyle={styles.productListContent}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>New Arrivals</Text>
-          <FlatList
-            data={featuredProducts}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={item => item.id}
-            renderItem={renderProductItem}
-            contentContainerStyle={styles.productListContent}
-          />
-        </View>
+        <ProductSection
+          title="New Arrivals"
+          data={featuredProducts}
+          viewMoreRoute="(standalone)/category/ProductListScreen"
+        />
       </Animated.ScrollView>
 
       {/* --- Floating Cart Button --- */}
@@ -123,36 +63,14 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#ffffff' },
   fixedHeader: {
     backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,
-  },
-
-  headerTitle: { fontSize: 24, fontWeight: '700', color: '#111' },
-  stickyCategories: {
-    position: 'absolute',
-    top: 110,
-    left: 0,
-    right: 0,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    zIndex: 999,
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
-  section: { marginVertical: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#111' },
-  productListContent: { paddingTop: 4 },
-  dealsSectionBackground: {
-    backgroundColor: '#f0f5ff',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: -5,
-  },
+  scrollContent: { paddingTop: 20, paddingBottom: 40},
 });
 
 export default App;

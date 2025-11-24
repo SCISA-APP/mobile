@@ -1,7 +1,7 @@
-// app/(tabs)/profile.tsx
 import IconFontAwesome from "@expo/vector-icons/FontAwesome";
-import { Stack } from "expo-router";
-import React from "react";
+import { Stack,useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { auth } from "@/firebaseConfig";
 import {
   Image,
   ScrollView,
@@ -10,28 +10,55 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import colors from "@/constants/colors";
+import CustomButton from "@/components/buttons/CustomButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { signOut } from "firebase/auth";
 
 export default function ProfileScreen() {
-  const user = {
-    name: "Albert Florest",
-    status: "Student",
-    avatarUri: null,
-  };
+  const router = useRouter();
+  const [student, setStudent] = useState<any>(null);
 
-  const firstInitial = user.name ? user.name.charAt(0).toUpperCase() : "";
+  // Load stored student data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const data = await AsyncStorage.getItem("@student_user");
+        if (data) {
+          setStudent(JSON.parse(data));
+        }
+      } catch (error) {
+        console.log("Error loading student user:", error);
+      }
+    };
 
-  const handleEditProfile = () => {
-    console.log("Edit Profile pressed");
-  };
-  const handleNotifications = () => {
-    console.log("Notifications pressed");
-  };
-  const handleChangePassword = () => {
-    console.log("Change Password pressed");
-  };
-  const handleSignOut = () => {
-    console.log("Sign Out pressed");
-  };
+    loadUserData();
+  }, []);
+
+  const firstInitial = student?.fullName
+    ? student.fullName.charAt(0).toUpperCase()
+    : "U";
+
+  const handleEditProfile = () => console.log("Edit Profile pressed");
+  const handleNotifications = () => console.log("Notifications pressed");
+  const handleChangePassword = () => console.log("Change Password pressed");
+  const handleSignOut = async () => {
+  try {
+    // 1. Sign out from Firebase
+    await signOut(auth);
+
+    // 2. Clear all app-related AsyncStorage
+    await AsyncStorage.clear();
+
+    // 3. Redirect to login screen
+    router.replace("/(auth)/login");
+
+    console.log("User signed out successfully");
+  } catch (error) {
+    console.log("Error signing out:", error);
+    alert("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <View style={styles.fullScreenContainer}>
@@ -48,9 +75,9 @@ export default function ProfileScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            {user.avatarUri ? (
+            {student?.avatarUri ? (
               <Image
-                source={{ uri: user.avatarUri }}
+                source={{ uri: student.avatarUri }}
                 style={styles.avatarImage}
               />
             ) : (
@@ -60,9 +87,24 @@ export default function ProfileScreen() {
             )}
           </View>
 
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userStatus}>{user.status}</Text>
+          <Text style={styles.userName}>{student?.fullName}</Text>
+          <Text style={styles.userStatus}>{student?.email}</Text>
         </View>
+
+        {/* User Info Card */}
+        {student && (
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Program:</Text>
+              <Text style={styles.infoValue}>{student.program}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Year:</Text>
+              <Text style={styles.infoValue}>{student.year}</Text>
+            </View>
+          </View>
+        )}
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
@@ -71,7 +113,7 @@ export default function ProfileScreen() {
               <IconFontAwesome
                 name="user-o"
                 size={20}
-                color="#20B2AA"
+                color={colors.primaryLight}
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Edit Profile</Text>
@@ -87,7 +129,7 @@ export default function ProfileScreen() {
               <IconFontAwesome
                 name="bell-o"
                 size={20}
-                color="#20B2AA"
+                color={colors.primaryLight}
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Notification</Text>
@@ -103,7 +145,7 @@ export default function ProfileScreen() {
               <IconFontAwesome
                 name="lock"
                 size={20}
-                color="#20B2AA"
+                color={colors.primaryLight}
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Change Password</Text>
@@ -114,18 +156,11 @@ export default function ProfileScreen() {
 
         {/* Sign Out */}
         <View style={styles.signOutButtonContainer}>
-          <TouchableOpacity
-            style={styles.signOutButton}
+          <CustomButton
+            label="Sign Out"
             onPress={handleSignOut}
-          >
-            <IconFontAwesome
-              name="sign-out"
-              size={20}
-              color="#fff"
-              style={styles.signOutIcon}
-            />
-            <Text style={styles.signOutButtonText}>Sign Out</Text>
-          </TouchableOpacity>
+            leftIcon={<IconFontAwesome name="sign-out" size={18} color="#fff" />}
+          />
         </View>
       </ScrollView>
     </View>
@@ -146,11 +181,10 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 20,
     marginTop: 20,
   },
   avatarContainer: {
-    position: "relative",
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -160,34 +194,44 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  avatarImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-  },
+  avatarImage: { width: 110, height: 110, borderRadius: 55 },
   initialsFallback: {
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: "#20B2AA",
+    backgroundColor: colors.primaryDark,
     justifyContent: "center",
     alignItems: "center",
   },
-  initialsText: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: "#fff",
-  },
+  initialsText: { fontSize: 48, fontWeight: "bold", color: "#fff" },
   userName: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 5,
+    marginBottom: 3,
   },
-  userStatus: {
-    fontSize: 14,
-    color: "#666",
+  userStatus: { fontSize: 14, color: "#666" },
+
+  // ⭐ User Info Card
+  infoCard: {
+    width: "100%",
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 12,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 2,
+  },
+  infoLabel: { fontSize: 15, color: "#555", fontWeight: "500" },
+  infoValue: { fontSize: 15, color: "#333", fontWeight: "600" },
+
   menuContainer: {
     width: "100%",
     backgroundColor: "#fff",
@@ -222,29 +266,10 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "500",
   },
-  lastMenuItem: {
-    borderBottomWidth: 0,
-  },
+  lastMenuItem: { borderBottomWidth: 0 },
+
   signOutButtonContainer: {
     width: "100%",
-    paddingHorizontal: 20,
     marginBottom: 8,
-  },
-  signOutButton: {
-    flexDirection: "row",
-    backgroundColor: "#20B2AA",
-    paddingVertical: 15,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-  },
-  signOutIcon: {
-    marginRight: 10,
-  },
-  signOutButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
   },
 });
