@@ -16,25 +16,57 @@ import CustomButton from '@/components/buttons/CustomButton';
 import colors from '../../constants/colors';
 import AuthenticationGif from '../../assets/images/Authentication.gif';
 import { useRouter } from 'expo-router';
+import {  signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db,auth } from '@/firebaseConfig';
+import { doc,getDoc } from 'firebase/firestore';
 
 const LoginScreen = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loaing, setLoading] = useState(false)
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert('Please enter both email and password');
+
+const handleLogin = async () => {
+  if (!email || !password) {
+    alert("Please enter both email and password");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (!user.emailVerified) {
+      alert("Your email is not verified yet.");
       return;
     }
 
-    console.log('Logging in with:', { email, password });
+    const userDocRef = doc(db, "Student_Users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
 
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 4000));
+    if (!userDocSnap.exists()) {
+      alert("User data not found.");
+      return;
+    }
 
-    router.push('/home');
-  };
+    const userData = userDocSnap.data();
+
+    await AsyncStorage.setItem("@student_user", JSON.stringify({
+      uid: user.uid,
+      ...userData,
+    }));
+
+    router.push("/home");
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
