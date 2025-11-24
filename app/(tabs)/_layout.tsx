@@ -5,19 +5,42 @@ import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
+  const router = useRouter();
+  const isDark = colorScheme === "dark";
+
+  const bellPress = () => {
+    router.push("/(standalone)/notification");
+  };
+
+  const profilePress = () => {
+    router.push("/profile"); // fixed
+  };
+
+  const renderHeader = (title?: string) => (
+    <Header
+      title={title}
+      showGreeting={!title}
+      showNotification={true}
+      showProfile={true}
+      onNotificationPress={bellPress}
+      onProfilePress={profilePress}
+    />
+  );
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#000000",
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(0, 0, 0, 0.1)',
-          height: Platform.OS === 'ios' ? 88 : 72,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 16,
-          paddingTop: 8,
-          paddingHorizontal: 0,
-          marginBottom: Platform.OS === 'android' ? 10 : 0,
+          borderTopWidth: 0,
+          height: Platform.OS === "ios" ? 88 : 72,
+          paddingBottom: Platform.OS === "ios" ? 24 : 12,
+          paddingTop: 0,
+          paddingHorizontal: 12,
+          position: "absolute",
+          ...Platform.select({
+            ios: { shadowColor: "transparent" },
+            android: { elevation: 0 }
+          })
         },
         tabBarItemStyle: {
           paddingVertical: 8,

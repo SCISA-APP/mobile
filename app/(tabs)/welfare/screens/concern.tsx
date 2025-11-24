@@ -1,25 +1,35 @@
 import { ThemedText } from '@/components/themed-text';
 import colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
-import CustomButton from '@/components/buttons/CustomButton';
-import CustomInput from '@/components/inputs/CustomInput';
-import React, { useState } from 'react';
-import { Alert, ScrollView, Switch, View, StyleSheet } from 'react-native';
+import React,
+{
+  useState
+} from 'react';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ConcernScreen = () => {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('General');
   const [isAnonymous, setIsAnonymous] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!title || !description) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-
+    // In a real app, you would send this data to a server
     const concern = {
       id: Math.random().toString(),
       title,
@@ -29,10 +39,9 @@ const ConcernScreen = () => {
       status: 'Submitted',
       date: new Date().toISOString(),
     };
-
     console.log('New concern submitted:', concern);
     Alert.alert('Success', 'Your concern has been submitted.', [
-      { text: 'OK', onPress: () => router.replace('/(tabs)/welfare') },
+      { text: 'OK', onPress: () => router.push('/(tabs)/welfare/screens/concerns') },
     ]);
   };
 
@@ -44,30 +53,28 @@ const ConcernScreen = () => {
           Your feedback is valuable to us. Please provide as much detail as possible.
         </ThemedText>
 
-        {/* Custom Inputs */}
-        <CustomInput
+        <TextInput
+          style={styles.input}
           placeholder="Title of your concern"
           value={title}
           onChangeText={setTitle}
         />
-        <CustomInput
+        <TextInput
+          style={[styles.input, styles.textArea]}
           placeholder="Describe your concern in detail"
           value={description}
           onChangeText={setDescription}
           multiline
-          style={{ height: 150, textAlignVertical: 'top' }}
         />
 
-        {/* Category row */}
         <View style={styles.row}>
           <ThemedText style={styles.label}>Category</ThemedText>
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <CustomInput
-              placeholder="Category"
-              value={category}
-              onChangeText={setCategory}
-            />
-          </View>
+          {/* In a real app, you might use a more sophisticated picker */}
+          <TextInput
+            style={styles.picker}
+            value={category}
+            onChangeText={setCategory}
+          />
         </View>
 
         <View style={styles.row}>
@@ -80,10 +87,9 @@ const ConcernScreen = () => {
           />
         </View>
 
-        <CustomButton
-          label="Submit Concern"
-          onPress={handleSubmit}
-        />
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Submit Concern</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -108,12 +114,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: colors.gray,
   },
+  input: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  textArea: {
+    height: 150,
+    textAlignVertical: 'top',
+  },
   row: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
+  },
+  picker: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    width: '50%',
+  },
+  button: {
+    backgroundColor: colors.primary,
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });

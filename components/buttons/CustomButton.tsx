@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, View } from 'react-native';
 import colors from '@/constants/colors';
+import React, { useState } from 'react';
+import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface CustomButtonProps {
   label: string;
   onPress: (event: GestureResponderEvent) => Promise<void> | void;
   leftIcon?: React.ReactNode;   // optional left icon
   rightIcon?: React.ReactNode;  // optional right icon
+  style?:object;// optional style prop
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, rightIcon }) => {
@@ -55,23 +58,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-
-    // subtle shadow
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconLeft: {
-    marginRight: 8,
-  },
-  iconRight: {
-    marginLeft: 8,
+    width: '100%',  //change to flex:1 to allow equal spacing in row
+    // flex: 1,
   },
   label: {
     color: colors.background,
