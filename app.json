@@ -1,11 +1,15 @@
 {
   "expo": {
-    "name": "myApp",
-    "slug": "myApp",
+    "name": "scisaapp",
+    "slug": "scisaapp",
     "version": "1.0.0",
+     "extra": {
+      "SUPABASE_URL": "https://vtnpiyszfmgqtyfeiaps.supabase.co",
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bnBpeXN6Zm1ncXR5ZmVpYXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYzMTgsImV4cCI6MjA3OTgwMjMxOH0.2A8Duz63as9G37jIgZlPnpx2c0zDKQAXkDCuB7FXQG8"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "scisaapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
