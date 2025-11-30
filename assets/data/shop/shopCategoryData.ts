@@ -14,5 +14,6 @@ const categoryData: Category[] = [
   { id: '5', name: 'Phone & Accessories', icon: Screen },
   { id: '6', name: 'Department', icon: Book },
 ];
+export const categories = ["Beauty","Fashion", 'Electronics', 'Food', 'Books', 'Accessories', "Department"];
 
 export default categoryData;

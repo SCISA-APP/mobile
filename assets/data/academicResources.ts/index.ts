@@ -5,4 +5,6 @@ export * from "./Optometry"
 export * from "./foodSciences"
 export * from "./physics"
 export * from "./biochemistry"
+export * from "./statistics"
+export * from "./mathematics"
 

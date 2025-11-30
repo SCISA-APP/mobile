@@ -1,11 +1,11 @@
 import React from 'react';
 import { Image, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Product } from '@/types/models/shop/product';
+import { AddProductPayload } from '@/types/models/shop/addProductPayload';
 import Rating from '../ratings/Rating';
 
 type ProductCardProps = {
-  product: Product;
+  product: AddProductPayload;
   cardWidth?: number; // dynamically set width
 };
 
@@ -32,7 +32,7 @@ const ProductCard = ({ product, cardWidth }: ProductCardProps) => {
   return (
     <TouchableOpacity style={[styles.productCard, { width: cardWidth }]} onPress={handlePress}>
       <View style={styles.productImageContainer}>
-        <Image source={{ uri: product.image }} style={styles.productImage} />
+        <Image source={{ uri: product.front_image }} style={styles.productImage} />
         {hasDiscount && (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>-{product.discount?.toString()}%</Text>
@@ -41,13 +41,13 @@ const ProductCard = ({ product, cardWidth }: ProductCardProps) => {
       </View>
 
       <Text style={styles.productTitle} numberOfLines={1}>
-        {product.title}
+        {product.name}
       </Text>
 
       <View style={styles.priceContainer}>
-        <Text style={styles.currentPrice}>${discountedPrice.toFixed(2)}</Text>
+        <Text style={styles.currentPrice}>₵{discountedPrice.toFixed(2)}</Text>
         {hasDiscount && (
-          <Text style={styles.originalPrice}>${product.price.toFixed(2)}</Text>
+          <Text style={styles.originalPrice}>₵{product.price.toFixed(2)}</Text>
         )}
       </View>
 

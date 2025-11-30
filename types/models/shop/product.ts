@@ -2,6 +2,7 @@ import { Rating } from "./rating";
 import { Timestamp } from "firebase/firestore";
 
 export type Product = {
+  name: ReactNode;
   id: string;
   sellerId: string;
   description: string;

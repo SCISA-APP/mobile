@@ -13,7 +13,6 @@ import {
 const { width } = Dimensions.get('window');
 const IMAGE_WIDTH = width;
 
-// 🎯 Type for a single image item in the carousel
 type ImageItem = { uri: string };
 
 type ProductImageProps = {
@@ -23,20 +22,17 @@ type ProductImageProps = {
 const ProductImage = ({ images = [] }: ProductImageProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Convert string array to { uri } objects
   const formattedImages: ImageItem[] = images.map((uri) => ({ uri }));
 
-  // Handle scroll updates to sync the indicator dots
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffsetX / IMAGE_WIDTH);
     setActiveIndex(index);
   };
 
-  // Inner carousel item
   const ImageCarouselItem = ({ uri }: ImageItem) => (
     <View style={styles.carouselItem}>
-      <RNImage source={{ uri }} style={styles.mainImage} resizeMode="contain" />
+      <RNImage source={{ uri }} style={styles.mainImage} />
     </View>
   );
 
@@ -56,7 +52,6 @@ const ProductImage = ({ images = [] }: ProductImageProps) => {
             style={styles.carousel}
           />
 
-          {/* Image indicators */}
           <View style={styles.indicatorContainer}>
             {formattedImages.map((_, i) => (
               <View
@@ -83,23 +78,25 @@ export default ProductImage;
 const styles = StyleSheet.create({
   imageWrapper: {
     alignItems: 'center',
-    paddingTop: 10,
+    
     paddingBottom: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   carousel: {
     width: IMAGE_WIDTH,
-    height: width * 0.7,
+    height: width * 0.9,
   },
   carouselItem: {
     width: IMAGE_WIDTH,
-    alignItems: 'center',
+    height: width * 0.9,
     justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',    // ensures image fills without showing gaps
   },
   mainImage: {
-    width: width * 0.9,
-    height: width * 0.7,
-    resizeMode: 'contain',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',   // FULL WIDTH + FULL HEIGHT + NO GAPS
   },
   indicatorContainer: {
     flexDirection: 'row',

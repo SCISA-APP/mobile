@@ -2,42 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
-interface StoreHeaderProps {
+interface HeaderProps {
   title: string;
-  showStoreButton?: boolean; // optional prop to show/hide button
+  showStoreButton?: boolean;
+  rightIcon?: keyof typeof Ionicons.glyphMap; // icon name
+  onRightPress?: () => void;                // function for icon
 }
 
-const Header: React.FC<StoreHeaderProps> = ({ title, showStoreButton }) => {
+const Header: React.FC<HeaderProps> = ({
+  title,
+  showStoreButton,
+  rightIcon,
+  onRightPress,
+}) => {
   const router = useRouter();
   const [shopStatus, setShopStatus] = useState<'accepted' | 'pending'>('pending');
 
-useEffect(() => {
-  if (!showStoreButton) return;
+  useEffect(() => {
+    if (!showStoreButton) return;
 
-  const fetchUserStatus = async () => {
-    try {
-      const userJson = await AsyncStorage.getItem('@student_user');
-      console.log('🟢 AsyncStorage @student_user raw:', userJson); // log raw JSON
+    const fetchUserStatus = async () => {
+      try {
+        const userJson = await AsyncStorage.getItem('@student_user');
 
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        console.log('🟢 Parsed user object:', user); // log parsed object
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          const isAccepted = user.isShopApplicationAccepted;
 
-        const isAccepted = user.isShopApplicationAccepted;
-
-        // false or null => pending
-        if (isAccepted === true) setShopStatus('accepted');
-        else setShopStatus('pending');
+          setShopStatus(isAccepted === true ? 'accepted' : 'pending');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching user info:', error);
       }
-    } catch (error) {
-      console.error('❌ Error fetching user info:', error);
-    }
-  };
+    };
 
-  fetchUserStatus();
-}, [showStoreButton]);
-
+    fetchUserStatus();
+  }, [showStoreButton]);
 
   const handlePress = () => {
     if (shopStatus === 'accepted') {
@@ -51,16 +53,26 @@ useEffect(() => {
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>{title}</Text>
 
-      {showStoreButton && (
-        <TouchableOpacity onPress={handlePress}>
-          <Text style={styles.subButtonText}>
-            {shopStatus === 'accepted' ? 'My Store' : 'Become a Seller'}
-          </Text> 
-        </TouchableOpacity>
-      )}
+      <View style={styles.rightSide}>
+        {showStoreButton && (
+          <TouchableOpacity onPress={handlePress} style={{ marginRight: 12 }}>
+            <Text style={styles.subButtonText}>
+              {shopStatus === 'accepted' ? 'My Store' : 'Become a Seller'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {rightIcon && (
+          <TouchableOpacity onPress={onRightPress}>
+            <Ionicons name={rightIcon} size={24} color="#333" />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
+
+export default Header;
 
 const styles = StyleSheet.create({
   headerContainer: {
@@ -71,6 +83,10 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rightSide: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   headerTitle: {
@@ -84,5 +100,3 @@ const styles = StyleSheet.create({
     color: '#0052cc',
   },
 });
-
-export default Header;

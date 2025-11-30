@@ -2,6 +2,7 @@
 import { db } from "../../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 
+
 interface StudentUserData {
   uid: string;
   fullName: string;

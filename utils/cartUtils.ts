@@ -1,6 +1,6 @@
 // utils/cartUtils.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Product } from '@/types/models/shop/product';
+import { AddProductPayload } from '@/types/models/shop/addProductPayload';
 import { CartItem } from '@/types/models/shop/cartItem';
 
 const CART_KEY = '@user_cart';
@@ -17,7 +17,7 @@ export const getCart = async (): Promise<CartItem[]> => {
 };
 
 // Add product to cart (or increase quantity if it already exists)
-export const addToCart = async (product: Product, qty: number = 1): Promise<void> => {
+export const addToCart = async (product: AddProductPayload, qty: number = 1): Promise<void> => {
   try {
     const currentCart = await getCart();
     const existingIndex = currentCart.findIndex(item => item.id === product.id);

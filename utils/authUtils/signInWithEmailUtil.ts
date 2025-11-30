@@ -34,8 +34,9 @@ export const signInUser = async (data: SignInData) => {
   '@student_user',
   JSON.stringify({
     uid: user.id,
+    id: user.id,
     email: user.email,
-    fullName: profileData?.full_name ?? '',
+    full_name: profileData?.full_name ?? '',
     program: profileData?.program ?? '',
     year: profileData?.year ?? 0,
     permission: profileData?.permission ?? 'user',

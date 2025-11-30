@@ -35,8 +35,8 @@ export default function ProfileScreen() {
     loadUserData();
   }, []);
 
-  const firstInitial = student?.fullName
-    ? student.fullName.charAt(0).toUpperCase()
+  const firstInitial = student?.full_name
+    ? student.full_name.charAt(0).toUpperCase()
     : "U";
 
   const handleEditProfile = () => console.log("Edit Profile pressed");

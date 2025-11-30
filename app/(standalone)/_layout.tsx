@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventsLayout() {
   return (
+       
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
       {/* ✅ Dark text/icons on white background */}
       <StatusBar barStyle="dark-content" backgroundColor="white" />

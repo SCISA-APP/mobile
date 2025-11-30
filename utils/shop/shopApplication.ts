@@ -93,6 +93,7 @@ export const submitShopApplication = async (formData: ShopFormData) => {
         account_number: formData.accountNumber,
         account_name: formData.accountName,
         status: 'pending',
+        product_count: 0,
       });
 
     if (insertError) throw insertError;

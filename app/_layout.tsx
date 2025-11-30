@@ -3,10 +3,12 @@ import colors from '@/constants/colors';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { ShopProvider } from "@/context/ShopContext";
 
 export default function RootLayout() {
   return (
     <> 
+           <ShopProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -81,6 +83,7 @@ export default function RootLayout() {
           }} 
         />
       </Stack>
+      </ShopProvider>
     </> 
   );
 }

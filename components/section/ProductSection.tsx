@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { Product } from '@/types/models/shop/product';
+import { AddProductPayload } from '@/types/models/shop/addProductPayload';
 import ProductCard from '../cards/productCard';
 import colors from '@/constants/colors';
 import { useRouter } from 'expo-router';
 
 interface ProductSectionProps {
   title: string;
-  data: Product[];
+  data: AddProductPayload[];
   viewMoreRoute: string;
   backgroundColor?: string;
 }
@@ -25,7 +25,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   const spacing = 12; // space between columns
   const cardWidth = (screenWidth - paddingHorizontal - spacing) / 2;
 
-  const renderItem = ({ item }: { item: Product }) => (
+  const renderItem = ({ item }: { item: AddProductPayload }) => (
     <ProductCard product={item} cardWidth={cardWidth} />
   );
 
@@ -36,8 +36,8 @@ const ProductSection: React.FC<ProductSectionProps> = ({
      <TouchableOpacity
   onPress={() =>
     router.push({
-      pathname: viewMoreRoute, // use the route from prop
-      params: { data: JSON.stringify(data) }, // pass the data from props
+      pathname: viewMoreRoute, 
+      params: { data: JSON.stringify(data) }, 
     })
   }
 >

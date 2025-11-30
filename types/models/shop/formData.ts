@@ -8,4 +8,5 @@ export interface ShopFormData {
   mobileProvider?: string;
   accountNumber: string;
   accountName: string;
+  productCount?: number;
 }

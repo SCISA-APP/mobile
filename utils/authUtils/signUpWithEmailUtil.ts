@@ -41,6 +41,7 @@ export const signUpUser = async (data: SignUpData) => {
     console.log('Attempting to insert profile...');
     const profileData = {
       id: user.id,
+      email: user.email,
       full_name: data.fullName,
       program: data.program,
       year: data.year,

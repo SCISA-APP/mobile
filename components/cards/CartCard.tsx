@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Text, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
-import { Product } from '@/types/models/shop/product';
 import { FontAwesome } from '@expo/vector-icons';
+import {CartItem} from "../../types/models/shop/cartItem"
+
 
 type CartCardProps = {
-  product: Product;
+  product: CartItem;
   initialQuantity?: number;
   onRemove?: () => void;
   onQuantityChange?: (newQuantity: number) => void;
@@ -30,38 +31,42 @@ const CartCard = ({ product, initialQuantity = 1, onRemove, onQuantityChange }: 
   const savedAmount = hasDiscount ? (product.price - pricePerUnit) * quantity : 0;
 
   // Handle remove with confirmation
-  const handleRemove = () => {
-    Alert.alert(
-      'Remove Item',
-      `Are you sure you want to remove "${product.title}" from the cart?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: onRemove },
-      ]
-    );
-  };
-
+const handleRemove = () => {
+  if (!onRemove) return; // safety
+  Alert.alert(
+    'Remove Item',
+    `Are you sure you want to remove "${product.name}" from the cart?`,
+    [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => onRemove() }, // wrap in arrow
+    ]
+  );
+};
   return (
     <View style={styles.cardContainer}>
-      <Image source={{ uri: product.image }} style={styles.productImage} />
-
+{product.front_image && (
+  <Image
+    source={{ uri: product.front_image }}
+    style={styles.productImage}
+  />
+)}
       <View style={styles.infoContainer}>
         <Text style={styles.productTitle} numberOfLines={2}>
-          {product.title}
+          {product.name}
         </Text>
 
         <View style={styles.priceRow}>
-          <Text style={styles.priceText}>GHC {totalPrice}</Text>
+          <Text style={styles.priceText}>₵ {totalPrice}</Text>
           {hasDiscount && (
             <Text style={styles.originalPrice}>
-              GHC {(product.price * quantity).toFixed(2)}
+              ₵ {(product.price * quantity).toFixed(2)}
             </Text>
           )}
         </View>
 
         {hasDiscount && (
           <Text style={styles.discountText}>
-            You save GHC {savedAmount.toFixed(2)}!
+            You save ₵ {savedAmount.toFixed(2)}!
           </Text>
         )}
 
