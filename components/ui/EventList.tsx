@@ -6,6 +6,7 @@ import {
   FlatList,
   ImageStyle,
   StyleProp,
+  StyleSheet,
   Text,
   TextStyle,
   TouchableOpacity,
@@ -40,7 +41,6 @@ const EventListComponent = ({
   data,
   onPressItem,
   emptyTitle = "No upcoming events",
-  emptyDescription,
   style,
   headerStyle,
   itemStyle,
@@ -70,106 +70,52 @@ const EventListComponent = ({
   };
 
   return (
-    <View style={{ backgroundColor: "#fff", marginTop: 10 }}>
-      {/* Header */}
+    <View style={[styles.container, style]}>
       {headerTitle && (
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "700",
-            color: "#000",
-            marginHorizontal: 16,
-            marginTop: 10,
-            marginBottom: 8,
-          }}
-        >
-          {headerTitle}
-        </Text>
+        <Text style={[styles.header, headerStyle]}>{headerTitle}</Text>
       )}
 
-      {/* Horizontal FlatList */}
       <FlatList
         horizontal
         data={data}
         keyExtractor={(item, index) => item.id?.toString() || index.toString()}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 20,
-        }}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => handlePress(item)}
-            style={{
-              backgroundColor: "white",
-              borderRadius: 16,
-              marginRight: 14,
-              width: width * 0.6,
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 4,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 3,
-              overflow: "hidden",
-            }}
+            style={[styles.cardContainer, itemStyle]}
           >
-            {/* Image with animation */}
             <Animated.Image
               entering={FadeIn.duration(400)}
               exiting={FadeOut.duration(200)}
               source={{ uri: item.image }}
-              style={{
-                width: "100%",
-                height: 120,
-              }}
+              style={[styles.cardImage, imageStyle]}
               resizeMode="cover"
             />
 
-            {/* Content */}
-            <View style={{ padding: 10 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: "#000",
-                  marginBottom: 4,
-                }}
-                numberOfLines={1}
-              >
+            <View style={styles.cardContent}>
+              <Text style={[styles.cardTitle, titleStyle]} numberOfLines={1}>
                 {item.title}
               </Text>
               <Text
-                style={{
-                  color: "#555",
-                  fontSize: 13,
-                  lineHeight: 18,
-                }}
+                style={[styles.cardDescription, descriptionStyle]}
                 numberOfLines={2}
               >
                 {item.description}
               </Text>
-              <Text
-                style={{
-                  color: "#007AFF",
-                  fontWeight: "600",
-                  marginTop: 6,
-                  fontSize: 12,
-                }}
-              >
+              <Text style={[styles.cardDate, dateStyle]}>
                 {item.date || "Coming soon"}
               </Text>
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={() => (
-          <View style={{ padding: 16, alignItems: "center" }}>
-            <Text style={{ color: "#007AFF", fontWeight: "600" }}>
-              No upcoming events
-            </Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>{emptyTitle}</Text>
           </View>
         )}
-        // ⚡ Performance optimization
         initialNumToRender={5}
         maxToRenderPerBatch={8}
         windowSize={5}
@@ -178,6 +124,69 @@ const EventListComponent = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fff",
+    marginTop: 10,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 8,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  cardContainer: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    marginRight: 14,
+    width: width * 0.6,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    overflow: "hidden",
+  },
+  cardImage: {
+    width: "100%",
+    height: 120,
+  },
+  cardContent: {
+    padding: 10,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 4,
+  },
+  cardDescription: {
+    color: "#555",
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  cardDate: {
+    color: "#007AFF",
+    fontWeight: "600",
+    marginTop: 6,
+    fontSize: 12,
+  },
+  emptyContainer: {
+    padding: 16,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#007AFF",
+    fontWeight: "600",
+  },
+});
 
 const EventList = memo(EventListComponent);
 EventList.displayName = "EventList";

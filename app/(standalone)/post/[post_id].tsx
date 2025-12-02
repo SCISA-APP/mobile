@@ -13,11 +13,23 @@ import {
 } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { Comment } from "@/types/models";
+import { parseTextWithLinks, openLink } from "@/utils/linkUtils";
+import OccasionHeader from "@/components/headers/OccassionHeader";
 
 export default function AnnouncementDetail() {
-  const { title, description, image, date } = useLocalSearchParams();
+  const params = useLocalSearchParams();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+
+  // Normalize title and date to string
+  const title = Array.isArray(params.title) ? params.title[0] : params.title ?? "";
+  const date = Array.isArray(params.date) ? params.date[0] : params.date;
+  const description = Array.isArray(params.description) ? params.description[0] : params.description;
+  const image = Array.isArray(params.image) ? params.image[0] : params.image;
+
+  const paragraphs = typeof description === 'string' 
+    ? description.split('\n\n').filter(p => p.trim().length > 0)
+    : [];
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
@@ -34,6 +46,43 @@ export default function AnnouncementDetail() {
     Keyboard.dismiss();
   };
 
+  const renderParagraph = (paragraph: string, index: number) => {
+    const parts = parseTextWithLinks(paragraph.trim());
+
+    return (
+      <Text
+        key={index}
+        style={{
+          color: "#4a4a4a",
+          fontSize: 16,
+          lineHeight: 26,
+          letterSpacing: 0.2,
+          marginBottom: index < paragraphs.length - 1 ? 16 : 0,
+          textAlign: "justify",
+        }}
+      >
+        {parts.map((part, partIndex) => {
+          if (part.type === 'link') {
+            return (
+              <Text
+                key={partIndex}
+                onPress={() => openLink(part.url)}
+                style={{
+                  color: "#800020",
+                  textDecorationLine: "underline",
+                  fontWeight: "600",
+                }}
+              >
+                {part.content}
+              </Text>
+            );
+          }
+          return <Text key={partIndex}>{part.content}</Text>;
+        })}
+      </Text>
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#fafafa" }}
@@ -44,18 +93,13 @@ export default function AnnouncementDetail() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingBottom: 20,
-          }}
+          contentContainerStyle={{ paddingBottom: 20 }}
         >
           <Animated.View entering={FadeInUp.duration(600)}>
             {image && (
               <Image
                 source={{ uri: image }}
-                style={{
-                  width: "100%",
-                  height: 320,
-                }}
+                style={{ width: "100%", height: 320 }}
                 resizeMode="cover"
               />
             )}
@@ -74,47 +118,8 @@ export default function AnnouncementDetail() {
                 elevation: 5,
               }}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 16,
-                }}
-              >
-                <View style={{ flex: 1, marginRight: 12 }}>
-                  <Text
-                    style={{
-                      fontSize: 28,
-                      fontWeight: "800",
-                      color: "#1a1a1a",
-                      lineHeight: 34,
-                    }}
-                  >
-                    {title}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    backgroundColor: "#800020",
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "700",
-                      fontSize: 12,
-                      letterSpacing: 0.3,
-                    }}
-                  >
-                    {date || "UPCOMING"}
-                  </Text>
-                </View>
-              </View>
+              {/* Use OccasionHeader here */}
+              <OccasionHeader title={title} date={date} />
 
               <View
                 style={{
@@ -126,16 +131,8 @@ export default function AnnouncementDetail() {
                 }}
               />
 
-              <Text
-                style={{
-                  color: "#4a4a4a",
-                  fontSize: 16,
-                  lineHeight: 26,
-                  letterSpacing: 0.2,
-                }}
-              >
-                {description}
-              </Text>
+              {/* Render description paragraphs */}
+              {paragraphs.map((paragraph, index) => renderParagraph(paragraph, index))}
             </View>
           </Animated.View>
 

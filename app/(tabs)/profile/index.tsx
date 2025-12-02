@@ -1,7 +1,6 @@
 import IconFontAwesome from "@expo/vector-icons/FontAwesome";
 import { Stack,useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { auth } from "@/firebaseConfig";
 import {
   Image,
   ScrollView,
@@ -13,7 +12,6 @@ import {
 import colors from "@/constants/colors";
 import CustomButton from "@/components/buttons/CustomButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { signOut } from "firebase/auth";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -44,8 +42,6 @@ export default function ProfileScreen() {
   const handleChangePassword = () => console.log("Change Password pressed");
   const handleSignOut = async () => {
   try {
-    // 1. Sign out from Firebase
-    await signOut(auth);
 
     // 2. Clear all app-related AsyncStorage
     await AsyncStorage.clear();

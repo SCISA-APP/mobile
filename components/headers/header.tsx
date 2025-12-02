@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
         {showStoreButton && (
           <TouchableOpacity onPress={handlePress} style={{ marginRight: 12 }}>
             <Text style={styles.subButtonText}>
-              {shopStatus === 'accepted' ? 'My Store' : 'Become a Seller'}
+              {shopStatus === 'accepted' ? '🛍️My Store🛒' : '˗ˋˏ$ˎˊ˗Become a Seller'}
             </Text>
           </TouchableOpacity>
         )}
