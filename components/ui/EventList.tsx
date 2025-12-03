@@ -1,6 +1,7 @@
 import { EventItem } from "@/types/models/event";
 import { useRouter } from "expo-router";
 import React, { memo } from "react";
+import colors from "@/constants/colors";
 import {
   Dimensions,
   FlatList,
@@ -106,7 +107,16 @@ const EventListComponent = ({
                 {item.description}
               </Text>
               <Text style={[styles.cardDate, dateStyle]}>
-                {item.date || "Coming soon"}
+                <Text style={[styles.cardDate, dateStyle]}>
+  {item.date
+    ? new Date(item.date).toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "Coming soon"}
+</Text>
               </Text>
             </View>
           </TouchableOpacity>
@@ -173,7 +183,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   cardDate: {
-    color: "#007AFF",
+    color: colors.primaryDark,
     fontWeight: "600",
     marginTop: 6,
     fontSize: 12,

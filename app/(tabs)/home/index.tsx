@@ -2,10 +2,12 @@ import EventList from "@/components/ui/EventList";
 import ListComponent from "@/components/ui/ListComponent";
 import React from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
-import { occasions, announcements } from "@/assets/data";
+import { useOccasionAnnouncement } from "@/context/OccasionAnnouncementContext";
 import Header from "@/components/ui/Header";
 
 const HomeScreen = () => {
+    const { occasions, announcements, loading } = useOccasionAnnouncement();
+
   return (
     <View style={styles.container}>
       {/* Static Header */}

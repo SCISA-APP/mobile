@@ -7,11 +7,21 @@ interface OccasionHeaderProps {
 }
 
 export default function OccasionHeader({ title, date }: OccasionHeaderProps) {
+  // Convert date string to human-readable format
+  const formattedDate = date
+    ? new Date(date).toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "UPCOMING";
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.dateContainer}>
-        <Text style={styles.date}>{date || "UPCOMING"}</Text>
+        <Text style={styles.date}>{formattedDate}</Text>
       </View>
     </View>
   );

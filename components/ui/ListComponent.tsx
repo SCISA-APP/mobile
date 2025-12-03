@@ -95,7 +95,16 @@ const ListComponent = memo<ListComponentProps>(function ListComponent({
 
               <View style={styles.footerRow}>
                 <Text style={[styles.date, dateStyle]}>
-                  {item.date || "Today"}
+                 <Text style={[styles.date, dateStyle]}>
+  {item.date
+    ? new Date(item.date).toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "Today"}
+</Text>
                 </Text>
 
                 <View style={styles.commentContainer}>
@@ -184,7 +193,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   date: {
-    color: colors.primary,
+    color: colors.primaryDark,
     fontWeight: "600",
     fontSize: 13,
   },
