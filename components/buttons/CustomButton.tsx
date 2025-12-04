@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, View } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  GestureResponderEvent,
+  ActivityIndicator,
+  View,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 import colors from '@/constants/colors';
-
 
 interface CustomButtonProps {
   label: string;
   onPress: (event: GestureResponderEvent) => Promise<void> | void;
-  leftIcon?: React.ReactNode;   // optional left icon
-  rightIcon?: React.ReactNode;  // optional right icon
-  style?:object;// optional style prop
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  style?: ViewStyle;
+  backgroundColor?: string; // optional background color
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, rightIcon }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({
+  label,
+  onPress,
+  leftIcon,
+  rightIcon,
+  style,
+  backgroundColor,
+}) => {
   const [loading, setLoading] = useState(false);
 
   const handlePress = async (event: GestureResponderEvent) => {
@@ -24,20 +40,30 @@ const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, r
     }
   };
 
+  // Dynamic colors
+  const isLightBg = backgroundColor === '#fff' || backgroundColor === 'white';
+  const bgColor = backgroundColor || colors.primaryDark;
+  const textColor = isLightBg ? colors.primaryDark : colors.background;
+  const borderColor = isLightBg ? colors.primaryDark : 'transparent';
+
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[
+        styles.button,
+        { backgroundColor: bgColor, borderColor, borderWidth: isLightBg ? 1 : 0 },
+        style,
+      ]}
       onPress={handlePress}
       activeOpacity={0.7}
       disabled={loading}
     >
       {loading ? (
-        <ActivityIndicator color={colors.background} />
+        <ActivityIndicator color={textColor} />
       ) : (
         <View style={styles.content}>
           {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
 
-          <Text style={styles.label}>{label}</Text>
+          <Text style={[styles.label, { color: textColor }]}>{label}</Text>
 
           {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
         </View>
@@ -48,36 +74,35 @@ const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, r
 
 export default CustomButton;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+  button: ViewStyle;
+  content: ViewStyle;
+  iconLeft: ViewStyle;
+  iconRight: ViewStyle;
+  label: TextStyle;
+}>({
   button: {
-    backgroundColor: colors.primaryDark,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
+    width: '100%', // full width, can be flex-adjusted in parent
   },
-
   content: {
-    flexDirection: 'row',       // <-- makes icon + text inline
-    alignItems: 'center',       // <-- centers them vertically
-    justifyContent: 'center',   // <-- centers horizontally
-    gap: 8,                     // optional spacing between items (RN 0.71+)
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
-
   iconLeft: {
     marginRight: 8,
   },
-
   iconRight: {
     marginLeft: 8,
   },
-
   label: {
-    color: colors.background,
     fontWeight: '600',
     fontSize: 16,
   },
 });
-

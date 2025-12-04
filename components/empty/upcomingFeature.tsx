@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import WorkingGif from '@/assets/images/Working.gif';
+import colors from '@/constants/colors';
 
 interface UpcomingFeatureProps {
   title?: string;
@@ -11,7 +12,7 @@ const UpcomingFeature: React.FC<UpcomingFeatureProps> = ({ title }) => {
     <View style={styles.container}>
       <Image source={WorkingGif} style={styles.image} resizeMode="contain" />
       <Text style={styles.title}>{title || 'Feature'} Coming Soon 🚧</Text>
-
+      <Text style={styles.highlightText}>SCISA, We Hold The World</Text>
     </View>
   );
 };
@@ -34,14 +35,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#002855',
+    color: colors.primaryDark,
     marginBottom: 8,
     textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
+  highlightText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.secondaryDark,
     textAlign: 'center',
-    lineHeight: 22,
   },
 });

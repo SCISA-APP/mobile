@@ -18,6 +18,8 @@ interface CustomInputProps extends TextInputProps {
   icon?: keyof typeof Ionicons.glyphMap;
   secure?: boolean;
   style?: StyleProp<TextStyle>;
+  /** NEW OPTIONAL PROP */
+  autoGrow?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -26,19 +28,24 @@ const CustomInput: React.FC<CustomInputProps> = ({
   secure,
   value,
   style,
+  multiline,
+  autoGrow = false, // default off so nothing breaks
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!secure);
+  const [inputHeight, setInputHeight] = useState<number>(50); // default height
+
   const animatedValue = useRef(new Animated.Value(value ? 1 : 0)).current;
 
+  // Floating label animation
   useEffect(() => {
     Animated.timing(animatedValue, {
       toValue: isFocused || value ? 1 : 0,
       duration: 180,
       useNativeDriver: false,
     }).start();
-  }, [animatedValue, isFocused, value]);
+  }, [isFocused, value]);
 
   const labelStyle: TextStyle = {
     position: 'absolute',
@@ -46,7 +53,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
     top: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [18, -8],
-    }) as unknown as number, // TypeScript workaround
+    }) as unknown as number,
     fontSize: animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [16, 12],
@@ -73,12 +80,21 @@ const CustomInput: React.FC<CustomInputProps> = ({
       <TextInput
         {...rest}
         value={value}
+        multiline={multiline}
+        onContentSizeChange={(e) => {
+          if (autoGrow && multiline) {
+            const newHeight = e.nativeEvent.contentSize.height;
+            // Limit min height but allow expansion
+            setInputHeight(Math.max(50, newHeight + 10));
+          }
+        }}
         style={[
           styles.input,
           {
             paddingLeft: icon ? 40 : 12,
             paddingRight: secure ? 40 : 12,
-            paddingTop: 5,
+            height: multiline && autoGrow ? inputHeight : 50,
+            textAlignVertical: multiline ? 'top' : 'center',
           },
           style,
         ]}
@@ -109,24 +125,19 @@ export default CustomInput;
 const ICON_SIZE = 20;
 const INPUT_HEIGHT = 50;
 
-const styles = StyleSheet.create<{
-  container: ViewStyle;
-  input: TextStyle;
-  leftIcon: TextStyle,
-  rightIcon: ViewStyle
-}>({
+const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
     position: 'relative',
   },
   input: {
-    height: INPUT_HEIGHT,
     backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.primaryDark,
     borderRadius: 12,
     fontSize: 16,
     color: colors.primaryDark,
+    paddingTop: 5,
   },
   leftIcon: {
     position: 'absolute',
@@ -140,6 +151,4 @@ const styles = StyleSheet.create<{
     top: (INPUT_HEIGHT - ICON_SIZE) / 2,
     zIndex: 2,
   },
-
 });
-
