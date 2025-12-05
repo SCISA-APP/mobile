@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -10,50 +10,12 @@ import {
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { Bell, Heart, Star, CheckCircle } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  NotificationItem,
-  NotificationType,
-} from "@/types/models/notification";
+import { useNotifications } from "@/context/notificationContext";
+import { NotificationType } from "@/types/models/notification";
+import { format, isToday } from "date-fns";
 
 const NotificationScreen = () => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: "1",
-      title: "New Review!",
-      message: "Sarah left a 5⭐ review on your hostel.",
-      type: "review",
-      time: "5 min ago",
-      read: false,
-      dateGroup: "Today",
-    },
-    {
-      id: "2",
-      title: "Booking Confirmed!",
-      message: "Michael booked a room in Hostel Haven.",
-      type: "booking",
-      time: "30 min ago",
-      read: true,
-      dateGroup: "Today",
-    },
-    {
-      id: "3",
-      title: "New Like ❤️",
-      message: "Anna liked your recent post.",
-      type: "like",
-      time: "Yesterday",
-      read: true,
-      dateGroup: "Earlier",
-    },
-    {
-      id: "4",
-      title: "App Update",
-      message: "New amenities section added to HostelHubb.",
-      type: "general",
-      time: "2 days ago",
-      read: false,
-      dateGroup: "Earlier",
-    },
-  ]);
+  const { notifications, markAsRead } = useNotifications();
 
   const renderIcon = (type: NotificationType) => {
     switch (type) {
@@ -68,82 +30,84 @@ const NotificationScreen = () => {
     }
   };
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
-  };
+  const groupedData = [
+    {
+      title: "Today",
+      data: notifications.filter((n) => isToday(new Date(n.created_at))),
+    },
+    {
+      title: "Earlier",
+      data: notifications.filter((n) => !isToday(new Date(n.created_at))),
+    },
+  ];
 
-  const groupedData = ["Today", "Earlier"].map((group) => ({
-    title: group,
-    data: notifications.filter((n) => n.dateGroup === group),
-  }));
+  const isEmpty = groupedData.every((group) => group.data.length === 0);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      <FlatList
-        data={groupedData}
-        keyExtractor={(item) => item.title}
-        renderItem={({ item }) => (
-          <View>
-            {item.data.length > 0 && (
-              <Text style={styles.groupTitle}>{item.title}</Text>
-            )}
+      {isEmpty ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No notifications yet</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={groupedData}
+          keyExtractor={(item) => item.title}
+          renderItem={({ item }) => (
+            <View>
+              {item.data.length > 0 && (
+                <Text style={styles.groupTitle}>{item.title}</Text>
+              )}
 
-            {item.data.map((notif, index) => (
-              <Animated.View
-                key={notif.id}
-                entering={FadeInUp.delay(index * 100).springify()}
-              >
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => handleMarkAsRead(notif.id)}
-                  style={[styles.card, notif.read && { opacity: 0.9 }]}
+              {item.data.map((notif, index) => (
+                <Animated.View
+                  key={notif.id}
+                  entering={FadeInUp.delay(index * 80).springify()}
                 >
-                  <LinearGradient
-                    colors={
-                      notif.read
-                        ? ["#FFFFFF", "#F9F9F9"]
-                        : ["#FFF5F8", "#FFEAF1"]
-                    }
-                    style={styles.gradient}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => markAsRead(notif.id)}
+                    style={[styles.card, notif.read && { opacity: 0.9 }]}
                   >
-                    <View style={styles.iconContainer}>
-                      {renderIcon(notif.type)}
-                    </View>
+                    <LinearGradient
+                      colors={
+                        notif.read
+                          ? ["#FFFFFF", "#F9F9F9"]
+                          : ["#FFF5F8", "#FFEAF1"]
+                      }
+                      style={styles.gradient}
+                    >
+                      <View style={styles.iconContainer}>
+                        {renderIcon(notif.type)}
+                      </View>
 
-                    <View style={styles.textContainer}>
-                      <Text style={styles.title}>{notif.title}</Text>
-                      <Text style={styles.message}>{notif.message}</Text>
-                      <Text style={styles.time}>{notif.time}</Text>
-                    </View>
+                      <View style={styles.textContainer}>
+                        <Text style={styles.title}>{notif.title}</Text>
+                        <Text style={styles.message}>{notif.message}</Text>
+                        <Text style={styles.time}>
+                          {format(new Date(notif.created_at), "HH:mm")}
+                        </Text>
+                      </View>
 
-                    {!notif.read && <View style={styles.unreadDot} />}
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </View>
-        )}
-      />
+                      {!notif.read && <View style={styles.unreadDot} />}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fafafa",
-    paddingHorizontal: 16,
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#800020",
-    marginBottom: 10,
-  },
+  container: { flex: 1, backgroundColor: "#fafafa", paddingHorizontal: 16 },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyText: { fontSize: 16, color: "#999", fontWeight: "500" },
   groupTitle: {
     fontSize: 15,
     color: "#555",
@@ -159,7 +123,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
   gradient: {
     flexDirection: "row",
@@ -176,25 +139,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 10,
   },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#111",
-    marginBottom: 3,
-  },
-  message: {
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 18,
-  },
-  time: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 5,
-  },
+  textContainer: { flex: 1 },
+  title: { fontSize: 15, fontWeight: "700", color: "#111", marginBottom: 3 },
+  message: { fontSize: 13, color: "#555", lineHeight: 18 },
+  time: { fontSize: 12, color: "#999", marginTop: 5 },
   unreadDot: {
     width: 8,
     height: 8,

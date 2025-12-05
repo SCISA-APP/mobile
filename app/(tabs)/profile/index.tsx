@@ -1,5 +1,5 @@
 import IconFontAwesome from "@expo/vector-icons/FontAwesome";
-import { Stack,useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import colors from "@/constants/colors";
 import CustomButton from "@/components/buttons/CustomButton";
@@ -16,17 +17,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function ProfileScreen() {
   const router = useRouter();
   const [student, setStudent] = useState<any>(null);
+  const [logs, setLogs] = useState<string[]>([]); // On-screen logs
+
+  // Helper to push logs
+  const log = (message: string) => {
+    console.log(message);
+    setLogs((prev) => [message, ...prev]);
+  };
 
   // Load stored student data
   useEffect(() => {
     const loadUserData = async () => {
       try {
         const data = await AsyncStorage.getItem("@student_user");
-        if (data) {
-          setStudent(JSON.parse(data));
-        }
+        if (data) setStudent(JSON.parse(data));
       } catch (error) {
-        console.log("Error loading student user:", error);
+        log(`Error loading student user: ${error}`);
       }
     };
 
@@ -37,24 +43,21 @@ export default function ProfileScreen() {
     ? student.full_name.charAt(0).toUpperCase()
     : "U";
 
-  const handleEditProfile = () => console.log("Edit Profile pressed");
-  const handleNotifications = () => console.log("Notifications pressed");
-  const handleChangePassword = () => console.log("Change Password pressed");
+  // Button handlers
+  const handleEditProfile = () => Alert.alert("Coming Soon", "Edit Profile feature is coming soon!");
+  const handleChangePassword = () => Alert.alert("Coming Soon", "Change Password feature is coming soon!");
+
   const handleSignOut = async () => {
-  try {
-
-    // 2. Clear all app-related AsyncStorage
-    await AsyncStorage.clear();
-
-    // 3. Redirect to login screen
-    router.replace("/(auth)/login");
-
-    console.log("User signed out successfully");
-  } catch (error) {
-    console.log("Error signing out:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
+    try {
+      await AsyncStorage.clear();
+      router.replace("/(auth)/login");
+      log("User signed out successfully");
+      Alert.alert("Success", "Signed out successfully");
+    } catch (error) {
+      log(`Error signing out: ${error}`);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <View style={styles.fullScreenContainer}>
@@ -158,16 +161,25 @@ export default function ProfileScreen() {
             leftIcon={<IconFontAwesome name="sign-out" size={18} color="#fff" />}
           />
         </View>
+
+        {/* On-screen Logs */}
+        {logs.length > 0 && (
+          <View style={styles.logContainer}>
+            <Text style={styles.logTitle}>Logs:</Text>
+            {logs.map((l, idx) => (
+              <Text key={idx} style={styles.logText}>
+                {l}
+              </Text>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fullScreenContainer: {
-    flex: 1,
-    backgroundColor: "#f8f8f8",
-  },
+  fullScreenContainer: { flex: 1, backgroundColor: "#f8f8f8" },
   scrollContent: {
     flexGrow: 1,
     alignItems: "center",
@@ -175,11 +187,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingHorizontal: 20,
   },
-  profileHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-    marginTop: 20,
-  },
+  profileHeader: { alignItems: "center", marginBottom: 20, marginTop: 20 },
   avatarContainer: {
     width: 120,
     height: 120,
@@ -200,15 +208,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   initialsText: { fontSize: 48, fontWeight: "bold", color: "#fff" },
-  userName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 3,
-  },
+  userName: { fontSize: 22, fontWeight: "bold", color: "#333", marginBottom: 3 },
   userStatus: { fontSize: 14, color: "#666" },
 
-  // ⭐ User Info Card
   infoCard: {
     width: "100%",
     backgroundColor: "#fff",
@@ -220,11 +222,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 2,
-  },
+  infoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 2 },
   infoLabel: { fontSize: 15, color: "#555", fontWeight: "500" },
   infoValue: { fontSize: 15, color: "#333", fontWeight: "600" },
 
@@ -248,24 +246,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  menuItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  menuIcon: {
-    width: 28,
-    textAlign: "center",
-    marginRight: 15,
-  },
-  menuText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
+  menuItemLeft: { flexDirection: "row", alignItems: "center" },
+  menuIcon: { width: 28, textAlign: "center", marginRight: 15 },
+  menuText: { fontSize: 16, color: "#333", fontWeight: "500" },
   lastMenuItem: { borderBottomWidth: 0 },
 
-  signOutButtonContainer: {
+  signOutButtonContainer: { width: "100%", marginBottom: 8 },
+
+  logContainer: {
     width: "100%",
-    marginBottom: 8,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 20,
   },
+  logTitle: { fontWeight: "700", marginBottom: 6, color: "#333" },
+  logText: { fontSize: 12, color: "#555" },
 });

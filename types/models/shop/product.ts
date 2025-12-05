@@ -1,5 +1,5 @@
+import { ReactNode } from "react";
 import { Rating } from "./rating";
-import { Timestamp } from "firebase/firestore";
 
 export type Product = {
   name: ReactNode;
@@ -13,6 +13,6 @@ export type Product = {
   price: number;          // Base price
   discount?: number;      // Optional discount percentage
   ratings?: Rating[];     // Array of individual Rating entries
-  createdAt: Timestamp;   // Firestore creation timestamp
-  updatedAt: Timestamp;   // Firestore last updated timestamp
+  createdAt: Date;        // Creation date
+  updatedAt: Date;        // Last updated date
 };

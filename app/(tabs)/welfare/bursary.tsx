@@ -52,6 +52,17 @@ const handleSubmit = async () => {
   }
 
   try {
+    // ----------------------------------------------------
+    // 1. Validate basic required fields before ANY insert
+    // ----------------------------------------------------
+    if (!formData.contactNumber || !formData.hostel || !formData.cwa) {
+      Alert.alert("Missing Information", "Please complete all required fields.");
+      return;
+    }
+
+    // ----------------------------------------------------
+    // Build bursary payload
+    // ----------------------------------------------------
     const payload = {
       user_id: user.id,
       contactnumber: formData.contactNumber,
@@ -71,36 +82,70 @@ const handleSubmit = async () => {
       created_at: new Date().toISOString(),
     };
 
-    console.log("📤 Submitting bursary:", payload);
+    console.log("📤 Payload:", payload);
 
+    // ----------------------------------------------------
+    // 2. INSERT NOTIFICATION FIRST
+    // ----------------------------------------------------
+    const { data: notifData, error: notifError } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: user.id,
+        title: "Bursary Application Submitted",
+        message:
+          "Your application has been submitted successfully to the SCISA bursary desk. You will be notified of any updates.",
+        is_read: false,
+        for_all: false,
+      })
+      .select()
+      .single();
+
+    if (notifError) {
+      console.error("❌ Notification insert error:", notifError);
+      Alert.alert("Error", "Failed to create notification. Form not submitted.");
+      return; // STOP EVERYTHING
+    }
+
+    console.log("🔔 Notification created:", notifData.id);
+
+    // ----------------------------------------------------
+    // 3. INSERT BURSARY FORM SECOND
+    // ----------------------------------------------------
     const { data, error } = await supabase
       .from("bursary_applications")
       .insert(payload)
-      .select();
+      .select()
+      .single();
 
     if (error) {
-      console.error("❌ Supabase insert error:", error);
-      if (error.code === "23505") {
-        Alert.alert(
-          "Duplicate Application",
-          "You have already submitted a bursary application."
-        );
-      } else {
-        Alert.alert("Submission Error", error.message);
-      }
+      console.error("❌ Bursary insert error:", error);
+
+      // ----------------------------------------------------
+      // 4. ROLLBACK NOTIFICATION IF BURSARY SAVE FAILED
+      // ----------------------------------------------------
+      await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notifData.id);
+
+      console.log("⛔ Rolled back notification");
+
+      Alert.alert("Submission Error", "Failed to submit bursary form.");
       return;
     }
 
+    // ----------------------------------------------------
+    // 5. SUCCESS — EVERYTHING COMPLETED
+    // ----------------------------------------------------
+    console.log("✅ Bursary saved:", data);
     Alert.alert("Success", "Your bursary form has been submitted!");
-    console.log("✅ Saved:", data);
+    router.replace("/(tabs)/welfare");
 
-    router.replace("/(tabs)/welfare/bursary");
   } catch (err) {
     console.error("❌ Unexpected error:", err);
     Alert.alert("Error", "Something went wrong.");
   }
 };
-
 
   // ---------------------------------------------------------
   // STEP HANDLERS

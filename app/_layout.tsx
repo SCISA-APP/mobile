@@ -5,12 +5,15 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ShopProvider } from "@/context/ShopContext";
 import { OccasionAnnouncementProvider } from '@/context/OccasionAnnouncementContext';
+import { NotificationProvider } from '@/context/notificationContext';
+
 
 export default function RootLayout() {
   return (
     <> 
       <ShopProvider>
         <OccasionAnnouncementProvider>
+           <NotificationProvider>
           <StatusBar style="dark" />
           <Stack
             screenOptions={{
@@ -85,6 +88,7 @@ export default function RootLayout() {
               }} 
             />
           </Stack>
+          </NotificationProvider>
         </OccasionAnnouncementProvider>
       </ShopProvider>
     </> 

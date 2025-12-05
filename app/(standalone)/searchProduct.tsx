@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, Dimensions } from 'react-native';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
-import { exampleProducts } from '@/assets/data/shop/product';
-import ProductCard from '@/components/cards/productCard';
 import SearchEmptyState from '@/components/empty/SearchEmptyState';
 
 import ProductSearchGif from '@/assets/images/ProductSearch.gif';
@@ -15,14 +13,13 @@ const CARD_WIDTH = (width - 16 * 2 - CARD_MARGIN) / 2; // paddingHorizontal * 2 
 const SearchProduct = () => {
   const [query, setQuery] = useState('');
 
-  const filteredProducts = exampleProducts.filter(product =>
-    product.title.toLowerCase().includes(query.toLowerCase()) ||
-    product.description.toLowerCase().includes(query.toLowerCase())
-  );
+  // Empty for now since no products
+  const filteredProducts: any[] = [];
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: any) => (
     <View style={{ width: CARD_WIDTH, marginBottom: 16, marginRight: CARD_MARGIN }}>
-      <ProductCard product={item} />
+      {/* Keep ProductCard component commented until you have products */}
+      {/* <ProductCard product={item} /> */}
     </View>
   );
 
@@ -43,7 +40,7 @@ const SearchProduct = () => {
       ) : (
         <FlatList
           data={filteredProducts}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           renderItem={renderItem}
           numColumns={2}
           showsVerticalScrollIndicator={false}

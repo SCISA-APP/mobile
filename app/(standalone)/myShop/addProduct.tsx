@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView,Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Alert } from 'react-native';
 import React, { useState } from 'react';
 import colors from '@/constants/colors';
 import Header from '@/components/headers/header';
@@ -15,10 +15,12 @@ import { statusOptions } from '@/assets/data/shop/statusOption';
 import { useShop } from '@/context/ShopContext';
 import { useRouter } from 'expo-router';
 import { categories } from '@/assets/data/shop/shopCategoryData';
+import { productSchema } from '@/assets/validation/productSchema';
 
 const AddProduct = () => {
-    const { addProduct } = useShop();
-    const router = useRouter();
+  const { addProduct } = useShop();
+  const router = useRouter();
+  
   const [productName, setProductName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState(categories[0]);
@@ -45,43 +47,98 @@ const AddProduct = () => {
     );
   };
 
-const handleSubmit = async () => {
-  try {
-    const newProduct = await addProduct({
-      name: productName,
-      description,
-      category,
-      price: Number(price),
-      discount: Number(discount) || 0,
-      stock: Number(stock),
-      status,
-      front_image: frontImage,
-      additional_images: additionalImages,
-      sizes: selectedSizes,
-      colors: selectedColors,
-      tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-    });
+  const handleSubmit = async () => {
+    try {
+      // Parse and clean the tags
+      const parsedTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+      
+      // Prepare the data object
+      const productData = {
+        name: productName,
+        description,
+        category,
+        price: Number(price),
+        discount: Number(discount) || 0,
+        stock: Number(stock),
+        status,
+        front_image: frontImage,
+        additional_images: additionalImages,
+        sizes: selectedSizes,
+        colors: selectedColors,
+        tags: parsedTags,
+      };
 
-    console.log('✅ Product added:', newProduct);
+      console.log('📦 Validating product data:', productData);
 
-    // ✅ Alert the user
-    Alert.alert(
-      'Success',
-      'Product added successfully. Good luck selling!',
-      [
-        {
-          text: 'OK',
-          onPress: () => router.replace("/(standalone)/myShop"),
-        },
-      ],
-      { cancelable: false }
-    );
-
-  } catch (err) {
-    console.error('❌ Error adding product:', err);
-    Alert.alert('Error', 'Failed to add product. Please try again.');
-  }
-};
+      // Use safeParse for better error handling
+      const result = productSchema.safeParse(productData);
+      
+      console.log('🔍 Validation result:', result);
+      console.log('🔍 Result success:', result.success);
+      
+      if (!result.success) {
+        console.log('❌ Validation failed');
+        console.log('🔍 Result error object:', result.error);
+        console.log('🔍 Error issues:', result.error?.issues);
+        
+        // Handle validation errors with extra safety checks
+        if (result.error && result.error.issues && Array.isArray(result.error.issues)) {
+          const errorMessages = result.error.issues.map(e => {
+            const field = e.path && e.path.length > 0 ? e.path.join('.') : 'unknown';
+            return `• ${field}: ${e.message}`;
+          }).join('\n');
+          
+          Alert.alert(
+            "Validation Error", 
+            errorMessages || "Please check your input and try again.",
+            [{ text: 'OK' }]
+          );
+        } else {
+          // Fallback error message
+          Alert.alert(
+            "Validation Error", 
+            "Please check all fields and try again.",
+            [{ text: 'OK' }]
+          );
+        }
+        return; // Stop execution here
+      }
+      
+      console.log('✅ Validation passed, adding product...');
+      
+      // Add the product to database with validated data
+      const newProduct = await addProduct(result.data);
+      
+      console.log('✅ Product added successfully:', newProduct);
+      
+      Alert.alert(
+        'Success',
+        'Product added successfully. Good luck selling!',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.replace("/(standalone)/myShop"),
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (err) {
+      // This catches errors from addProduct, not validation
+      console.error('❌ Error adding product:', err);
+      console.error('❌ Error type:', typeof err);
+      console.error('❌ Error stack:', err instanceof Error ? err.stack : 'no stack');
+      
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to add product. Please try again.';
+      
+      Alert.alert(
+        'Error', 
+        errorMessage,
+        [{ text: 'OK' }]
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>

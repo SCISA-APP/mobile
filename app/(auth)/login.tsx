@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  ScrollView,
   StyleSheet,
   View,
   Text,
@@ -7,10 +8,11 @@ import {
   Platform,
   Image,
   TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-  ImageStyle
+
 } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
 import colors from '../../constants/colors';
@@ -18,39 +20,82 @@ import AuthenticationGif from '../../assets/images/Authentication.gif';
 import { useRouter } from 'expo-router';
 import { signInUser } from '@/utils/authUtils/signInWithEmailUtil';
 
+
 const LoginScreen = () => {
   const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loaing, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true);  // ✅ default checked
+  const [loading, setLoading] = useState(false);
+
+  // ----------------------------------------------------
+  // 🔥 Load saved login info on app start
+  // ----------------------------------------------------
+  useEffect(() => {
+    const loadStoredCredentials = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem("savedEmail");
+        const savedPassword = await AsyncStorage.getItem("savedPassword");
+
+        if (savedEmail && savedPassword) {
+          setEmail(savedEmail);
+          setPassword(savedPassword);
+          setRememberMe(true);
+        }
+      } catch (error) {
+        console.log("Error loading saved login info:", error);
+      }
+    };
+
+    loadStoredCredentials();
+  }, []);
+
+  // ----------------------------------------------------
+  // 🔥 Login Handler
+  // ----------------------------------------------------
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter both email and password");
+      return;
+    }
+
+    setLoading(true);
+
+    const result = await signInUser({ email, password });
+
+    setLoading(false);
+
+    if (result.error) {
+      alert(`Login failed: ${result.error}`);
+      return;
+    }
+
+    // 🔥 Save credentials if rememberMe is TRUE
+    if (rememberMe) {
+      await AsyncStorage.setItem("savedEmail", email);
+      await AsyncStorage.setItem("savedPassword", password);
+    } else {
+      await AsyncStorage.removeItem("savedEmail");
+      await AsyncStorage.removeItem("savedPassword");
+    }
+
+    alert("Login successful!");
+    router.push('/home');
+  };
 
 
-const handleLogin = async () => {
-  if (!email || !password) {
-    alert("Please enter both email and password");
-    return;
-  }
-
-  setLoading(true);
-
-  const result = await signInUser({ email, password });
-
-  setLoading(false);
-
-  if (result.error) {
-    alert(`Login failed: ${result.error}`);
-    return;
-  }
-
-  alert('Login successful!');
-  router.push('/home');
-};
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
     >
-      <View style={styles.inner}>
+      <ScrollView
+        contentContainerStyle={styles.inner}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Image
           source={AuthenticationGif}
           style={styles.gif}
@@ -68,6 +113,7 @@ const handleLogin = async () => {
             value={email}
             onChangeText={setEmail}
           />
+
           <CustomInput
             placeholder="Password"
             icon="lock-closed-outline"
@@ -76,15 +122,31 @@ const handleLogin = async () => {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity
-            style={styles.forgotContainer}
-            onPress={() => router.push('/(auth)/forgotPassword')}
-          >
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
+          {/* ------------------------ */}
+          {/* 🔥 REMEMBER ME CHECKBOX */}
+          {/* ------------------------ */}
+{/* REMEMBER + FORGOT in one row */}
+<View style={styles.rememberForgotRow}>
+  {/* Remember Me */}
+  <TouchableOpacity
+    style={styles.rememberContainer}
+    onPress={() => setRememberMe(!rememberMe)}
+  >
+    <View style={styles.checkbox}>
+      {rememberMe ? <Text style={styles.checked}>✓</Text> : null}
+    </View>
+    <Text style={styles.rememberText}>Remember Me</Text>
+  </TouchableOpacity>
+
+  {/* Forgot Password */}
+  <TouchableOpacity onPress={() => router.push('/(auth)/forgotPassword')}>
+    <Text style={styles.forgotText}>Forgot Password?</Text>
+  </TouchableOpacity>
+</View>
+
         </View>
 
-        <CustomButton label="Login" onPress={handleLogin} />
+        <CustomButton label={loading ? "Logging in..." : "Login"} onPress={handleLogin} />
 
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Do not have an account? </Text>
@@ -92,31 +154,18 @@ const handleLogin = async () => {
             <Text style={styles.signupLink}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 export default LoginScreen;
 
-// --- STYLES ---
-const styles = StyleSheet.create<{
-  container: ViewStyle;
-  inner: ViewStyle;
-  gif: ImageStyle;
-  title: TextStyle;
-  subtitle: TextStyle;
-  inputContainer: ViewStyle;
-  forgotContainer: ViewStyle;
-  forgotText: TextStyle;
-  signupContainer: ViewStyle;
-  signupText: TextStyle;
-  signupLink: TextStyle;
-}>({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+
+// ----------------------------------------------------------------------
+// STYLES
+// ----------------------------------------------------------------------
+const styles = StyleSheet.create({
   inner: {
     flex: 1,
     justifyContent: 'center',
@@ -135,29 +184,62 @@ const styles = StyleSheet.create<{
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.primaryDark, // see next fix
+    color: colors.primaryDark,
     fontSize: 15,
     textAlign: 'center',
     marginBottom: 24,
   },
   inputContainer: {
-    width: '100%',
+    width: '100%', 
     marginBottom: 20,
   },
-  forgotContainer: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-  },
-  forgotText: {
-    color: colors.primaryDark, // see next fix
-    fontSize: 14,
-  },
+
+  // 🔥 REMEMBER ME STYLES
+rememberForgotRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  width: "100%",
+  marginTop: 8,
+},
+
+rememberContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+checkbox: {
+  width: 22,
+  height: 22,
+  borderWidth: 2,
+  borderColor: colors.primaryDark,
+  borderRadius: 5,
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 8,
+},
+
+checked: {
+  fontSize: 16,
+  color: colors.primaryDark,
+},
+
+rememberText: {
+  fontSize: 14,
+  color: colors.primaryDark,
+},
+
+forgotText: {
+  color: colors.primaryDark,
+  fontSize: 14,
+  textDecorationLine: "underline",
+},
   signupContainer: {
     flexDirection: 'row',
     marginTop: 16,
   },
   signupText: {
-    color: colors.primaryDark, // see next fix
+    color: colors.primaryDark,
     fontSize: 14,
   },
   signupLink: {
@@ -166,4 +248,3 @@ const styles = StyleSheet.create<{
     fontWeight: '600',
   },
 });
-

@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 8.0.0"
+  },
+  "build": {
+    "apk": {
+      "channel": "production",
+      "distribution": "store",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "aab": {
+      "channel": "production",
+      "distribution": "store",
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "ios": {
+      "channel": "production",
+      "distribution": "store",
+      "ios": {
+        "simulator": false
+      }
+    }
+  },
+  "submit": {
+    "aab": {},
+    "ios": {}
+  }
+}

@@ -3,12 +3,16 @@
     "name": "scisaapp",
     "slug": "scisaapp",
     "version": "1.0.0",
-     "extra": {
+    "extra": {
       "SUPABASE_URL": "https://vtnpiyszfmgqtyfeiaps.supabase.co",
-      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bnBpeXN6Zm1ncXR5ZmVpYXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYzMTgsImV4cCI6MjA3OTgwMjMxOH0.2A8Duz63as9G37jIgZlPnpx2c0zDKQAXkDCuB7FXQG8"
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bnBpeXN6Zm1ncXR5ZmVpYXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMjYzMTgsImV4cCI6MjA3OTgwMjMxOH0.2A8Duz63as9G37jIgZlPnpx2c0zDKQAXkDCuB7FXQG8",
+      "router": {},
+      "eas": {
+        "projectId": "9c35cf6a-04bc-4e36-bc1f-8b5d0b9c7870"
+      }
     },
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.jpeg",
     "scheme": "scisaapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,23 +22,24 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundImage": "./assets/images/icon.png",
+        "monochromeImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.hostelhubb.scisaapp"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logo.jpeg"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/logo.jpeg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -47,6 +52,15 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9c35cf6a-04bc-4e36-bc1f-8b5d0b9c7870",
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
     }
   }
 }

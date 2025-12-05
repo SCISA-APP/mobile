@@ -9,33 +9,27 @@ import {
   ViewStyle,
   TextStyle,
   ImageStyle,
+  ScrollView,
   Image,
   Alert,
 } from 'react-native';
+
 import colors from '../../constants/colors';
 import { useRouter } from 'expo-router';
+
 import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
 import CustomDropdown from '@/components/inputs/CustomDropdown';
+
 import SignUpGif from '../../assets/images/SignUp.gif';
 import { signUpUser } from '@/utils/authUtils/signUpWithEmailUtil';
 
-const programs = [
-  'Computer Science',
-  'Physics',
-  'Actuarial Science',
-  'Chemistry',
-  'Environmental Science',
-  'Biological Science',
-  'Biochemistry',
-  'Mathematics',
-  'Optometry',
-  'Meteorological and Climate Sciences',
-  'Food Science and Technology',
-  'Statistics',
-];
+// DATA
+import { programs, years } from '@/assets/data/programYearData';
 
-const years = [100, 200, 300, 400, 500, 600];
+// ✅ Zod schema
+import { signUpSchema } from '@/assets/validation/signupSchema';
+
 
 const SignUp = () => {
   const router = useRouter();
@@ -48,183 +42,158 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    console.log('🚀 handleSignUp called');
-    console.log('Form values:', { fullName, email, program, year, passwordLength: password.length });
+    console.log("🚀 Running Zod Validation...");
 
-    // Validation
-    if (!fullName.trim()) {
-      console.log('❌ Validation failed: No full name');
-      Alert.alert('Error', 'Please enter your full name');
-      return;
-    }
-    if (!email.trim()) {
-      console.log('❌ Validation failed: No email');
-      Alert.alert('Error', 'Please enter your email');
-      return;
-    }
-    if (!password || password.length < 6) {
-      console.log('❌ Validation failed: Password too short');
-      Alert.alert('Error', 'Password must be at least 6 characters');
-      return;
-    }
-    if (!program) {
-      console.log('❌ Validation failed: No program');
-      Alert.alert('Error', 'Please select your program');
-      return;
-    }
-    if (!year) {
-      console.log('❌ Validation failed: No year');
-      Alert.alert('Error', 'Please select your year');
+    // ---------- ZOD VALIDATION ----------
+    const result = signUpSchema.safeParse({
+      fullName,
+      email,
+      password,
+      program,
+      year,
+    });
+
+    if (!result.success) {
+      const firstError = result.error.errors[0]?.message;
+      console.log("❌ Zod validation failed:", firstError);
+      Alert.alert("Error", firstError || "Invalid form data");
       return;
     }
 
-    console.log('✅ Validation passed');
+    console.log("✅ Validation Passed");
+
+    const validData = result.data;
     setLoading(true);
-    console.log('Loading state set to true');
 
     try {
-      console.log('Getting push token...');
+      console.log("Calling signUpUser...");
 
-      console.log('Calling signUpUser...');
-      const result = await signUpUser({
-        email: email.trim(),
-        password,
-        fullName: fullName.trim(),
-        program: program.toString(),
-        year: Number(year),
+      const response = await signUpUser({
+        email: validData.email.trim(),
+        password: validData.password,
+        fullName: validData.fullName.trim(),
+        program: validData.program.toString(),
+        year: Number(validData.year),
       });
 
-      console.log('signUpUser result:', result);
+      console.log("Signup Response:", response);
 
-      if (result.error) {
-        console.error('❌ Signup returned error:', result.error);
-        Alert.alert('Signup Failed', result.error);
+      if (response.error) {
+        Alert.alert("Signup Failed", response.error);
         return;
       }
 
-      console.log('✅ Signup successful!');
       Alert.alert(
-        'Success!',
-        'Account created successfully! Please check your email to verify your account before logging in.',
+        "Success!",
+        "Account created successfully! Kindly login with your verified email",
         [
           {
-            text: 'OK',
-            onPress: () => {
-              console.log('Navigating to login...');
-              router.replace('/(auth)/login');
-            },
+            text: "OK",
+            onPress: () => router.replace('/(auth)/login'),
           },
         ]
       );
     } catch (err) {
-      console.error('💥 Caught error in handleSignUp:', err);
-      console.error('Error details:', JSON.stringify(err, null, 2));
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      console.error("💥 Signup error:", err);
+      Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
-      <View style={styles.inner}>
+      <ScrollView
+        contentContainerStyle={styles.inner}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={SignUpGif} style={styles.gif} resizeMode="contain" />
 
         <Text style={styles.title}>Create Account</Text>
 
+        {/* INPUTS */}
         <View style={styles.inputContainer}>
           <CustomInput
             placeholder="Full Name"
             icon="person-outline"
             value={fullName}
-            onChangeText={(text) => {
-              console.log('Full name changed:', text);
-              setFullName(text);
-            }}
+            onChangeText={setFullName}
             editable={!loading}
           />
+
           <CustomInput
             placeholder="Email Address"
             icon="mail-outline"
             keyboardType="email-address"
             value={email}
-            onChangeText={(text) => {
-              console.log('Email changed:', text);
-              setEmail(text);
-            }}
+            onChangeText={setEmail}
             autoCapitalize="none"
             editable={!loading}
           />
+
           <CustomInput
             placeholder="Password"
             icon="lock-closed-outline"
             secure
             value={password}
-            onChangeText={(text) => {
-              console.log('Password changed, length:', text.length);
-              setPassword(text);
-            }}
+            onChangeText={setPassword}
             editable={!loading}
           />
         </View>
 
-        <View style={{ width: '100%', zIndex: 20 }}>
+        {/* PROGRAM DROPDOWN */}
+        <View style={{ width: "100%", zIndex: 20 }}>
           <CustomDropdown
             placeholder="Program"
             data={programs}
             value={program}
-            onValueChange={(value) => {
-              console.log('Program selected:', value);
-              setProgram(value);
-            }}
+            onValueChange={setProgram}
             icon="school-outline"
             disabled={loading}
           />
         </View>
 
-        <View style={{ width: '100%', marginBottom: 20, zIndex: 10 }}>
+        {/* YEAR DROPDOWN */}
+        <View style={{ width: "100%", marginBottom: 20, zIndex: 10 }}>
           <CustomDropdown
             placeholder="Year / Level"
             data={years}
             value={year}
-            onValueChange={(value) => {
-              console.log('Year selected:', value);
-              setYear(value);
-            }}
+            onValueChange={setYear}
             icon="calendar-outline"
             disabled={loading}
           />
         </View>
 
-        <CustomButton 
-          label={loading ? "Creating Account..." : "Sign Up"} 
-          onPress={() => {
-            console.log('Sign Up button pressed');
-            handleSignUp();
-          }}
+        {/* SIGNUP BUTTON */}
+        <CustomButton
+          label={loading ? "Creating Account..." : "Sign Up"}
+          onPress={handleSignUp}
           disabled={loading}
         />
 
+        {/* LOGIN LINK */}
         <View style={styles.loginContainer}>
           <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity 
-            onPress={() => router.push('/(auth)/login')}
-            disabled={loading}
-          >
+          <TouchableOpacity onPress={() => router.push('/(auth)/login')} disabled={loading}>
             <Text style={styles.loginLink}>Login</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 export default SignUp;
 
+
+// ---------- STYLES ----------
 const styles = StyleSheet.create<{
   container: ViewStyle;
   inner: ViewStyle;
@@ -235,41 +204,52 @@ const styles = StyleSheet.create<{
   loginLink: TextStyle;
   inputContainer: ViewStyle;
 }>({
+
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  inner: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
+
+  // 🔥 FIX so inputs don't hide behind keyboard
+inner: {
+  paddingHorizontal: 24,
+  paddingTop: 40,
+  paddingBottom: 120,
+  alignItems: "center",        // ⭐ center everything
+},
+
   gif: {
     width: 200,
     height: 200,
     marginBottom: 16,
+    justifyContent: 'center',
+    alignContent:'center'
   },
+
   title: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.primaryDark,
     marginBottom: 24,
   },
+
   inputContainer: {
-    width: '100%',
+    width: "100%",
   },
+
   loginContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 16,
   },
+
   loginText: {
     color: colors.primary,
     fontSize: 14,
   },
+
   loginLink: {
     color: colors.secondaryDark,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

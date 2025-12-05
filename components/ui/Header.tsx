@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Bell } from "lucide-react-native";
 import colors from "@/constants/colors";
 import { Colors } from "@/constants/theme";
+import { useNotifications } from "@/context/notificationContext";
 
 const formatName = (fullName: string) => {
   if (!fullName) return "User";
@@ -27,6 +28,7 @@ const Header: React.FC<any> = ({
   style,
 }) => {
   const insets = useSafeAreaInsets();
+  const { unreadCount } = useNotifications();
   const router = useRouter();
   const [student, setStudent] = useState<any>(null);
 
@@ -59,12 +61,17 @@ const Header: React.FC<any> = ({
 
         <View style={styles.actions}>
           {showNotification && (
-            <TouchableOpacity onPress={onNotificationPress || (() => {})} style={styles.actionBtn}>
-              <Bell color={colors.primaryDark} size={24} />
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>3</Text>
-              </View>
-            </TouchableOpacity>
+             <TouchableOpacity
+          onPress={onNotificationPress || (() => router.push("/(standalone)/notification"))}
+          style={styles.actionBtn}
+        >
+          <Bell color={colors.primaryDark} size={24} />
+          {unreadCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
           )}
 
           {showProfile && (
