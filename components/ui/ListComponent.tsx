@@ -1,19 +1,18 @@
-import { memo } from "react";
-import React from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-} from "react-native";
-import { MessageCircle } from "lucide-react-native"; // comment icon
-import { useRouter } from "expo-router";
 import colors from "@/constants/colors";
-import { ListComponentProps } from "@/types/props";
 import { AnnouncementItem } from "@/types/models";
+import { ListComponentProps } from "@/types/props";
+import { useRouter } from "expo-router";
+import { MessageCircle } from "lucide-react-native"; // comment icon
+import React, { memo } from "react";
+import {
+    Dimensions,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -141,86 +140,86 @@ const ListComponent = memo<ListComponentProps>(function ListComponent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
+    paddingVertical: 16,
   },
   header: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: colors.text.primary,
     marginHorizontal: 16,
-    marginTop: 10,
+    marginBottom: 16,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
     paddingBottom: 60,
   },
   card: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    borderRadius: 18,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    marginBottom: 16,
     overflow: "hidden",
-    backdropFilter: "blur(10px)", // glassmorphism feel
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   image: {
     width: "100%",
-    height: width * 0.45,
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
+    height: width * 0.5,
+    backgroundColor: colors.gray[100],
   },
   textWrapper: {
-    padding: 14,
+    padding: 16,
   },
   title: {
     fontSize: 17,
     fontWeight: "700",
     color: colors.text.primary,
     marginBottom: 6,
+    lineHeight: 24,
   },
   description: {
     color: colors.text.secondary,
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.gray[200],
   },
   date: {
-    color: colors.primaryDark,
-    fontWeight: "600",
-    fontSize: 13,
+    color: colors.text.secondary,
+    fontWeight: "500",
+    fontSize: 12,
   },
   commentContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(128,0,32,0.08)", // soft wine tint
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   commentCount: {
-    color: colors.primary,
+    color: colors.text.primary,
     fontWeight: "600",
     fontSize: 13,
   },
   emptyContainer: {
     alignItems: "center",
-    marginTop: 80,
+    paddingVertical: 60,
   },
   emptyTitle: {
-    color: colors.primary,
+    color: colors.text.primary,
     fontWeight: "700",
     fontSize: 16,
   },
   emptyDescription: {
-    color: colors.gray[600],
+    color: colors.text.secondary,
     fontSize: 14,
     marginTop: 4,
   },

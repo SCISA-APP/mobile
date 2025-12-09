@@ -1,9 +1,9 @@
+import colors from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import colors from '@/constants/colors';
 
 const counselors = [
   {
@@ -52,34 +52,40 @@ const CounselorsScreen = () => {
 
   const renderCounselor = ({ item }) => {
     const handlePress = () => {
-      if (item.type === 'Peer') {
-        router.push({
-          pathname: `/welfare/screens/student-counselor/${item.id}`,
-          params: { student_counselor: JSON.stringify(item) },
-        });
-      } else {
-        router.push({
-          pathname: `/welfare/screens/counselor/${item.id}`,
-          params: { counselor: JSON.stringify(item) },
-        });
-      }
+      router.push({
+        pathname: '/(standalone)/welfare/counselor-detail',
+        params: {
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          department: item.department,
+          image: item.image,
+          bio: item.bio,
+          specialties: JSON.stringify(item.specialties),
+        }
+      });
     };
 
     return (
-      <TouchableOpacity onPress={handlePress} style={styles.counselorCard}>
+      <TouchableOpacity onPress={handlePress} style={styles.counselorCard} activeOpacity={0.7}>
         <Image source={{ uri: item.image }} style={styles.counselorImage} />
         <View style={styles.counselorInfo}>
           <Text style={styles.counselorName}>{item.name}</Text>
-          <Text style={styles.counselorDepartment}>{item.department}</Text>
-          <View style={styles.specialtiesContainer}>
-            {item.specialties.map((specialty, index) => (
-              <View key={index} style={styles.specialtyBadge}>
-                <Text style={styles.specialtyText}>{specialty}</Text>
-              </View>
-            ))}
-          </View>
+          <Text style={styles.counselorType}>{item.type} Counselor</Text>
+          {item.specialties && item.specialties.length > 0 && (
+            <View style={styles.specialtiesContainer}>
+              {item.specialties.slice(0, 2).map((specialty, index) => (
+                <View key={index} style={styles.specialtyBadge}>
+                  <Text style={styles.specialtyText}>{specialty}</Text>
+                </View>
+              ))}
+              {item.specialties.length > 2 && (
+                <Text style={styles.moreText}>+{item.specialties.length - 2}</Text>
+              )}
+            </View>
+          )}
         </View>
-        <Ionicons name="chevron-forward" size={24} color={colors.gray} />
+        <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
       </TouchableOpacity>
     );
   };
@@ -101,53 +107,63 @@ export default CounselorsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
-  // Removed header styles as per request
   listContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10, // Adjusted padding
+    padding: 16,
+    paddingBottom: 100,
   },
   counselorCard: {
-    // Removed background, border, shadow, and elevation
-    paddingVertical: 10, // Adjusted padding
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 5, // Adjusted margin
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   counselorImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: 12,
+    backgroundColor: colors.gray[200],
   },
   counselorInfo: {
     flex: 1,
   },
   counselorName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 2,
   },
-  counselorDepartment: {
-    fontSize: 14,
-    color: '#000',
-    marginTop: 4,
+  counselorType: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 6,
   },
   specialtiesContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     flexWrap: 'wrap',
-    marginTop: 8,
+    gap: 6,
   },
   specialtyBadge: {
-    // Removed background and border radius
-    paddingVertical: 2, // Adjusted padding
-    paddingHorizontal: 6, // Adjusted padding
-    marginRight: 8,
-    marginBottom: 4, // Adjusted margin
+    backgroundColor: colors.surface,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
   },
   specialtyText: {
-    fontSize: 12,
-    color: '#000', // Colder text color
+    fontSize: 10,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  moreText: {
+    fontSize: 11,
+    color: colors.text.secondary,
+    fontWeight: '600',
   },
 });

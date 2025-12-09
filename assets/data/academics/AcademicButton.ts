@@ -11,7 +11,7 @@ export const academicsButtonsData: AcademicButton[] = [
     route: '/(standalone)/academics/timetable',
   },
   {
-    title: '',
+    title: 'Academic Resources',
     image: require('../../../assets/images/academic_resources.png'),
     route: '/(standalone)/academics/academicResources',
   },
@@ -19,11 +19,6 @@ export const academicsButtonsData: AcademicButton[] = [
     title: 'Academic Calendar',
     image: require('../../../assets/images/academic_calendar.png'),
     route: '/(standalone)/academics/academicCalendar',
-  },
-  {
-    title: 'Exam Arrangements',
-    image: require('../../../assets/images/sitting_arrangement.jpeg'),
-    route: '/(standalone)/academics/sittingArrangement',
   },
 ];
 

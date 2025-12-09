@@ -1,12 +1,16 @@
-import { useLocalSearchParams } from "expo-router";
+import colors from "@/constants/colors";
+import { openLink, parseTextWithLinks } from "@/utils/linkUtils";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { parseTextWithLinks, openLink } from "@/utils/linkUtils";
-import OccasionHeader from "@/components/headers/OccassionHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function OccasionDetail() {
+export default function EventDetail() {
   const params = useLocalSearchParams();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   // Normalize title and description
   const title = Array.isArray(params.title) ? params.title[0] : params.title ?? "";
@@ -76,28 +80,14 @@ export default function OccasionDetail() {
     const parts = parseTextWithLinks(paragraph.trim());
 
     return (
-      <Text
-        key={index}
-        style={{
-          color: "#4a4a4a",
-          fontSize: 16,
-          lineHeight: 26,
-          letterSpacing: 0.2,
-          marginBottom: index < paragraphs.length - 1 ? 16 : 0,
-          textAlign: "justify",
-        }}
-      >
+      <Text key={index} style={styles.paragraph}>
         {parts.map((part, partIndex) => {
           if (part.type === "link") {
             return (
               <Text
                 key={partIndex}
                 onPress={() => openLink(part.url)}
-                style={{
-                  color: "#610b0c",
-                  textDecorationLine: "underline",
-                  fontWeight: "600",
-                }}
+                style={styles.link}
               >
                 {part.content}
               </Text>
@@ -110,18 +100,8 @@ export default function OccasionDetail() {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "#fff" }}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
-      <Animated.View entering={FadeInUp.duration(600)}>
-        {image && (
-          <Image
-            source={{ uri: image as string }}
-            style={{ width: "100%", height: 320, marginBottom: 0 }}
-            resizeMode="cover"
-          />
-        )}
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
 
         <View
           style={{
@@ -143,19 +123,45 @@ export default function OccasionDetail() {
             date={formatEventDateRange(start_date, end_date)}
           />
 
-          <View
-            style={{
-              height: 3,
-              width: 40,
-              backgroundColor: "#610b0c",
-              borderRadius: 2,
-              marginBottom: 20,
-            }}
-          />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeInUp.duration(600)}>
+          {image && (
+            <Image
+              source={{ uri: image as string }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          )}
 
-          {paragraphs.map((paragraph, index) => renderParagraph(paragraph, index))}
-        </View>
-      </Animated.View>
-    </ScrollView>
+          <View style={styles.contentCard}>
+            <Text style={styles.title}>{title}</Text>
+            
+            {date && (
+              <View style={styles.dateContainer}>
+                <Ionicons name="calendar-outline" size={16} color={colors.primary} />
+                <Text style={styles.date}>
+                  {new Date(date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.divider} />
+
+            <View style={styles.descriptionContainer}>
+              {paragraphs.map((paragraph, index) => renderParagraph(paragraph, index))}
+            </View>
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 }

@@ -1,18 +1,18 @@
+import colors from "@/constants/colors";
 import { EventItem } from "@/types/models/event";
 import { useRouter } from "expo-router";
 import React, { memo } from "react";
-import colors from "@/constants/colors";
 import {
-  Dimensions,
-  FlatList,
-  ImageStyle,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
+    Dimensions,
+    FlatList,
+    ImageStyle,
+    StyleProp,
+    StyleSheet,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    ViewStyle,
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
@@ -107,9 +107,11 @@ router.push({
 
   return (
     <View style={[styles.container, style]}>
-      {headerTitle && (
-        <Text style={[styles.header, headerStyle]}>{headerTitle}</Text>
-      )}
+      <View style={styles.headerContainer}>
+        {headerTitle && (
+          <Text style={[styles.header, headerStyle]}>{headerTitle}</Text>
+        )}
+      </View>
 
       <FlatList
         horizontal
@@ -119,7 +121,7 @@ router.push({
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.9}
             onPress={() => handlePress(item)}
             style={[styles.cardContainer, itemStyle]}
           >
@@ -132,7 +134,7 @@ router.push({
             />
 
             <View style={styles.cardContent}>
-              <Text style={[styles.cardTitle, titleStyle]} numberOfLines={1}>
+              <Text style={[styles.cardTitle, titleStyle]} numberOfLines={2}>
                 {item.title}
               </Text>
               <Text
@@ -141,7 +143,7 @@ router.push({
               >
                 {item.description}
               </Text>
-              <Text style={[styles.cardDate, dateStyle]}>
+              <View style={styles.dateContainer}>
                 <Text style={[styles.cardDate, dateStyle]}>
 <Text style={[styles.cardDate, dateStyle]}>
   {item.start_date
@@ -170,64 +172,69 @@ router.push({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
-    marginTop: 10,
+    backgroundColor: colors.white,
+    paddingVertical: 16,
+  },
+  headerContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   header: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#000",
-    marginHorizontal: 16,
-    marginTop: 10,
-    marginBottom: 8,
+    color: colors.text.primary,
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    gap: 12,
   },
   cardContainer: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    marginRight: 14,
-    width: width * 0.6,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    width: width * 0.55,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
   cardImage: {
     width: "100%",
-    height: 120,
+    height: 100,
+    backgroundColor: colors.gray[100],
   },
   cardContent: {
     padding: 10,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
-    color: "#000",
+    color: colors.text.primary,
     marginBottom: 4,
-  },
-  cardDescription: {
-    color: "#555",
-    fontSize: 13,
     lineHeight: 18,
   },
+  cardDescription: {
+    color: colors.text.secondary,
+    fontSize: 11,
+    lineHeight: 15,
+    marginBottom: 6,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   cardDate: {
-    color: colors.primaryDark,
+    color: colors.primary,
     fontWeight: "600",
-    marginTop: 6,
     fontSize: 12,
+    textTransform: 'uppercase',
   },
   emptyContainer: {
-    padding: 16,
+    padding: 32,
     alignItems: "center",
   },
   emptyText: {
-    color: "#007AFF",
-    fontWeight: "600",
+    color: colors.text.secondary,
+    fontWeight: "500",
+    fontSize: 14,
   },
 });
 

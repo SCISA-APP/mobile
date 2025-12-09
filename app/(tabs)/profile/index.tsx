@@ -1,255 +1,324 @@
-import IconFontAwesome from "@expo/vector-icons/FontAwesome";
-import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import colors from "@/constants/colors";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Alert,
-  Platform
 } from "react-native";
-import colors from "@/constants/colors";
-import CustomButton from "@/components/buttons/CustomButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const menuItems = [
+  {
+    id: '1',
+    title: 'Edit Profile',
+    icon: 'person-outline' as keyof typeof Ionicons.glyphMap,
+    color: colors.primary,
+    action: 'edit',
+  },
+  {
+    id: '2',
+    title: 'Leadership',
+    icon: 'people-outline' as keyof typeof Ionicons.glyphMap,
+    color: colors.secondary,
+    action: 'leadership',
+  },
+  {
+    id: '3',
+    title: 'Notifications',
+    icon: 'notifications-outline' as keyof typeof Ionicons.glyphMap,
+    color: '#10B981',
+    action: 'notifications',
+  },
+  {
+    id: '4',
+    title: 'Change Password',
+    icon: 'lock-closed-outline' as keyof typeof Ionicons.glyphMap,
+    color: '#F59E0B',
+    action: 'password',
+  },
+];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [student, setStudent] = useState<any>(null);
-  const [logs, setLogs] = useState<string[]>([]); // On-screen logs
 
-  // Helper to push logs
-  const log = (message: string) => {
-    console.log(message);
-    setLogs((prev) => [message, ...prev]);
-  };
-
-  // Load stored student data
-useEffect(() => {
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
-      let data: string | null = null;
-
-      if (Platform.OS !== "web") { // ✅ Only access AsyncStorage on native
-        data = await AsyncStorage.getItem("@student_user");
-      }
-
+      const data = await AsyncStorage.getItem("@student_user");
       if (data) setStudent(JSON.parse(data));
     } catch (error) {
-      console.log(`Error loading student user: ${error}`);
+      console.error('Error loading student user:', error);
     }
-  };
+  }, []);
 
-  loadUserData();
-}, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [loadUserData])
+  );
 
   const firstInitial = student?.full_name
     ? student.full_name.charAt(0).toUpperCase()
     : "U";
 
-  // Button handlers
-  const handleEditProfile = () => Alert.alert("Coming Soon", "Edit Profile feature is coming soon!");
-  const handleChangePassword = () => Alert.alert("Coming Soon", "Change Password feature is coming soon!");
-
-  const handleSignOut = async () => {
-    try {
-      await AsyncStorage.clear();
-      router.replace("/(auth)/login");
-      log("User signed out successfully");
-      Alert.alert("Success", "Signed out successfully");
-    } catch (error) {
-      log(`Error signing out: ${error}`);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+  const handleMenuAction = (action: string) => {
+    switch (action) {
+      case 'edit':
+        router.push("/(standalone)/profile/edit");
+        break;
+      case 'leadership':
+        router.push("/(standalone)/executives");
+        break;
+      case 'notifications':
+        router.push("/(standalone)/notification");
+        break;
+      case 'password':
+        router.push("/(standalone)/profile/change-password");
+        break;
     }
   };
 
-  return (
-    <View style={styles.fullScreenContainer}>
-      <Stack.Screen
-        options={{
-          title: "Profile",
-          headerTitleAlign: "center",
-          headerTintColor: "#333",
-          headerShadowVisible: false,
-        }}
-      />
+  const handleSignOut = async () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+              router.replace("/(auth)/login");
+            } catch (error) {
+              Alert.alert("Error", "Something went wrong. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
+  return (
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <Text style={styles.headerTitle}>Profile</Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Profile Card */}
+        <Animated.View entering={FadeInDown.duration(500)} style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             {student?.avatarUri ? (
-              <Image
-                source={{ uri: student.avatarUri }}
-                style={styles.avatarImage}
-              />
+              <Image source={{ uri: student.avatarUri }} style={styles.avatar} />
             ) : (
-              <View style={styles.initialsFallback}>
-                <Text style={styles.initialsText}>{firstInitial}</Text>
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarText}>{firstInitial}</Text>
               </View>
             )}
           </View>
 
-          <Text style={styles.userName}>{student?.full_name}</Text>
-          <Text style={styles.userStatus}>{student?.email}</Text>
-        </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>{student?.full_name || 'Student Name'}</Text>
+            <Text style={styles.userEmail}>{student?.email || 'email@example.com'}</Text>
 
-        {/* User Info Card */}
-        {student && (
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Program:</Text>
-              <Text style={styles.infoValue}>{student.program}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Year:</Text>
-              <Text style={styles.infoValue}>{student.year}</Text>
-            </View>
+            {student && (
+              <View style={styles.badgesContainer}>
+                <View style={styles.badge}>
+                  <Ionicons name="school" size={14} color={colors.primary} />
+                  <Text style={styles.badgeText}>{student.program}</Text>
+                </View>
+                <View style={styles.badge}>
+                  <Ionicons name="calendar" size={14} color={colors.primary} />
+                  <Text style={styles.badgeText}>Year {student.year}</Text>
+                </View>
+              </View>
+            )}
           </View>
-        )}
+        </Animated.View>
 
         {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="user-o"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Edit Profile</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.menuItem, styles.lastMenuItem]}
-            onPress={handleChangePassword}
-          >
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="lock"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Change Password</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
+        <View style={styles.menuSection}>
+          {menuItems.map((item, index) => (
+            <Animated.View
+              key={item.id}
+              entering={FadeInDown.delay(index * 100 + 200).duration(500)}
+            >
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => handleMenuAction(item.action)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.menuIconContainer, { backgroundColor: item.color }]}>
+                  <Ionicons name={item.icon} size={20} color={colors.white} />
+                </View>
+                <Text style={styles.menuText}>{item.title}</Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
         </View>
 
-        {/* Sign Out */}
-        <View style={styles.signOutButtonContainer}>
-          <CustomButton
-            label="Sign Out"
-            onPress={handleSignOut}
-            leftIcon={<IconFontAwesome name="sign-out" size={18} color="#fff" />}
-          />
-        </View>
-
-        {/* On-screen Logs */}
-        {logs.length > 0 && (
-          <View style={styles.logContainer}>
-            <Text style={styles.logTitle}>Logs:</Text>
-            {logs.map((l, idx) => (
-              <Text key={idx} style={styles.logText}>
-                {l}
-              </Text>
-            ))}
-          </View>
-        )}
+        {/* Sign Out Button */}
+        <Animated.View entering={FadeInDown.delay(600).duration(500)} style={styles.signOutContainer}>
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <Ionicons name="log-out-outline" size={20} color={colors.secondary} />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fullScreenContainer: { flex: 1, backgroundColor: "#f8f8f8" },
-  scrollContent: {
-    flexGrow: 1,
-    alignItems: "center",
-    paddingTop: 20,
-    paddingBottom: 12,
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  header: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
   },
-  profileHeader: { alignItems: "center", marginBottom: 20, marginTop: 20 },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  profileCard: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    alignItems: 'center',
+  },
   avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: 16,
   },
-  avatarImage: { width: 110, height: 110, borderRadius: 55 },
-  initialsFallback: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: colors.primaryDark,
-    justifyContent: "center",
-    alignItems: "center",
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
-  initialsText: { fontSize: 48, fontWeight: "bold", color: "#fff" },
-  userName: { fontSize: 22, fontWeight: "bold", color: "#333", marginBottom: 3 },
-  userStatus: { fontSize: 14, color: "#666" },
-
-  infoCard: {
-    width: "100%",
-    backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 12,
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  avatarFallback: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  infoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 2 },
-  infoLabel: { fontSize: 15, color: "#555", fontWeight: "500" },
-  infoValue: { fontSize: 15, color: "#333", fontWeight: "600" },
-
-  menuContainer: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    marginBottom: 30,
+  avatarText: {
+    fontSize: 40,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  profileInfo: {
+    alignItems: 'center',
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 12,
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  menuSection: {
+    marginBottom: 16,
   },
   menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
   },
-  menuItemLeft: { flexDirection: "row", alignItems: "center" },
-  menuIcon: { width: 28, textAlign: "center", marginRight: 15 },
-  menuText: { fontSize: 16, color: "#333", fontWeight: "500" },
-  lastMenuItem: { borderBottomWidth: 0 },
-
-  signOutButtonContainer: { width: "100%", marginBottom: 8 },
-
-  logContainer: {
-    width: "100%",
-    backgroundColor: "#f1f1f1",
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 20,
+  menuIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  logTitle: { fontWeight: "700", marginBottom: 6, color: "#333" },
-  logText: { fontSize: 12, color: "#555" },
+  menuText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  signOutContainer: {
+    marginTop: 8,
+  },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    gap: 8,
+  },
+  signOutText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.secondary,
+  },
 });
