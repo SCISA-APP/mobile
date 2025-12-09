@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
 
   mentalHealthSection: {
     padding: 20,
-    margin: 20,
+    marginBottom:90,
     backgroundColor: 'white',
     borderRadius: 15,
   },

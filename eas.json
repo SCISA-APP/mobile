@@ -19,14 +19,15 @@
     },
     "ios": {
       "channel": "production",
-      "distribution": "store",
-      "ios": {
-        "simulator": false
-      }
+      "distribution": "store"
     }
   },
   "submit": {
-    "aab": {},
+    "aab": {
+      "android": {
+        "track": "production"
+      }
+    },
     "ios": {}
   }
 }

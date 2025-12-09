@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform,ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as academicData from '@/assets/data/academicResources.ts/index'; // imports all exported departments
@@ -14,30 +14,35 @@ const AcademicResources = () => {
   const [programData, setProgramData] = useState<DepartmentData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUserProgram = async () => {
-      try {
+useEffect(() => {
+  const loadUserProgram = async () => {
+    try {
+      let user: any = null;
+
+      if (Platform.OS !== 'web') { // ✅ Only access AsyncStorage on native
         const storedUser = await AsyncStorage.getItem('@student_user');
-        if (!storedUser) return;
-
-        const user = JSON.parse(storedUser);
-        const program = user.program?.toLowerCase();
-
-        // find the department object that matches the user's program
-        const department = Object.values(academicData).find(
-          (dept: any) => dept.department.toLowerCase() === program
-        ) as DepartmentData | undefined;
-
-        if (department) setProgramData(department);
-      } catch (error) {
-        console.error('Error loading user program:', error);
-      } finally {
-        setLoading(false);
+        if (storedUser) user = JSON.parse(storedUser);
       }
-    };
 
-    loadUserProgram();
-  }, []);
+      if (!user) return;
+
+      const program = user.program?.toLowerCase();
+
+      // find the department object that matches the user's program
+      const department = Object.values(academicData).find(
+        (dept: any) => dept.department.toLowerCase() === program
+      ) as DepartmentData | undefined;
+
+      if (department) setProgramData(department);
+    } catch (error) {
+      console.error('Error loading user program:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadUserProgram();
+}, []);
 
   const openLinkInApp = (link: string, title: string) => {
     router.push({

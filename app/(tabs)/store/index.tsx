@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Animated, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { Animated, SafeAreaView, StatusBar, StyleSheet, View, Platform } from 'react-native';
 import Header from '@/components/headers/header';
 import ProductSearchBar from '@/components/searchBar/productSearchBar';
 import FloatingCartButton from '@/components/buttons/FloatingCartButton';
@@ -28,7 +28,7 @@ const App = (): React.JSX.Element => {
 
     try {
       const nextBatch = await productService.fetchNext();
-      setAllProducts(nextBatch);
+      setAllProducts(prev => [...prev, ...nextBatch]); // append instead of replace
       setHasMore(productService.hasMoreProducts());
     } catch (err) {
       console.error('❌ Failed to fetch next products:', err);
@@ -54,7 +54,11 @@ const App = (): React.JSX.Element => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#ffffff"
+        translucent={false}
+      />
 
       {/* --- Fixed Header --- */}
       <View style={styles.fixedHeader}>
@@ -73,20 +77,20 @@ const App = (): React.JSX.Element => {
       >
         <ProductSection
           title="Featured Products"
-          data={allProducts.slice(0, 5)} // example: show first 5
+          data={allProducts.slice(0, 5)}
           viewMoreRoute="(standalone)/category/ProductListScreen"
         />
 
         <ProductSection
           title="Limited Time Deals"
-        data={allProducts.slice(0, 5)} 
+          data={allProducts.slice(0, 5)}
           viewMoreRoute="(standalone)/category/ProductListScreen"
           backgroundColor="#f0f5ff"
         />
 
         <ProductSection
           title="New Arrivals"
-          data={allProducts.slice(0, 5)} 
+          data={allProducts.slice(0, 5)}
           viewMoreRoute="(standalone)/category/ProductListScreen"
         />
       </Animated.ScrollView>
@@ -98,11 +102,12 @@ const App = (): React.JSX.Element => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#ffffff' },
-  fixedHeader: {
+  safeArea: {
+    flex: 1,
     backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0,
+  },
+  fixedHeader: {
     zIndex: 1000,
     paddingHorizontal: 16,
     paddingTop: 12,

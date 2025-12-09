@@ -99,7 +99,7 @@ export default function AnnouncementDetail() {
             {image && (
               <Image
                 source={{ uri: image }}
-                style={{ width: "100%", height: 320 }}
+                style={{ width: "100%", height: 400 }}
                 resizeMode="cover"
               />
             )}

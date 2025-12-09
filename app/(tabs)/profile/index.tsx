@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform
 } from "react-native";
 import colors from "@/constants/colors";
 import CustomButton from "@/components/buttons/CustomButton";
@@ -26,18 +27,23 @@ export default function ProfileScreen() {
   };
 
   // Load stored student data
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const data = await AsyncStorage.getItem("@student_user");
-        if (data) setStudent(JSON.parse(data));
-      } catch (error) {
-        log(`Error loading student user: ${error}`);
-      }
-    };
+useEffect(() => {
+  const loadUserData = async () => {
+    try {
+      let data: string | null = null;
 
-    loadUserData();
-  }, []);
+      if (Platform.OS !== "web") { // ✅ Only access AsyncStorage on native
+        data = await AsyncStorage.getItem("@student_user");
+      }
+
+      if (data) setStudent(JSON.parse(data));
+    } catch (error) {
+      console.log(`Error loading student user: ${error}`);
+    }
+  };
+
+  loadUserData();
+}, []);
 
   const firstInitial = student?.full_name
     ? student.full_name.charAt(0).toUpperCase()
@@ -116,22 +122,6 @@ export default function ProfileScreen() {
                 style={styles.menuIcon}
               />
               <Text style={styles.menuText}>Edit Profile</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={handleNotifications}
-          >
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="bell-o"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Notification</Text>
             </View>
             <IconFontAwesome name="angle-right" size={20} color="#555" />
           </TouchableOpacity>

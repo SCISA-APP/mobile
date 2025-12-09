@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ListRenderItemInfo,
-  ViewStyle, TextStyle, ImageStyle 
+  ViewStyle, TextStyle, ImageStyle ,
+  Platform,StatusBar
 } from 'react-native';
 import SafeGif from '../../assets/images/Safe.gif';
 import ShopGif from '../../assets/images/Shop.gif';
@@ -129,13 +130,14 @@ const styles = StyleSheet.create<Styles>({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
+header: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 8,
+},
   skipText: {
     color: colors.primary,
     fontSize: 14,

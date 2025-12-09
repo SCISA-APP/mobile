@@ -54,10 +54,11 @@ const SignUp = () => {
     });
 
     if (!result.success) {
-      const firstError = result.error.errors[0]?.message;
-      console.log("❌ Zod validation failed:", firstError);
-      Alert.alert("Error", firstError || "Invalid form data");
-      return;
+      if (!result.success) {
+  const firstError = result.error.issues[0]?.message;  // << correct property
+  Alert.alert("Error", firstError || "Invalid form data");
+  return;
+}
     }
 
     console.log("✅ Validation Passed");
@@ -155,7 +156,6 @@ const SignUp = () => {
             value={program}
             onValueChange={setProgram}
             icon="school-outline"
-            disabled={loading}
           />
         </View>
 
@@ -167,7 +167,6 @@ const SignUp = () => {
             value={year}
             onValueChange={setYear}
             icon="calendar-outline"
-            disabled={loading}
           />
         </View>
 
@@ -175,7 +174,6 @@ const SignUp = () => {
         <CustomButton
           label={loading ? "Creating Account..." : "Sign Up"}
           onPress={handleSignUp}
-          disabled={loading}
         />
 
         {/* LOGIN LINK */}

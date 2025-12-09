@@ -8,17 +8,69 @@ import OccasionHeader from "@/components/headers/OccassionHeader";
 export default function OccasionDetail() {
   const params = useLocalSearchParams();
 
-  // Normalize title and date to string
+  // Normalize title and description
   const title = Array.isArray(params.title) ? params.title[0] : params.title ?? "";
-  const date = Array.isArray(params.date) ? params.date[0] : params.date;
-
-  const description = Array.isArray(params.description) ? params.description[0] : params.description;
+  const description = Array.isArray(params.description)
+    ? params.description[0]
+    : params.description ?? "";
 
   const image = Array.isArray(params.image) ? params.image[0] : params.image;
 
-  const paragraphs = typeof description === "string"
-    ? description.split("\n\n").filter(p => p.trim().length > 0)
-    : [];
+  // Start & end date extraction
+  const start_date = Array.isArray(params.start_date)
+    ? params.start_date[0]
+    : params.start_date;
+
+  const end_date = Array.isArray(params.end_date)
+    ? params.end_date[0]
+    : params.end_date;
+
+  // Safe date parser for Hermes / React Native
+  const safeParseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+
+    // Replace +00:00 with Z (standard UTC format)
+    // Also handle +00 format
+    let safeStr = dateStr.replace(/\+00:00$/g, "Z").replace(/\+00$/g, "Z");
+
+    // Only replace space with T if there's no T already
+    if (!safeStr.includes("T") && safeStr.includes(" ")) {
+      safeStr = safeStr.replace(" ", "T");
+    }
+
+    const d = new Date(safeStr);
+
+    if (isNaN(d.getTime())) {
+      console.warn("Failed to parse date:", dateStr, "=>", safeStr);
+      return null;
+    }
+
+    return d;
+  };
+
+  const formatEventDateRange = (start?: string, end?: string | null) => {
+    const startDate = start ? safeParseDate(start) : null;
+    const endDate = end ? safeParseDate(end) : null;
+
+    if (!startDate) return "Date coming soon";
+
+    const format = (d: Date) =>
+      d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+
+    if (endDate) return `${format(startDate)} → ${format(endDate)}`;
+    return format(startDate);
+  };
+
+  const paragraphs =
+    typeof description === "string"
+      ? description.split("\n\n").filter((p) => p.trim().length > 0)
+      : [];
 
   const renderParagraph = (paragraph: string, index: number) => {
     const parts = parseTextWithLinks(paragraph.trim());
@@ -85,7 +137,11 @@ export default function OccasionDetail() {
             elevation: 5,
           }}
         >
-          <OccasionHeader title={title} date={date} />
+          {/* Safe date display */}
+          <OccasionHeader
+            title={title}
+            date={formatEventDateRange(start_date, end_date)}
+          />
 
           <View
             style={{

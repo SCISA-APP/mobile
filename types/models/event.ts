@@ -5,4 +5,6 @@ export interface EventItem {
   image?: string;
   date: string;
   thumbnail?: string;
+  start_date?: string | null;
+  end_date?: string | null;
 }
