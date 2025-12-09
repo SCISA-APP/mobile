@@ -98,7 +98,7 @@ export default function PostDetail() {
             {image && (
               <Image
                 source={{ uri: image }}
-                style={styles.image}
+                style={{ width: "100%", height: 400 }}
                 resizeMode="cover"
               />
             )}

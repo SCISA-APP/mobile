@@ -58,17 +58,52 @@ const EventListComponent = ({
       return;
     }
 
-    router.push({
-      pathname: "/(standalone)/event/[event_id]",
-      params: {
-        event_id: item.id.toString(),
-        title: item.title,
-        description: item.description,
-        ...(item.image && { image: item.image }),
-        ...(item.date && { date: item.date }),
-      },
-    });
+router.push({
+  pathname: "/(standalone)/event/[event_id]",
+  params: {
+    event_id: item.id.toString(),
+    title: item.title,
+    description: item.description,
+    ...(item.image && { image: item.image }),
+    ...(item.start_date && { start_date: item.start_date }),
+    ...(item.end_date && { end_date: item.end_date }),
+  },
+});
   };
+
+  const formatEventDate = (start: string, end?: string | null) => {
+
+    // 🔥 Fix invalid date by converting backend format → ISO format
+    const normalizeDate = (dateStr: string) => {
+      if (!dateStr) return dateStr;
+      return dateStr
+        .replace(" ", "T")          // insert T
+        .replace(/\+00$/, "+00:00") // fix timezone
+        .trim();
+    };
+
+    const format = (dateStr: string) => {
+      const safe = normalizeDate(dateStr);
+      const d = new Date(safe);
+
+      if (isNaN(d.getTime())) return "Invalid date";
+
+      return d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    };
+
+    if (end) {
+      return `${format(start)} → ...`;
+    }
+
+    return format(start); // only start date
+  };
+
 
   return (
     <View style={[styles.container, style]}>
@@ -110,14 +145,14 @@ const EventListComponent = ({
               </Text>
               <View style={styles.dateContainer}>
                 <Text style={[styles.cardDate, dateStyle]}>
-                  {item.date
-                    ? new Date(item.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "TBA"}
-                </Text>
-              </View>
+<Text style={[styles.cardDate, dateStyle]}>
+  {item.start_date
+    ? formatEventDate(item.start_date, item.end_date)
+    : "Date coming soon"}
+</Text>
+
+</Text>
+              </Text>
             </View>
           </TouchableOpacity>
         )}

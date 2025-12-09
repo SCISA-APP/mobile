@@ -1,4 +1,4 @@
-// services/shop/getProducts.ts
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/supabaseConfig';
 import type { AddProductPayload } from '@/types/models/shop/addProductPayload';
@@ -12,10 +12,12 @@ class ProductService {
   private hasMore: boolean = true;
 
   constructor() {
-    this.loadCacheFromStorage();
+    // Only try loading cache on native
+    if (Platform.OS !== 'web') {
+      this.loadCacheFromStorage();
+    }
   }
 
-  /** Load persisted cache */
   private async loadCacheFromStorage() {
     try {
       const raw = await AsyncStorage.getItem(CACHE_KEY);
@@ -28,8 +30,8 @@ class ProductService {
     }
   }
 
-  /** Save to persistent storage */
   private async saveCacheToStorage() {
+    if (Platform.OS === 'web') return; // skip storage on web
     try {
       await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(this.cache));
       console.log("💾 Cache saved to disk:", this.cache.length);
@@ -51,7 +53,8 @@ class ProductService {
     this.cache = [];
     this.page = 0;
     this.hasMore = true;
-    AsyncStorage.removeItem(CACHE_KEY);
+
+    if (Platform.OS !== 'web') AsyncStorage.removeItem(CACHE_KEY);
   }
 
   async fetchNext(): Promise<AddProductPayload[]> {
@@ -76,20 +79,16 @@ class ProductService {
 
       const before = this.cache.length;
 
-      // Merge + remove duplicates
       this.cache = [...this.cache, ...data].filter(
         (v, i, arr) => arr.findIndex(x => x.id === v.id) === i
       );
 
-      const after = this.cache.length;
-      const newItems = after - before;
-
-      console.log(`📡 Fetched ${data.length} from server`);
-      console.log(`🆕 Added ${newItems} new unique products`);
+      const newItems = this.cache.length - before;
+      console.log(`📡 Fetched ${data.length} from server, 🆕 ${newItems} new`);
 
       await this.saveCacheToStorage();
-
       this.page += 1;
+
       return this.cache;
     } catch (err) {
       console.error('❌ Failed to fetch products:', err);

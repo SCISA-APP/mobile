@@ -42,13 +42,15 @@ export const OccasionAnnouncementProvider = ({ children }: { children: ReactNode
 
     data?.forEach((item: any) => {
       if (item.type === "event") {
-        events.push({
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          date: item.date || item.created_at,
-          image: item.image,
-        });
+events.push({
+  id: item.id,
+  title: item.title,
+  description: item.description,
+  date: item.date || item.created_at,
+  image: item.image,
+  start_date: item.start_date,
+  end_date: item.end_date,
+});
       } else {
         ann.push({
           id: item.id,

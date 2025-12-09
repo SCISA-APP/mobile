@@ -7,14 +7,28 @@ interface OccasionHeaderProps {
 }
 
 export default function OccasionHeader({ title, date }: OccasionHeaderProps) {
-  // Convert date string to human-readable format
+  // Function to check if date is already formatted (contains "→" or has words like "Mon", "Tue", etc.)
+  const isAlreadyFormatted = (dateStr: string) => {
+    return dateStr.includes("→") || /^[A-Z][a-z]{2},/.test(dateStr);
+  };
+
+  // Convert date string to human-readable format only if it's a raw date
   const formattedDate = date
-    ? new Date(date).toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+    ? isAlreadyFormatted(date)
+      ? date // Already formatted, use as is
+      : (() => {
+          // Try to parse and format the raw date
+          const parsedDate = new Date(date);
+          if (isNaN(parsedDate.getTime())) {
+            return "UPCOMING"; // Invalid date
+          }
+          return parsedDate.toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        })()
     : "UPCOMING";
 
   return (

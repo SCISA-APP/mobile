@@ -12,14 +12,69 @@ export default function EventDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  // Normalize title and description
   const title = Array.isArray(params.title) ? params.title[0] : params.title ?? "";
-  const date = Array.isArray(params.date) ? params.date[0] : params.date;
-  const description = Array.isArray(params.description) ? params.description[0] : params.description;
+  const description = Array.isArray(params.description)
+    ? params.description[0]
+    : params.description ?? "";
+
   const image = Array.isArray(params.image) ? params.image[0] : params.image;
 
-  const paragraphs = typeof description === "string"
-    ? description.split("\n\n").filter(p => p.trim().length > 0)
-    : [];
+  // Start & end date extraction
+  const start_date = Array.isArray(params.start_date)
+    ? params.start_date[0]
+    : params.start_date;
+
+  const end_date = Array.isArray(params.end_date)
+    ? params.end_date[0]
+    : params.end_date;
+
+  // Safe date parser for Hermes / React Native
+  const safeParseDate = (dateStr: string) => {
+    if (!dateStr) return null;
+
+    // Replace +00:00 with Z (standard UTC format)
+    // Also handle +00 format
+    let safeStr = dateStr.replace(/\+00:00$/g, "Z").replace(/\+00$/g, "Z");
+
+    // Only replace space with T if there's no T already
+    if (!safeStr.includes("T") && safeStr.includes(" ")) {
+      safeStr = safeStr.replace(" ", "T");
+    }
+
+    const d = new Date(safeStr);
+
+    if (isNaN(d.getTime())) {
+      console.warn("Failed to parse date:", dateStr, "=>", safeStr);
+      return null;
+    }
+
+    return d;
+  };
+
+  const formatEventDateRange = (start?: string, end?: string | null) => {
+    const startDate = start ? safeParseDate(start) : null;
+    const endDate = end ? safeParseDate(end) : null;
+
+    if (!startDate) return "Date coming soon";
+
+    const format = (d: Date) =>
+      d.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+
+    if (endDate) return `${format(startDate)} → ${format(endDate)}`;
+    return format(startDate);
+  };
+
+  const paragraphs =
+    typeof description === "string"
+      ? description.split("\n\n").filter((p) => p.trim().length > 0)
+      : [];
 
   const renderParagraph = (paragraph: string, index: number) => {
     const parts = parseTextWithLinks(paragraph.trim());
@@ -48,12 +103,25 @@ export default function EventDetail() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.white} />
-        </TouchableOpacity>
-      </View>
+        <View
+          style={{
+            backgroundColor: "white",
+            marginTop: -24,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            padding: 15,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            elevation: 5,
+          }}
+        >
+          {/* Safe date display */}
+          <OccasionHeader
+            title={title}
+            date={formatEventDateRange(start_date, end_date)}
+          />
 
       <ScrollView
         style={styles.scrollView}
@@ -97,81 +165,3 @@ export default function EventDetail() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
-  image: {
-    width: "100%",
-    height: 280,
-    backgroundColor: colors.gray[200],
-  },
-  contentCard: {
-    backgroundColor: colors.white,
-    marginTop: -20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.primary,
-    lineHeight: 32,
-    marginBottom: 12,
-  },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-  },
-  date: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.gray[200],
-    marginBottom: 20,
-  },
-  descriptionContainer: {
-    gap: 16,
-  },
-  paragraph: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: colors.text.secondary,
-  },
-  link: {
-    color: colors.primary,
-    textDecorationLine: "underline",
-    fontWeight: "600",
-  },
-});

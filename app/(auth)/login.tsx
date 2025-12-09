@@ -32,9 +32,11 @@ const LoginScreen = () => {
   // ----------------------------------------------------
   // 🔥 Load saved login info on app start
   // ----------------------------------------------------
-  useEffect(() => {
-    const loadStoredCredentials = async () => {
-      try {
+useEffect(() => {
+  const loadStoredCredentials = async () => {
+    try {
+      // Only read AsyncStorage on native platforms
+      if (Platform.OS !== 'web') {
         const savedEmail = await AsyncStorage.getItem("savedEmail");
         const savedPassword = await AsyncStorage.getItem("savedPassword");
 
@@ -43,13 +45,15 @@ const LoginScreen = () => {
           setPassword(savedPassword);
           setRememberMe(true);
         }
-      } catch (error) {
-        console.log("Error loading saved login info:", error);
       }
-    };
+    } catch (error) {
+      console.log("Error loading saved login info:", error);
+    }
+  };
 
-    loadStoredCredentials();
-  }, []);
+  loadStoredCredentials();
+}, []);
+
 
   // ----------------------------------------------------
   // 🔥 Login Handler
@@ -72,13 +76,14 @@ const LoginScreen = () => {
     }
 
     // 🔥 Save credentials if rememberMe is TRUE
-    if (rememberMe) {
-      await AsyncStorage.setItem("savedEmail", email);
-      await AsyncStorage.setItem("savedPassword", password);
-    } else {
-      await AsyncStorage.removeItem("savedEmail");
-      await AsyncStorage.removeItem("savedPassword");
-    }
+if (rememberMe && Platform.OS !== 'web') {
+  await AsyncStorage.setItem("savedEmail", email);
+  await AsyncStorage.setItem("savedPassword", password);
+} else if (Platform.OS !== 'web') {
+  await AsyncStorage.removeItem("savedEmail");
+  await AsyncStorage.removeItem("savedPassword");
+}
+
 
     alert("Login successful!");
     router.push('/home');

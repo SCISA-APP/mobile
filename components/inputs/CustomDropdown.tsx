@@ -4,10 +4,12 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  Modal,
   StyleSheet,
   ViewStyle,
   TextStyle,
   StyleProp,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '@/constants/colors';
@@ -18,9 +20,11 @@ interface CustomDropdownProps {
   value?: string | number;
   onValueChange?: (value: string | number) => void;
   style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>; // <-- ONLY TextStyle
+  textStyle?: StyleProp<TextStyle>;
   icon?: keyof typeof Ionicons.glyphMap;
 }
+
+const { height: screenHeight } = Dimensions.get('window');
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
   placeholder,
@@ -64,20 +68,48 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       </TouchableOpacity>
 
       {isOpen && (
-        <View style={styles.dropdown}>
-          <FlatList
-            data={data}
-            keyExtractor={(item, index) => item.toString() + index}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.item}
-                onPress={() => handleSelect(item)}
-              >
-                <Text style={styles.itemText}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
+        <Modal transparent animationType="fade" visible={isOpen}>
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setIsOpen(false)}
+          >
+            <View style={styles.dropdownWrapper}>
+              <FlatList
+                data={data}
+                keyExtractor={(item, index) => item.toString() + index}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.item,
+                      value === item && styles.selectedItem,
+                      index === data.length - 1 && styles.lastItem
+                    ]}
+                    onPress={() => handleSelect(item)}
+                  >
+                    <Text
+                      style={[
+                        styles.itemText,
+                        value === item && styles.selectedItemText
+                      ]}
+                    >
+                      {item}
+                    </Text>
+                    {value === item && (
+                      <Ionicons
+                        name="checkmark"
+                        size={18}
+                        color={colors.primaryDark}
+                      />
+                    )}
+                  </TouchableOpacity>
+                )}
+                showsVerticalScrollIndicator
+                style={{ maxHeight: screenHeight * 0.4 }}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
       )}
     </View>
   );
@@ -85,15 +117,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
 export default CustomDropdown;
 
-const styles = StyleSheet.create<{
-  container: ViewStyle;
-  inputContainer: ViewStyle;
-  text: TextStyle;
-  leftIcon: TextStyle;
-  dropdown: ViewStyle;
-  item: ViewStyle;
-  itemText: TextStyle;
-}>({
+const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
     position: 'relative',
@@ -113,29 +137,47 @@ const styles = StyleSheet.create<{
   text: {
     fontSize: 16,
     color: colors.primaryDark,
-    flex: 1,       
-    textAlign: 'left' 
+    flex: 1,
+    textAlign: 'left',
   },
   leftIcon: {
     marginRight: 8,
   },
-  dropdown: {
-    position: 'absolute', 
-    top: 55, 
-    left: 0,
-    right: 0,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownWrapper: {
+    width: '80%',
+    maxHeight: '50%',
+    backgroundColor: colors.background,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.primaryDark,
-    borderRadius: 12,
-    backgroundColor: colors.background,
-    maxHeight: 150,
-    zIndex: 1000, // ensure dropdown is on top
+    overflow: 'hidden',
   },
   item: {
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[100],
+  },
+  selectedItem: {
+    backgroundColor: colors.gray[50],
+  },
+  lastItem: {
+    borderBottomWidth: 0,
   },
   itemText: {
     fontSize: 16,
     color: colors.primaryDark,
+    flex: 1,
+  },
+  selectedItemText: {
+    fontWeight: '600',
   },
 });

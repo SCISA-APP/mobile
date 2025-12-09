@@ -5,7 +5,7 @@ import Step4Wait from '@/components/stepper/shopOnboard/Step4Wait';
 import type { ShopFormData } from '@/types/models/shop/formData';
 import { submitShopApplication } from '@/utils/shop/shopApplication';
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View,Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BecomeAnOwner = () => {
@@ -16,28 +16,33 @@ const BecomeAnOwner = () => {
   const [ready, setReady] = useState(false); // wait until AsyncStorage is loaded
 
   // Load user status from AsyncStorage on mount
-  useEffect(() => {
-    const fetchUserStatus = async () => {
-      try {
-        const userJson = await AsyncStorage.getItem('@student_user');
-        if (userJson) {
-          const user = JSON.parse(userJson);
-          console.log('🟢 User from storage:', user);
-          if (user.isShopApplicationAccepted === false) {
-            setShopStatus('false'); // show Step 4 only
-          } else {
-            setShopStatus('null'); // start from Step 1
-          }
-        }
-      } catch (error) {
-        console.error('❌ Error fetching user info:', error);
-      } finally {
-        setReady(true);
-      }
-    };
+useEffect(() => {
+  const fetchUserStatus = async () => {
+    try {
+      let user = null;
 
-    fetchUserStatus();
-  }, []);
+      if (Platform.OS !== 'web') {
+        const userJson = await AsyncStorage.getItem('@student_user');
+        if (userJson) user = JSON.parse(userJson);
+      }
+
+      if (user) {
+        console.log('🟢 User from storage:', user);
+        if (user.isShopApplicationAccepted === false) {
+          setShopStatus('false'); // show Step 4 only
+        } else {
+          setShopStatus('null'); // start from Step 1
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error fetching user info:', error);
+    } finally {
+      setReady(true);
+    }
+  };
+
+  fetchUserStatus();
+}, []);
 
   const handleStep1Next = () => setCurrentStep(2);
   const handleStep2Next = (data: ShopFormData) => {
