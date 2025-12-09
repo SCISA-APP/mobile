@@ -1,105 +1,129 @@
 import { academicsButtonsData } from '@/assets/data/academics/AcademicButton';
-import Header from '@/components/headers/header';
+import colors from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
-const buttonWidth = (width - 60) / 2;
+const getIconName = (title: string): keyof typeof Ionicons.glyphMap => {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes('timetable')) return 'time';
+  if (lowerTitle.includes('calendar')) return 'calendar';
+  if (lowerTitle.includes('exam') || lowerTitle.includes('arrangement')) return 'document-text';
+  return 'book';
+};
 
-const index: React.FC = () => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+const iconColors = [colors.primary, colors.secondary, '#10B981', '#F59E0B'];
+
+const AcademicsScreen: React.FC = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Ensure status bar style matches background */}
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-      <View style={styles.header}>
-        <Header title="SCISA Academics" />
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <Text style={styles.headerTitle}>Academics</Text>
+        <Text style={styles.headerSubtitle}>Your academic resources</Text>
       </View>
-      
-      
-      <View style={styles.gridContainer}>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {academicsButtonsData.map((btn, index) => (
-          <TouchableOpacity
+          <Animated.View
             key={index}
-            style={styles.buttonWrapper}
-            onPress={() => router.push(btn.route as const)}
-            activeOpacity={0.8}
+            entering={FadeInDown.delay(index * 100).duration(500)}
           >
-            <ImageBackground 
-              source={btn.image} 
-              style={styles.image} 
-              imageStyle={styles.imageStyle}
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push(btn.route as const)}
+              activeOpacity={0.7}
             >
-              <View style={styles.overlay}>
-                <Text style={styles.buttonText}>{btn.title}</Text>
+              <View style={[styles.iconContainer, { backgroundColor: iconColors[index % iconColors.length] }]}>
+                <Ionicons name={getIconName(btn.title)} size={28} color={colors.white} />
               </View>
-            </ImageBackground>
-          </TouchableOpacity>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{btn.title || 'Academic Resources'}</Text>
+                <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
         ))}
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 };
 
-export default index;
+export default AcademicsScreen;
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
-  header:{
- marginHorizontal:10
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray[200],
   },
-  gridContainer: {
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    color: colors.text.secondary,
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  card: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 10,
-    paddingTop: "20%",
-    marginHorizontal:10
-  },
-  buttonWrapper: {
-    width: buttonWidth,
-    height: 160,
-    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor: colors.white,
     borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
     shadowRadius: 8,
+    elevation: 3,
   },
-  image: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  imageStyle: {
-    borderRadius: 16,
-  },
-  overlay: {
-    backgroundColor: 'rgba(0, 40, 85, 0.45)',
-    flex: 1,
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 16,
-    padding: 12,
+    marginRight: 16,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 19,
+  cardContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardTitle: {
+    fontSize: 17,
     fontWeight: '700',
-    textAlign: 'center',
-    letterSpacing: 0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: colors.text.primary,
+    flex: 1,
   },
 });

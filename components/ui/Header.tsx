@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Bell } from "lucide-react-native";
 import colors from "@/constants/colors";
-import { Colors } from "@/constants/theme";
 import { useNotifications } from "@/context/notificationContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { Bell } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const formatName = (fullName: string) => {
   if (!fullName) return "User";
@@ -49,29 +49,33 @@ const Header: React.FC<any> = ({
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }, style]}>
-      <View style={styles.row}>
+      <Animated.View entering={FadeInDown.duration(600)} style={styles.row}>
         <View style={{ flex: 1 }}>
           {showGreeting && (
             <>
-              <Text style={styles.greeting}>{greeting()}</Text>
-              <Text style={styles.name}>{formattedName}</Text>
+              <Animated.Text entering={FadeInRight.delay(200)} style={styles.greeting}>
+                {greeting()}
+              </Animated.Text>
+              <Animated.Text entering={FadeInRight.delay(300)} style={styles.name}>
+                {formattedName}
+              </Animated.Text>
             </>
           )}
         </View>
 
-        <View style={styles.actions}>
+        <Animated.View entering={FadeInRight.delay(400)} style={styles.actions}>
           {showNotification && (
-             <TouchableOpacity
-          onPress={onNotificationPress || (() => router.push("/(standalone)/notification"))}
-          style={styles.actionBtn}
-        >
-          <Bell color={colors.primaryDark} size={24} />
-          {unreadCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{unreadCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onNotificationPress || (() => router.push("/(standalone)/notification"))}
+              style={styles.actionBtn}
+            >
+              <Bell color={colors.text.primary} size={24} />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
           )}
 
           {showProfile && (
@@ -85,8 +89,8 @@ const Header: React.FC<any> = ({
               )}
             </TouchableOpacity>
           )}
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
 
       {title && <Text style={styles.title}>{title}</Text>}
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -96,36 +100,46 @@ const Header: React.FC<any> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.light.background,
     paddingBottom: 20,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
+    backgroundColor: colors.white,
   },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  greeting: { fontSize: 18, color: Colors.light.secondaryText },
-  name: { fontSize: 16, fontWeight: "600", color: colors.primaryDark, marginTop: 2 },
-  actions: { flexDirection: "row", alignItems: "center", gap: 1 },
+  greeting: { fontSize: 15, color: colors.text.secondary, fontWeight: "500" },
+  name: { fontSize: 22, fontWeight: "700", color: colors.text.primary, marginTop: 4 },
+  actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   actionBtn: { padding: 8, position: "relative" },
   badge: {
     position: "absolute",
     top: 4,
     right: 4,
-    backgroundColor: Colors.light.tint,
+    backgroundColor: colors.secondary,
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: colors.white,
   },
-  badgeText: { color: "white", fontSize: 10, fontWeight: "bold" },
-  profile: { width: 40, height: 40, borderRadius: 20, overflow: "hidden", marginLeft: 8 },
+  badgeText: { color: colors.white, fontSize: 10, fontWeight: "bold" },
+  profile: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 20, 
+    overflow: "hidden",
+  },
   profileImg: { width: "100%", height: "100%" },
-  initial: { flex: 1, backgroundColor: colors.primaryDark, justifyContent: "center", alignItems: "center" },
-  initialText: { fontSize: 18, color: "white", fontWeight: "700" },
-  title: { fontSize: 24, fontWeight: "bold", color: colors.primaryDark, marginTop: 12 },
-  subtitle: { fontSize: 14, color: Colors.light.secondaryText, marginTop: 4 },
+  initial: { 
+    flex: 1, 
+    backgroundColor: colors.primary, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+  initialText: { fontSize: 16, color: colors.white, fontWeight: "700" },
+  title: { fontSize: 24, fontWeight: "bold", color: colors.text.primary, marginTop: 12 },
+  subtitle: { fontSize: 14, color: colors.text.secondary, marginTop: 4 },
 });
 
 export default Header;

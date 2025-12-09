@@ -48,33 +48,33 @@ export interface AppColors {
 }
 
 const colors: AppColors = {
-  // Primary Colors
-  primary: '#2B4C83',
-  primaryLight: '#5A7AB0',
-  primaryDark: '#002259',
+  // Primary Colors - College of Science: Blue, Red, White
+  primary: '#1E40AF', // Deep Blue
+  primaryLight: '#3B82F6', // Bright Blue
+  primaryDark: '#1E3A8A', // Navy Blue
   
-  // Secondary Colors
-  secondary: '#FF6B35',
-  secondaryLight: '#FF9B5C',
-  secondaryDark: '#C43B00',
+  // Secondary Colors - Red accent
+  secondary: '#DC2626', // Vibrant Red
+  secondaryLight: '#EF4444', // Light Red
+  secondaryDark: '#991B1B', // Dark Red
   
   // Background
   background: '#FFFFFF',
-  surface: '#F8F9FA',
+  surface: '#F8FAFC',
   
   // Text
   text: {
-    primary: '#212529',
-    secondary: '#495057',
-    disabled: '#ADB5BD',
+    primary: '#1E293B',
+    secondary: '#64748B',
+    disabled: '#CBD5E1',
     inverse: '#FFFFFF',
   },
   
   // Status
-  success: '#28A745',
-  warning: '#FFC107',
-  error: '#DC3545',
-  info: '#17A2B8',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#DC2626',
+  info: '#3B82F6',
   
   // Common
   white: '#FFFFFF',
@@ -83,16 +83,16 @@ const colors: AppColors = {
   
   // Grayscale
   gray: {
-    50: '#F8F9FA',
-    100: '#F1F3F5',
-    200: '#E9ECEF',
-    300: '#DEE2E6',
-    400: '#CED4DA',
-    500: '#ADB5BD',
-    600: '#6C757D',
-    700: '#495057',
-    800: '#343A40',
-    900: '#212529',
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    800: '#1E293B',
+    900: '#0F172A',
   },
 };
 

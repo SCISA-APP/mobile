@@ -1,15 +1,22 @@
+import colors from '@/constants/colors';
 import React, { useState } from 'react';
 import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  GestureResponderEvent,
-  ActivityIndicator,
-  View,
-  ViewStyle,
-  TextStyle,
+    ActivityIndicator,
+    GestureResponderEvent,
+    StyleSheet,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    ViewStyle,
 } from 'react-native';
-import colors from '@/constants/colors';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
+
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface CustomButtonProps {
   label: string;
@@ -29,9 +36,16 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   backgroundColor,
 }) => {
   const [loading, setLoading] = useState(false);
+  const scale = useSharedValue(1);
 
   const handlePress = async (event: GestureResponderEvent) => {
     if (loading) return;
+    
+    // Animate press
+    scale.value = withSpring(0.95, {}, () => {
+      scale.value = withSpring(1);
+    });
+    
     setLoading(true);
     try {
       await onPress(event);
@@ -40,21 +54,26 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     }
   };
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   // Dynamic colors
   const isLightBg = backgroundColor === '#fff' || backgroundColor === 'white';
-  const bgColor = backgroundColor || colors.primaryDark;
-  const textColor = isLightBg ? colors.primaryDark : colors.background;
-  const borderColor = isLightBg ? colors.primaryDark : 'transparent';
+  const bgColor = backgroundColor || colors.primary;
+  const textColor = isLightBg ? colors.primary : colors.white;
+  const borderColor = isLightBg ? colors.primary : 'transparent';
 
   return (
-    <TouchableOpacity
+    <AnimatedTouchable
       style={[
         styles.button,
-        { backgroundColor: bgColor, borderColor, borderWidth: isLightBg ? 1 : 0 },
+        { backgroundColor: bgColor, borderColor, borderWidth: isLightBg ? 2 : 0 },
+        animatedStyle,
         style,
       ]}
       onPress={handlePress}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
       disabled={loading}
     >
       {loading ? (
@@ -68,7 +87,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
         </View>
       )}
-    </TouchableOpacity>
+    </AnimatedTouchable>
   );
 };
 
@@ -82,12 +101,17 @@ const styles = StyleSheet.create<{
   label: TextStyle;
 }>({
   button: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%', // full width, can be flex-adjusted in parent
+    width: '100%',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   content: {
     flexDirection: 'row',
@@ -102,7 +126,8 @@ const styles = StyleSheet.create<{
     marginLeft: 8,
   },
   label: {
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 16,
+    letterSpacing: 0.5,
   },
 });

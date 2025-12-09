@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import colors from "@/constants/colors";
-import { useCachedUser } from "@/utils/authUtils/getCachedUser";
 import { supabase } from "@/supabaseConfig";
+import { useCachedUser } from "@/utils/authUtils/getCachedUser";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 
 
+import CustomButton from "@/components/buttons/CustomButton";
 import StepIntro from "@/components/stepper/BursaryApplication/SepIntro";
 import StepA from "@/components/stepper/BursaryApplication/StepA";
 import StepB from "@/components/stepper/BursaryApplication/StepB";
 import StepC from "@/components/stepper/BursaryApplication/StepC";
 import StepD from "@/components/stepper/BursaryApplication/StepD";
 import StepE from "@/components/stepper/BursaryApplication/StepE";
-import CustomButton from "@/components/buttons/CustomButton";
 
 import { validateStep } from "@/assets/validation/bursaryValidation";
 
@@ -214,7 +214,8 @@ const handleSubmit = async () => {
       {/* Form Content */}
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       >
         {renderStep()}
       </ScrollView>
@@ -258,16 +259,16 @@ const handleSubmit = async () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
 
   progressContainer: {
-    height: 6,
+    height: 4,
     backgroundColor: "#eee",
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   progressBar: {
-    height: 6,
+    height: 4,
     backgroundColor: colors.primaryDark,
     borderRadius: 10,
   },
@@ -275,6 +276,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 80,
+    paddingBottom: 100,
+    paddingTop: 16,
   },
 });
