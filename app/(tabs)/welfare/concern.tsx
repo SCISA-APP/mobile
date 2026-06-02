@@ -1,6 +1,6 @@
+import Header from '@/components/headers/header';
 import { ThemedText } from '@/components/themed-text';
 import colors from '@/constants/colors';
-import { useRouter } from 'expo-router';
 import React,
 {
   useState
@@ -16,9 +16,9 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomInput from '@/components/inputs/CustomInput';
 
 const ConcernScreen = () => {
-  const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('General');
@@ -39,33 +39,42 @@ const ConcernScreen = () => {
       status: 'Submitted',
       date: new Date().toISOString(),
     };
-    console.log('New concern submitted:', concern);
-    Alert.alert('Success', 'Your concern has been submitted.', [
-      { text: 'OK', onPress: () => router.push('/(tabs)/welfare/screens/concerns') },
-    ]);
+    Alert.alert(
+  'Report Submitted',
+  'Your report has been received. We will follow up on it and do our best to ensure the matter is addressed.',
+  [
+    {
+      text: 'OK',
+    },
+  ]
+);
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <Header title="Report a Concern" />
       <ScrollView contentContainerStyle={styles.content}>
-        <ThemedText type="title" style={styles.title}>Report a Concern</ThemedText>
-        <ThemedText style={styles.subtitle}>
+       
+        <Text style={styles.subtitle}>
           Your feedback is valuable to us. Please provide as much detail as possible.
-        </ThemedText>
+        </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Title of your concern"
-          value={title}
-          onChangeText={setTitle}
-        />
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Describe your concern in detail"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-        />
+<CustomInput
+  placeholder="Title of your concern"
+  icon="alert-circle-outline"
+  value={title}
+  onChangeText={setTitle}
+/>
+
+<CustomInput
+  placeholder="Describe your concern in detail"
+  icon="document-text-outline"
+  value={description}
+  onChangeText={setDescription}
+  multiline
+  numberOfLines={6}
+/>
+
 
         <View style={styles.row}>
           <ThemedText style={styles.label}>Category</ThemedText>
@@ -105,25 +114,10 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  title: {
-    textAlign: 'center',
-    marginBottom: 10,
-  },
   subtitle: {
     textAlign: 'center',
     marginBottom: 20,
-    color: colors.gray,
-  },
-  input: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 150,
-    textAlignVertical: 'top',
+    color: colors.gray[900],
   },
   row: {
     flexDirection: 'row',

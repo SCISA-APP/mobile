@@ -17,6 +17,8 @@ interface CustomInputProps extends TextInputProps {
   placeholder: string;
   icon?: keyof typeof Ionicons.glyphMap;
   secure?: boolean;
+    multiline?: boolean;  
+  numberOfLines?: number;
   style?: StyleProp<TextStyle>;
 }
 
@@ -26,6 +28,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
   secure,
   value,
   style,
+  multiline,
+   numberOfLines = 4,  
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -64,7 +68,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
           name={icon}
           size={20}
           color={colors.primaryDark}
-          style={styles.leftIcon}
+          style={[styles.leftIcon, multiline && { top: 14 }]} // ← align icon to top when multiline
         />
       )}
 
@@ -73,12 +77,19 @@ const CustomInput: React.FC<CustomInputProps> = ({
       <TextInput
         {...rest}
         value={value}
+        multiline={multiline}                         // ← pass through
+        numberOfLines={multiline ? numberOfLines : 1} // ← pass through
         style={[
           styles.input,
           {
             paddingLeft: icon ? 40 : 12,
             paddingRight: secure ? 40 : 12,
-            paddingTop: 5,
+            paddingTop: multiline ? 18 : 5,           // ← more top padding for label clearance
+          },
+          multiline && {
+            height: undefined,                        // ← let it grow
+            minHeight: numberOfLines * 24,            // ← approximate line height * lines
+            textAlignVertical: 'top',                 // ← Android: start text at top
           },
           style,
         ]}
@@ -103,6 +114,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
     </View>
   );
 };
+
 
 export default CustomInput;
 

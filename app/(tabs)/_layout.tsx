@@ -5,27 +5,6 @@ import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
-  const router = useRouter();
-  const isDark = colorScheme === "dark";
-
-  const bellPress = () => {
-    router.push("/(standalone)/notification");
-  };
-
-  const profilePress = () => {
-    router.push("/profile"); // fixed
-  };
-
-  const renderHeader = (title?: string) => (
-    <Header
-      title={title}
-      showGreeting={!title}
-      showNotification={true}
-      showProfile={true}
-      onNotificationPress={bellPress}
-      onProfilePress={profilePress}
-    />
-  );
 
   return (
     <Tabs
@@ -110,9 +89,9 @@ headerShown:false,
       />
 
       <Tabs.Screen
-        name="store/index"
+        name="intership/index"
         options={{
-          title: 'Store',
+          title: 'internship',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons 
               name={focused ? "cart" : "cart-outline"} 

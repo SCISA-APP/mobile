@@ -1,7 +1,9 @@
 import colors from '@/constants/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Header from '@/components/headers/header';
 
 
 
@@ -21,7 +23,8 @@ const WelfareScreen = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <Header title="Welfare Space" />
       <ScrollView style={styles.content}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/quotes')}>
           <View
@@ -39,43 +42,19 @@ const WelfareScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <View style={styles.counselorSection}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors?type=Peer')}>
-              <ImageBackground 
-                source={require('@/assets/images/studentCounsel.jpg')} 
-                style={styles.counselorCard}
-                imageStyle={{ borderRadius: 15 }}
-              >
-                <View style={styles.cardOverlay} />
-                <Text style={styles.counselorCardTitle}>Student Peer Counselor</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/welfare/screens/counselors?type=Departmental')}>
-              <ImageBackground 
-                source={require('@/assets/images/counselor.jpg')} 
-                style={styles.counselorCard}
-                imageStyle={{ borderRadius: 15 }}
-              >
-                <View style={styles.cardOverlay} />
-                <Text style={styles.counselorCardTitle}>Professional Counselor</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
 
-        <TouchableOpacity style={styles.reportButton} onPress={() => router.push('/(tabs)/welfare/screens/concern')}>
+        <TouchableOpacity style={styles.reportButton} onPress={() => router.push('/(tabs)/welfare/concern')}>
           <Text style={styles.reportButtonText}>Report a Concern</Text>
         </TouchableOpacity>
 
         <View style={styles.mentalHealthSection}>
-          <Text type="subtitle" style={styles.mentalHealthTitle}>Your Mental Health Matters</Text>
+          <Text style={styles.mentalHealthTitle}>Your Mental Health Matters</Text>
           <Text style={styles.mentalHealthText}>
             Taking care of your mental health is just as important as taking care of your physical health. It&apos;s okay to not be okay, and it&apos;s okay to ask for help. Our counselors are here to support you through any challenges you may be facing.
           </Text>
         </View>
       </ScrollView>
-   </View>
+   </SafeAreaView>
   );
 };
 

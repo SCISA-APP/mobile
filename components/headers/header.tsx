@@ -31,9 +31,8 @@ const Header: React.FC<StoreHeaderProps> = ({ title, showStoreButton }) => {
 
   const handlePress = () => {
     if (isShopOwner) {
-      router.push('/(standalone)/myShop');
     } else {
-      router.push('/(standalone)/becomeAnOwner');
+     
     }
   };
 
@@ -56,6 +55,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: '#ffffff',
     paddingVertical: 12,
+    paddingLeft:10,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
     zIndex: 1000,

@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextStyle,
-  ImageStyle
+  ImageStyle, Alert
 } from 'react-native';
 import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
@@ -25,23 +25,34 @@ const LoginScreen = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loaing, setLoading] = useState(false)
-
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("");
 
 const handleLogin = async () => {
   if (!email || !password) {
-    alert("Please enter both email and password");
+    Alert.alert(
+      "Missing Information",
+      "Please enter both email and password."
+    );
     return;
   }
 
   setLoading(true);
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
     const user = userCredential.user;
 
     if (!user.emailVerified) {
-      alert("Your email is not verified yet.");
+      Alert.alert(
+        "Email Not Verified",
+        "Please verify your email before logging in."
+      );
       return;
     }
 
@@ -49,20 +60,46 @@ const handleLogin = async () => {
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      alert("User data not found.");
+      Alert.alert(
+        "Account Error",
+        "User data not found."
+      );
       return;
     }
 
     const userData = userDocSnap.data();
 
-    await AsyncStorage.setItem("@student_user", JSON.stringify({
-      uid: user.uid,
-      ...userData,
-    }));
+    await AsyncStorage.setItem(
+      "@student_user",
+      JSON.stringify({
+        uid: user.uid,
+        ...userData,
+      })
+    );
 
     router.push("/home");
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    switch (error.code) {
+      case "auth/invalid-credential":
+        Alert.alert(
+          "Login Failed",
+          "Invalid email or password."
+        );
+        break;
+
+      case "auth/invalid-email":
+        Alert.alert(
+          "Invalid Email",
+          "Please enter a valid email address."
+        );
+        break;
+
+      default:
+        Alert.alert(
+          "Error",
+          error.message || "Something went wrong."
+        );
+    }
   } finally {
     setLoading(false);
   }
@@ -107,7 +144,16 @@ const handleLogin = async () => {
           </TouchableOpacity>
         </View>
 
-        <CustomButton label="Login" onPress={handleLogin} />
+        {error ? (
+  <Text style={styles.errorText}>
+    {error}
+  </Text>
+) : null}
+
+<CustomButton
+  label="Login"
+  onPress={handleLogin}
+/>
 
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Do not have an account? </Text>
@@ -131,6 +177,7 @@ const styles = StyleSheet.create<{
   subtitle: TextStyle;
   inputContainer: ViewStyle;
   forgotContainer: ViewStyle;
+  errorText: TextStyle;
   forgotText: TextStyle;
   signupContainer: ViewStyle;
   signupText: TextStyle;
@@ -146,6 +193,7 @@ const styles = StyleSheet.create<{
     alignItems: 'center',
     paddingHorizontal: 24,
   },
+  
   gif: {
     width: 200,
     height: 200,
@@ -175,6 +223,12 @@ const styles = StyleSheet.create<{
     color: colors.primaryDark, // see next fix
     fontSize: 14,
   },
+    errorText: {
+  color: "red",
+  textAlign: "center",
+  marginBottom: 12,
+  fontSize: 14,
+},
   signupContainer: {
     flexDirection: 'row',
     marginTop: 16,

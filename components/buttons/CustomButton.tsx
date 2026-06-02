@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, View } from 'react-native';
 import colors from '@/constants/colors';
-import React, { useState } from 'react';
-import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, TouchableOpacity } from 'react-native';
+
 
 interface CustomButtonProps {
   label: string;
@@ -12,22 +11,32 @@ interface CustomButtonProps {
   style?:object;// optional style prop
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, rightIcon }) => {
+const CustomButton: React.FC<CustomButtonProps> = ({
+  label,
+  onPress,
+  leftIcon,
+  rightIcon
+}) => {
   const [loading, setLoading] = useState(false);
 
   const handlePress = async (event: GestureResponderEvent) => {
     if (loading) return;
+
     setLoading(true);
+
     try {
       await onPress(event);
+    } catch (err: any) {
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
+ return (
+  <View style={{ width: '100%' }}>
     <TouchableOpacity
-      style={styles.button}
+      style={[styles.button]}
       onPress={handlePress}
       activeOpacity={0.7}
       disabled={loading}
@@ -44,7 +53,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({ label, onPress, leftIcon, r
         </View>
       )}
     </TouchableOpacity>
-  );
+  </View>
+);
 };
 
 export default CustomButton;
@@ -58,12 +68,29 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',  //change to flex:1 to allow equal spacing in row
-    // flex: 1,
   },
   label: {
     color: colors.background,
     fontWeight: '600',
     fontSize: 16,
   },
+  content: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+iconLeft: {
+  marginRight: 8,
+},
+
+iconRight: {
+  marginLeft: 8,
+},
+errorText: {
+  color: 'red',
+  marginTop: 6,
+  fontSize: 13,
+  textAlign: 'center',
+},
 });

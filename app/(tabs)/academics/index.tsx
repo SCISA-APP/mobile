@@ -1,6 +1,6 @@
 import { academicsButtonsData } from '@/assets/data/academics/AcademicButton';
 import Header from '@/components/headers/header';
-import { useRouter } from 'expo-router';
+import { Href, useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, ImageBackground, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -23,7 +23,7 @@ const index: React.FC = () => {
           <TouchableOpacity
             key={index}
             style={styles.buttonWrapper}
-            onPress={() => router.push(btn.route as const)}
+            onPress={() => router.push(btn.route as Href)}
             activeOpacity={0.8}
           >
             <ImageBackground 
@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#fff',
-    marginHorizontal: 10,
   },
   gridContainer: {
     flexDirection: 'row',

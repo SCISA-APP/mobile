@@ -1,6 +1,8 @@
 import { EventItem } from "@/types/models/event";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { useRouter } from "expo-router";
 import React, { memo } from "react";
+import { StyleSheet } from "react-native";
 import {
   Dimensions,
   FlatList,
@@ -44,9 +46,7 @@ const EventListComponent = ({
   style,
   headerStyle,
   itemStyle,
-  imageStyle,
-  titleStyle,
-  descriptionStyle,
+
   dateStyle,
 }: EventListProps) => {
   const router = useRouter() as unknown as Router;
@@ -97,71 +97,50 @@ const EventListComponent = ({
           paddingHorizontal: 16,
           paddingBottom: 20,
         }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => handlePress(item)}
-            style={{
-              backgroundColor: "white",
-              borderRadius: 16,
-              marginRight: 14,
-              width: width * 0.6,
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 4,
-              shadowOffset: { width: 0, height: 2 },
-              elevation: 3,
-              overflow: "hidden",
-            }}
-          >
-            {/* Image with animation */}
-            <Animated.Image
-              entering={FadeIn.duration(400)}
-              exiting={FadeOut.duration(200)}
-              source={{ uri: item.image }}
-              style={{
-                width: "100%",
-                height: 120,
-              }}
-              resizeMode="cover"
-            />
+renderItem={({ item, index }) => {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => handlePress(item)}
+      style={{
+        backgroundColor: 'white',
+        borderRadius: 20,
+        marginRight: 14,
+        width: width * 0.55,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: '#E5E5E5',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Colored image area */}
+      <View style={{ backgroundColor: '#F0F0F0', height: 110, alignItems: 'center', justifyContent: 'center' }}>
+        {item.image
+          ? <Animated.Image entering={FadeIn.duration(400)} source={{ uri: item.image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          : <Ionicons name="calendar-outline" size={36} color="#888" />
+        }
+      </View>
 
-            {/* Content */}
-            <View style={{ padding: 10 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: "#000",
-                  marginBottom: 4,
-                }}
-                numberOfLines={1}
-              >
-                {item.title}
-              </Text>
-              <Text
-                style={{
-                  color: "#555",
-                  fontSize: 13,
-                  lineHeight: 18,
-                }}
-                numberOfLines={2}
-              >
-                {item.description}
-              </Text>
-              <Text
-                style={{
-                  color: "#007AFF",
-                  fontWeight: "600",
-                  marginTop: 6,
-                  fontSize: 12,
-                }}
-              >
-                {item.date || "Coming soon"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+      <View style={{ padding: 12 }}>
+
+
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#1a1a1a', lineHeight: 20, marginBottom: 4 }} numberOfLines={1}>
+          {item.title}
+        </Text>
+        <Text style={{ fontSize: 12, color: '#888', lineHeight: 18, marginBottom: 12 }} numberOfLines={2}>
+          {item.description}
+        </Text>
+
+        {/* Footer */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 0, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#F0F0F0' }}>
+          <Text style={{ fontSize: 11, color: '#000000' }}>{item.date || 'Coming soon'}</Text>
+          <View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: StyleSheet.hairlineWidth, borderColor: '#E0E0E0', alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="arrow-forward" size={13} color="#888" />
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}}
         ListEmptyComponent={() => (
           <View style={{ padding: 16, alignItems: "center" }}>
             <Text style={{ color: "#007AFF", fontWeight: "600" }}>

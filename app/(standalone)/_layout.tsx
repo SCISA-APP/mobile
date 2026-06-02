@@ -1,22 +1,17 @@
 import { Stack } from "expo-router";
-import React from "react";
-import { StatusBar } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function EventsLayout() {
+export default function StandaloneLayout() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
-      {/* ✅ Dark text/icons on white background */}
-      <StatusBar barStyle="dark-content" backgroundColor="white" />
-
-      <Stack
-        screenOptions={{
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "white" } }}>
+      <Stack.Screen
+        name="notification"
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+          gestureEnabled: true,
           headerShown: false,
-          headerStyle: { backgroundColor: "white" },
-          headerBackButtonMenuEnabled: true,
-          contentStyle: { backgroundColor: "white" },
         }}
       />
-    </SafeAreaView>
+    </Stack>
   );
 }

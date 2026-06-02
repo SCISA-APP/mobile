@@ -50,19 +50,19 @@ export interface AppColors {
 
 const colors: AppColors = {
   // Primary Colors
-  primary: '#2B4C83',
-  primaryLight: '#5A7AB0',
+  primary: '#002259',
+  primaryLight: '#002259',
   primaryDark: '#002259',
-  
+
   // Secondary Colors
   secondary: '#FF6B35',
   secondaryLight: '#FF9B5C',
   secondaryDark: '#C43B00',
-  
+
   // Background
   background: '#FFFFFF',
   surface: '#F8F9FA',
-  
+
   // Text
   text: {
     primary: '#212529',
@@ -70,18 +70,18 @@ const colors: AppColors = {
     disabled: '#ADB5BD',
     inverse: '#FFFFFF',
   },
-  
+
   // Status
   success: '#28A745',
   warning: '#FFC107',
   error: '#DC3545',
   info: '#17A2B8',
-  
+
   // Common
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
-  
+
   // Grayscale
   gray: {
     50: '#F8F9FA',
@@ -95,6 +95,7 @@ const colors: AppColors = {
     800: '#343A40',
     900: '#212529',
   },
+  muted: ""
 };
 
 export default colors;
