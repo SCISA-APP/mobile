@@ -1,275 +1,221 @@
-import IconFontAwesome from "@expo/vector-icons/FontAwesome";
-import { Stack,useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { auth } from "@/firebaseConfig";
+import colors from '@/constants/colors';
+import { useAuth } from '@/context/AuthContext';
+import { auth, db } from '@/firebaseConfig';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 import {
-  Image,
+  ActivityIndicator,
+  Alert,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import colors from "@/constants/colors";
-import CustomButton from "@/components/buttons/CustomButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { signOut } from "firebase/auth";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const HEADER_COLOR = '#003080';
+
+interface StudentProfile {
+  uid: string;
+  fullName: string;
+  email: string | null;
+  program: string;
+  year: number | string;
+  permission: string;
+}
+
+function Avatar({ name }: { name: string }) {
+  const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  return (
+    <View style={styles.avatarRing}>
+      <LinearGradient colors={['#4A90D9', '#002259']} style={styles.avatarGradient}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+        <Text style={styles.avatarText}>{initials}</Text>
+      </LinearGradient>
+    </View>
+  );
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.sectionCard}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function MenuItem({ icon, label, sublabel, onPress, tint, last }: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string; sublabel?: string;
+  onPress?: () => void; tint?: string; last?: boolean;
+}) {
+  const c = tint ?? colors.primary;
+  return (
+    <TouchableOpacity style={[styles.menuItem, last && styles.menuItemLast]}
+      onPress={onPress} activeOpacity={0.65}>
+      <View style={[styles.menuIconWrap, { backgroundColor: `${c}18` }]}>
+        <Ionicons name={icon} size={20} color={c} />
+      </View>
+      <View style={styles.menuTextWrap}>
+        <Text style={styles.menuLabel}>{label}</Text>
+        {sublabel ? <Text style={styles.menuSublabel}>{sublabel}</Text> : null}
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.gray[400]} />
+    </TouchableOpacity>
+  );
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [student, setStudent] = useState<any>(null);
+  const insets = useSafeAreaInsets();
+  const { studentUser, clearStudentUser } = useAuth();
+  const [profile, setProfile] = useState<StudentProfile | null>(studentUser as StudentProfile | null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Load stored student data
   useEffect(() => {
-    const loadUserData = async () => {
+    const fetch_ = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      setRefreshing(true);
       try {
-        const data = await AsyncStorage.getItem("@student_user");
-        if (data) {
-          setStudent(JSON.parse(data));
-        }
-      } catch (error) {
-        console.log("Error loading student user:", error);
-      }
+        const snap = await getDoc(doc(db, 'Student_Users', uid));
+        if (snap.exists()) setProfile({ uid, ...(snap.data() as Omit<StudentProfile, 'uid'>) });
+      } catch { /* fall back */ } finally { setRefreshing(false); }
     };
-
-    loadUserData();
+    fetch_();
   }, []);
 
-  const firstInitial = student?.fullName
-    ? student.fullName.charAt(0).toUpperCase()
-    : "U";
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign Out', style: 'destructive', onPress: async () => {
+        try { await signOut(auth); await clearStudentUser(); router.replace('/(auth)/login'); }
+        catch { Alert.alert('Error', 'Something went wrong.'); }
+      }},
+    ]);
+  };
 
-  const handleEditProfile = () => console.log("Edit Profile pressed");
-  const handleNotifications = () => console.log("Notifications pressed");
-  const handleChangePassword = () => console.log("Change Password pressed");
-  const handleSignOut = async () => {
-  try {
-    // 1. Sign out from Firebase
-    await signOut(auth);
-
-    // 2. Clear all app-related AsyncStorage
-    await AsyncStorage.clear();
-
-    // 3. Redirect to login screen
-    router.replace("/(auth)/login");
-
-    console.log("User signed out successfully");
-  } catch (error) {
-    console.log("Error signing out:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
+  const permissionLabel = profile?.permission
+    ? profile.permission.charAt(0).toUpperCase() + profile.permission.slice(1)
+    : 'Student';
 
   return (
-    <View style={styles.fullScreenContainer}>
-      <Stack.Screen
-        options={{
-          title: "Profile",
-          headerTitleAlign: "center",
-          headerTintColor: "#333",
-          headerShadowVisible: false,
-        }}
-      />
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" backgroundColor={HEADER_COLOR} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            {student?.avatarUri ? (
-              <Image
-                source={{ uri: student.avatarUri }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <View style={styles.initialsFallback}>
-                <Text style={styles.initialsText}>{firstInitial}</Text>
-              </View>
-            )}
-          </View>
+      {/* Bleeds behind the status bar so rubber-band over-scroll is blue */}
+      <View style={[styles.safeAreaFill, { height: insets.top }]} />
 
-          <Text style={styles.userName}>{student?.fullName}</Text>
-          <Text style={styles.userStatus}>{student?.email}</Text>
-        </View>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* ── Gradient header ── */}
+        <LinearGradient colors={[HEADER_COLOR, '#002259']} style={[styles.header, { paddingTop: insets.top + 20 }]}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+          <View style={styles.decorCircle1} />
+          <View style={styles.decorCircle2} />
 
-        {/* User Info Card */}
-        {student && (
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Program:</Text>
-              <Text style={styles.infoValue}>{student.program}</Text>
+          {refreshing && (
+            <ActivityIndicator color="rgba(255,255,255,0.6)" style={styles.refreshIndicator} />
+          )}
+
+          <Avatar name={profile?.fullName ?? 'U'} />
+          <Text style={styles.headerName}>{profile?.fullName ?? '—'}</Text>
+          <Text style={styles.headerEmail}>{profile?.email ?? '—'}</Text>
+
+          <View style={styles.statsRow}>
+            <View style={styles.statPill}>
+              <Text style={styles.statValue}>{profile?.year ?? '—'}</Text>
+              <Text style={styles.statLabel}>Level</Text>
             </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Year:</Text>
-              <Text style={styles.infoValue}>{student.year}</Text>
+            <View style={styles.statDivider} />
+            <View style={styles.statPill}>
+              <Text style={styles.statValue}>{permissionLabel}</Text>
+              <Text style={styles.statLabel}>Role</Text>
             </View>
           </View>
-        )}
+        </LinearGradient>
 
-        {/* Menu Items */}
-        <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="user-o"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Edit Profile</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={handleNotifications}
-          >
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="bell-o"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Notification</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.menuItem, styles.lastMenuItem]}
-            onPress={handleChangePassword}
-          >
-            <View style={styles.menuItemLeft}>
-              <IconFontAwesome
-                name="lock"
-                size={20}
-                color={colors.primaryLight}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuText}>Change Password</Text>
-            </View>
-            <IconFontAwesome name="angle-right" size={20} color="#555" />
-          </TouchableOpacity>
+        {/* ── Programme banner ── */}
+        <View style={styles.programBanner}>
+          <Ionicons name="school-outline" size={18} color={colors.primary} />
+          <Text style={styles.programBannerText} numberOfLines={1}>{profile?.program ?? '—'}</Text>
         </View>
 
-        {/* Sign Out */}
-        <View style={styles.signOutButtonContainer}>
-          <CustomButton
-            label="Sign Out"
-            onPress={handleSignOut}
-            leftIcon={<IconFontAwesome name="sign-out" size={18} color="#fff" />}
-          />
-        </View>
+        <SectionCard title="Account">
+          <MenuItem icon="person-outline" label="Edit Profile" sublabel="Update your personal information" onPress={() => {}} />
+          <MenuItem icon="lock-closed-outline" label="Change Password" sublabel="Keep your account secure" onPress={() => router.push('/(auth)/forgotPassword')} />
+          <MenuItem icon="notifications-outline" label="Notifications" sublabel="Manage alerts and reminders" onPress={() => router.push('/(standalone)/notification')} last />
+        </SectionCard>
+
+        <SectionCard title="Academics">
+          <MenuItem icon="calendar-outline" label="Academic Calendar" tint="#7C3AED" onPress={() => router.push('/(standalone)/academics/academicCalendar')} />
+          <MenuItem icon="document-text-outline" label="Resources" tint="#7C3AED" onPress={() => router.push('/(standalone)/academics/academicResources')} />
+          <MenuItem icon="grid-outline" label="Timetable" tint="#7C3AED" onPress={() => router.push('/(standalone)/academics/timetable')} last />
+        </SectionCard>
+
+        <SectionCard title="App">
+          <MenuItem icon="help-circle-outline" label="Help & Support" tint={colors.info} onPress={() => {}} />
+          <MenuItem icon="shield-checkmark-outline" label="Privacy Policy" tint={colors.info} onPress={() => {}} last />
+        </SectionCard>
+
+        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} activeOpacity={0.8}>
+          <Ionicons name="log-out-outline" size={20} color={colors.error} />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.version}>SCISA • v1.0.0</Text>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fullScreenContainer: {
-    flex: 1,
-    backgroundColor: "#f8f8f8",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    alignItems: "center",
-    paddingTop: 20,
-    paddingBottom: 12,
+  root: { flex: 1, backgroundColor: colors.gray[100] },
+  // Sits at position absolute top-0 so over-scroll rubber-band reveals brand colour
+  safeAreaFill: { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: HEADER_COLOR, zIndex: 0 },
+  scroll: { paddingBottom: 120 },
+
+  header: {
+    alignItems: 'center',
+    paddingBottom: 36,
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
-  profileHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  avatarContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#e0e0e0",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarImage: { width: 110, height: 110, borderRadius: 55 },
-  initialsFallback: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: colors.primaryDark,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  initialsText: { fontSize: 48, fontWeight: "bold", color: "#fff" },
-  userName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 3,
-  },
-  userStatus: { fontSize: 14, color: "#666" },
+  decorCircle1: { position: 'absolute', width: 260, height: 260, borderRadius: 130, backgroundColor: 'rgba(255,255,255,0.05)', top: -60, right: -60 },
+  decorCircle2: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,255,255,0.05)', bottom: 20, left: -50 },
+  refreshIndicator: { position: 'absolute', top: 20, right: 20 },
 
-  // ⭐ User Info Card
-  infoCard: {
-    width: "100%",
-    backgroundColor: "#fff",
-    padding: 18,
-    borderRadius: 12,
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 2,
-  },
-  infoLabel: { fontSize: 15, color: "#555", fontWeight: "500" },
-  infoValue: { fontSize: 15, color: "#333", fontWeight: "600" },
+  avatarRing: { width: 96, height: 96, borderRadius: 48, padding: 3, backgroundColor: 'rgba(255,255,255,0.25)', marginBottom: 14 },
+  avatarGradient: { flex: 1, borderRadius: 45, justifyContent: 'center', alignItems: 'center' },
+  avatarText: { fontSize: 34, fontWeight: '700', color: '#fff', letterSpacing: 1 },
+  headerName: { fontSize: 22, fontWeight: '700', color: '#fff', marginBottom: 4, letterSpacing: 0.2 },
+  headerEmail: { fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 24 },
 
-  menuContainer: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    marginBottom: 30,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  menuItemLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  menuIcon: {
-    width: 28,
-    textAlign: "center",
-    marginRight: 15,
-  },
-  menuText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  lastMenuItem: { borderBottomWidth: 0 },
+  statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 16, paddingVertical: 12, paddingHorizontal: 20, width: '100%' },
+  statPill: { alignItems: 'center', flex: 1 },
+  statValue: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+  statDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.2)' },
 
-  signOutButtonContainer: {
-    width: "100%",
-    marginBottom: 8,
-  },
+  programBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.white, marginHorizontal: 16, marginTop: -1, marginBottom: 20, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3 },
+  programBannerText: { fontSize: 14, fontWeight: '600', color: colors.text.primary, flex: 1 },
+
+  sectionCard: { backgroundColor: colors.white, marginHorizontal: 16, borderRadius: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, overflow: 'hidden' },
+  sectionTitle: { fontSize: 11, fontWeight: '700', color: colors.gray[500], textTransform: 'uppercase', letterSpacing: 0.8, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.gray[100] },
+  menuItemLast: { borderBottomWidth: 0 },
+  menuIconWrap: { width: 38, height: 38, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  menuTextWrap: { flex: 1 },
+  menuLabel: { fontSize: 15, fontWeight: '500', color: colors.text.primary },
+  menuSublabel: { fontSize: 12, color: colors.gray[500], marginTop: 1 },
+
+  signOutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginHorizontal: 16, marginTop: 8, paddingVertical: 15, borderRadius: 16, backgroundColor: `${colors.error}12`, borderWidth: 1, borderColor: `${colors.error}30` },
+  signOutText: { fontSize: 15, fontWeight: '600', color: colors.error },
+  version: { textAlign: 'center', fontSize: 12, color: colors.gray[400], marginTop: 20 },
 });

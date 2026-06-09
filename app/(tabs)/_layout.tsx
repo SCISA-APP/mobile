@@ -1,8 +1,7 @@
 import { HapticTab } from '@/components/haptic-tab';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
 
@@ -26,7 +25,7 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontWeight: "600", // default weight for all tabs
+          fontWeight: "600",
           letterSpacing: -0.1,
           marginTop: 4,
         },
@@ -47,11 +46,11 @@ export default function TabLayout() {
         name="home/index"
         options={{
           title: 'Home',
-headerShown:false,
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? "home" : "home-outline"} 
-              size={24} 
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={24}
               color={color}
             />
           ),
@@ -77,10 +76,10 @@ headerShown:false,
         name="welfare"
         options={{
           title: 'Welfare',
-          tabBarIcon: ({ color, focused }) => (
-            <FontAwesome5 
-              name="hands-helping" 
-              size={20} 
+          tabBarIcon: ({ color }) => (
+            <FontAwesome5
+              name="hands-helping"
+              size={20}
               color={color}
             />
           ),
@@ -93,9 +92,9 @@ headerShown:false,
         options={{
           title: 'internship',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? "cart" : "cart-outline"} 
-              size={24} 
+            <Ionicons
+              name={focused ? "cart" : "cart-outline"}
+              size={24}
               color={color}
             />
           ),
@@ -108,9 +107,9 @@ headerShown:false,
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? "person" : "person-outline"} 
-              size={24} 
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={24}
               color={color}
             />
           ),

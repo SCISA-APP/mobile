@@ -17,6 +17,7 @@ export const signUpWithEmail = async (
     return userCredential.user;
   } catch (error: any) {
     console.error("Signup error:", error);
-    throw new Error(error.message);
+    // Re-throw the original Firebase error so callers can inspect error.code
+    throw error;
   }
 };

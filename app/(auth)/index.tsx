@@ -1,48 +1,40 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Image, ViewStyle, TextStyle, ImageStyle  } from 'react-native';
+import { useAuth } from '@/context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import colors from '../../constants/colors';
+import React, { useEffect } from 'react';
+import { Image, ImageStyle, StyleSheet, View, ViewStyle } from 'react-native';
 import Logo from '../../assets/images/logo.jpeg';
+import colors from '../../constants/colors';
 
-interface StudentUser {
-  uid: string;
-  fullName: string;
-  email: string | null;
-  permission: string;
-  program: string;
-  year: number;
-}
-
-const WelcomeScreen: React.FC = () => {
+const SplashScreen: React.FC = () => {
   const router = useRouter();
+  const { firebaseUser, isLoading } = useAuth();
 
   useEffect(() => {
-    const checkUserState = async () => {
-      try {
-        // Simulate splash delay (2 seconds)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+    if (isLoading) return; // Wait for Firebase to resolve auth state
 
-        const hasOpenedBefore = await AsyncStorage.getItem('hasOpenedBefore');
-        const storedUser = await AsyncStorage.getItem('@student_user');
+    const navigate = async () => {
+      // Brief splash delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        if (storedUser) {
-          const user: StudentUser = JSON.parse(storedUser);
-          console.log('Returning user:', user.fullName);
-          router.replace('/(tabs)/home'); // ✅ Already logged in
-        } else if (!hasOpenedBefore) {
-          await AsyncStorage.setItem('hasOpenedBefore', 'true');
-          router.replace('/(auth)/welcome'); // 🆕 First time opening the app
-        } else {
-          router.replace('/(auth)/login'); // Not logged in
-        }
-      } catch (error) {
-        console.error('Error checking user state:', error);
+      if (firebaseUser) {
+        // Already signed in — go straight to the app
+        router.replace('/(tabs)/home');
+        return;
+      }
+
+      // First-time launch check
+      const hasOpenedBefore = await AsyncStorage.getItem('hasOpenedBefore');
+      if (!hasOpenedBefore) {
+        await AsyncStorage.setItem('hasOpenedBefore', 'true');
+        router.replace('/(auth)/welcome');
+      } else {
+        router.replace('/(auth)/login');
       }
     };
 
-    checkUserState();
-  }, [router]);
+    navigate();
+  }, [isLoading, firebaseUser]);
 
   return (
     <View style={styles.container}>
@@ -51,14 +43,12 @@ const WelcomeScreen: React.FC = () => {
   );
 };
 
-export default WelcomeScreen;
+export default SplashScreen;
 
-type Styles = {
-  logo: StyleProp<ImageStyle>;
+const styles = StyleSheet.create<{
   container: ViewStyle;
-};
-
-const styles = StyleSheet.create<Styles>({
+  logo: ImageStyle;
+}>({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -69,10 +59,5 @@ const styles = StyleSheet.create<Styles>({
     width: 150,
     height: 150,
     borderRadius: 75,
-  },
-  subText: {
-    marginTop: 10,
-    color: colors.black,
-    fontSize: 14,
   },
 });

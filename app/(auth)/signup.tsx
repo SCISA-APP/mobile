@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Platform,
-  KeyboardAvoidingView,
-  ViewStyle,
-  TextStyle,
-  ImageStyle,
-  Image,
-} from 'react-native';
-import colors from '../../constants/colors';
-import { useRouter } from 'expo-router';
-import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
-import CustomDropdown from '@/components/inputs/CustomDropdown'; 
-import SignUpGif from '../../assets/images/SignUp.gif'; 
+import CustomDropdown from '@/components/inputs/CustomDropdown';
+import CustomInput from '@/components/inputs/CustomInput';
+import { addStudentUser } from '@/utils/authUtils/addStudentUser';
+import { signUpWithEmail } from '@/utils/authUtils/signUpWithEmailUtil';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import {
+    Alert,
+    Image,
+    ImageStyle,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    ViewStyle,
+} from 'react-native';
+import SignUpGif from '../../assets/images/SignUp.gif';
+import colors from '../../constants/colors';
 
-// --- DATA DECLARED AT THE TOP ---
 const programs = [
   'Computer Science',
   'Physics',
@@ -44,15 +46,53 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [program, setProgram] = useState<string | number>('');
   const [year, setYear] = useState<string | number>('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!fullName || !email || !password || !program || !year) {
-      alert('Please fill all fields');
+      Alert.alert('Missing Information', 'Please fill in all fields.');
       return;
     }
 
-    console.log({ fullName, email, password, program, year });
-    router.push('/home');
+    setLoading(true);
+
+    try {
+      // 1. Create Firebase Auth account and send verification email
+      const user = await signUpWithEmail(email, password);
+
+      // 2. Write student profile to Firestore
+      await addStudentUser({
+        uid: user.uid,
+        fullName,
+        email,
+        program: String(program),
+        year,
+        permission: 'student',
+      });
+
+      // 3. Let the user know to verify their email before logging in
+      Alert.alert(
+        'Account Created',
+        'A verification email has been sent to your inbox. Please verify your email before logging in.',
+        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+      );
+    } catch (error: any) {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          Alert.alert('Email Taken', 'An account with this email already exists.');
+          break;
+        case 'auth/weak-password':
+          Alert.alert('Weak Password', 'Password must be at least 6 characters.');
+          break;
+        case 'auth/invalid-email':
+          Alert.alert('Invalid Email', 'Please enter a valid email address.');
+          break;
+        default:
+          Alert.alert('Sign Up Failed', error.message || 'Something went wrong.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,7 +128,6 @@ const SignUp = () => {
           />
         </View>
 
-        {/* Dropdowns */}
         <View style={{ width: '100%', zIndex: 20 }}>
           <CustomDropdown
             placeholder="Program"
@@ -109,7 +148,7 @@ const SignUp = () => {
           />
         </View>
 
-        <CustomButton label="Sign Up" onPress={handleSignUp} />
+        <CustomButton label={loading ? 'Creating account...' : 'Sign Up'} onPress={handleSignUp} />
 
         <View style={styles.loginContainer}>
           <Text style={styles.loginText}>Already have an account? </Text>

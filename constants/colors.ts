@@ -49,12 +49,12 @@ export interface AppColors {
 }
 
 const colors: AppColors = {
-  // Primary Colors
+  // Primary Colors — College of Science navy
   primary: '#002259',
-  primaryLight: '#002259',
-  primaryDark: '#002259',
+  primaryLight: '#1A3A7A',
+  primaryDark: '#001540',
 
-  // Secondary Colors
+  // Secondary Colors — kept for other uses (orange accent)
   secondary: '#FF6B35',
   secondaryLight: '#FF9B5C',
   secondaryDark: '#C43B00',

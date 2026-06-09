@@ -1,109 +1,96 @@
-import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-  ImageStyle, Alert
-} from 'react-native';
-import CustomInput from '@/components/inputs/CustomInput';
 import CustomButton from '@/components/buttons/CustomButton';
-import colors from '../../constants/colors';
-import AuthenticationGif from '../../assets/images/Authentication.gif';
+import CustomInput from '@/components/inputs/CustomInput';
+import { useAuth } from '@/context/AuthContext';
+import { auth, db } from '@/firebaseConfig';
 import { useRouter } from 'expo-router';
-import {  signInWithEmailAndPassword } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db,auth } from '@/firebaseConfig';
-import { doc,getDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { useState } from 'react';
+import {
+    Alert,
+    Image,
+    ImageStyle,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextStyle,
+    TouchableOpacity,
+    View,
+    ViewStyle,
+} from 'react-native';
+import AuthenticationGif from '../../assets/images/Authentication.gif';
+import colors from '../../constants/colors';
 
 const LoginScreen = () => {
   const router = useRouter();
+  const { cacheStudentUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const handleLogin = async () => {
-  if (!email || !password) {
-    Alert.alert(
-      "Missing Information",
-      "Please enter both email and password."
-    );
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    const user = userCredential.user;
-
-    if (!user.emailVerified) {
-      Alert.alert(
-        "Email Not Verified",
-        "Please verify your email before logging in."
-      );
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Missing Information', 'Please enter both email and password.');
       return;
     }
 
-    const userDocRef = doc(db, "Student_Users", user.uid);
-    const userDocSnap = await getDoc(userDocRef);
+    setLoading(true);
 
-    if (!userDocSnap.exists()) {
-      Alert.alert(
-        "Account Error",
-        "User data not found."
-      );
-      return;
-    }
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    const userData = userDocSnap.data();
+      if (!user.emailVerified) {
+        Alert.alert(
+          'Email Not Verified',
+          'Please verify your email before logging in.'
+        );
+        return;
+      }
 
-    await AsyncStorage.setItem(
-      "@student_user",
-      JSON.stringify({
+      const userDocRef = doc(db, 'Student_Users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        Alert.alert('Account Error', 'User data not found.');
+        return;
+      }
+
+      const userData = userDocSnap.data();
+
+      // Cache student profile locally and in AsyncStorage
+      await cacheStudentUser({
         uid: user.uid,
-        ...userData,
-      })
-    );
+        fullName: userData.fullName,
+        email: userData.email,
+        permission: userData.permission,
+        program: userData.program,
+        year: userData.year,
+      });
 
-    router.push("/home");
-  } catch (error: any) {
-    switch (error.code) {
-      case "auth/invalid-credential":
-        Alert.alert(
-          "Login Failed",
-          "Invalid email or password."
-        );
-        break;
-
-      case "auth/invalid-email":
-        Alert.alert(
-          "Invalid Email",
-          "Please enter a valid email address."
-        );
-        break;
-
-      default:
-        Alert.alert(
-          "Error",
-          error.message || "Something went wrong."
-        );
+      // Replace so the user can't go back to login with the back button
+      router.replace('/(tabs)/home');
+    } catch (error: any) {
+      switch (error.code) {
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+          Alert.alert('Login Failed', 'Invalid email or password.');
+          break;
+        case 'auth/invalid-email':
+          Alert.alert('Invalid Email', 'Please enter a valid email address.');
+          break;
+        case 'auth/too-many-requests':
+          Alert.alert('Too Many Attempts', 'Account temporarily locked. Try again later.');
+          break;
+        default:
+          Alert.alert('Error', error.message || 'Something went wrong.');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <KeyboardAvoidingView
@@ -111,11 +98,7 @@ const handleLogin = async () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.inner}>
-        <Image
-          source={AuthenticationGif}
-          style={styles.gif}
-          resizeMode="contain"
-        />
+        <Image source={AuthenticationGif} style={styles.gif} resizeMode="contain" />
 
         <Text style={styles.title}>Welcome Back 👋</Text>
         <Text style={styles.subtitle}>Log in to your SCISA account</Text>
@@ -144,16 +127,7 @@ const handleLogin = async () => {
           </TouchableOpacity>
         </View>
 
-        {error ? (
-  <Text style={styles.errorText}>
-    {error}
-  </Text>
-) : null}
-
-<CustomButton
-  label="Login"
-  onPress={handleLogin}
-/>
+        <CustomButton label={loading ? 'Logging in...' : 'Login'} onPress={handleLogin} />
 
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Do not have an account? </Text>
@@ -168,7 +142,6 @@ const handleLogin = async () => {
 
 export default LoginScreen;
 
-// --- STYLES ---
 const styles = StyleSheet.create<{
   container: ViewStyle;
   inner: ViewStyle;
@@ -177,7 +150,6 @@ const styles = StyleSheet.create<{
   subtitle: TextStyle;
   inputContainer: ViewStyle;
   forgotContainer: ViewStyle;
-  errorText: TextStyle;
   forgotText: TextStyle;
   signupContainer: ViewStyle;
   signupText: TextStyle;
@@ -193,7 +165,6 @@ const styles = StyleSheet.create<{
     alignItems: 'center',
     paddingHorizontal: 24,
   },
-  
   gif: {
     width: 200,
     height: 200,
@@ -206,7 +177,7 @@ const styles = StyleSheet.create<{
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.primaryDark, // see next fix
+    color: colors.primaryDark,
     fontSize: 15,
     textAlign: 'center',
     marginBottom: 24,
@@ -220,21 +191,15 @@ const styles = StyleSheet.create<{
     marginTop: 8,
   },
   forgotText: {
-    color: colors.primaryDark, // see next fix
+    color: colors.primaryDark,
     fontSize: 14,
   },
-    errorText: {
-  color: "red",
-  textAlign: "center",
-  marginBottom: 12,
-  fontSize: 14,
-},
   signupContainer: {
     flexDirection: 'row',
     marginTop: 16,
   },
   signupText: {
-    color: colors.primaryDark, // see next fix
+    color: colors.primaryDark,
     fontSize: 14,
   },
   signupLink: {
@@ -243,4 +208,3 @@ const styles = StyleSheet.create<{
     fontWeight: '600',
   },
 });
-

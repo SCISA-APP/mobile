@@ -1,24 +1,23 @@
 
+import colors from "@/constants/colors";
+import { Colors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
 import {
-  HeaderActionProps,
-  HeaderGreetingProps,
-  HeaderProps,
+    HeaderActionProps,
+    HeaderGreetingProps,
+    HeaderProps,
 } from "@/types/components/header";
 import { useRouter } from "expo-router";
 import { Bell } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import colors from "@/constants/colors";
-import { Colors } from "@/constants/theme";
 
 // Utility function to format names
 const formatName = (fullName: string) => {
@@ -99,23 +98,8 @@ const Header: React.FC<HeaderProps> = ({
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [student, setStudent] = useState<any>(null);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const data = await AsyncStorage.getItem("@student_user");
-
-        if (data) {
-          setStudent(JSON.parse(data));
-        }
-      } catch (e) {
-        console.log("Error loading student user:", e);
-      }
-    };
-
-    loadUser();
-  }, []);
+  const { studentUser } = useAuth();
+  const student = studentUser;
 
   const renderDefaultLeft = () => {
     if (leftComponent) return leftComponent;
