@@ -105,7 +105,7 @@ export default function WelfareScreen() {
           <LinearGradient colors={['#003080', '#1a5fb4']} style={styles.quoteCard}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <View style={styles.quoteDecorCircle} />
-            <Ionicons name="quote" size={28} color="rgba(255,255,255,0.35)" style={styles.quoteIcon} />
+            <Ionicons name="book" size={28} color="rgba(255,255,255,0.35)" style={styles.quoteIcon} />
             {quoteLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
@@ -129,11 +129,11 @@ export default function WelfareScreen() {
           <View style={styles.divider} />
           <ActionCard icon="people-outline" title="Talk to a Counselor"
             subtitle="We're here to listen" tint="#7C3AED"
-            onPress={() => console.log('Counselor')} />
+            onPress={() => router.push('/welfare/counselor')} />
           <View style={styles.divider} />
           <ActionCard icon="call-outline" title="Emergency Contacts"
             subtitle="Campus security & health services" tint={colors.warning}
-            onPress={() => console.log('Emergency')} />
+            onPress={() => router.push('/welfare/emergency')} />
         </View>
 
         <Text style={styles.sectionLabel}>Resources</Text>

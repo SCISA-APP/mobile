@@ -69,15 +69,6 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="category"
-          options={{
-            headerBackVisible: false,
-            headerBackTitle: ' ',
-            headerShown: false,
-            gestureEnabled: false,
-          }}
-        />
-        <Stack.Screen
           name="(standalone)"
           options={{
             headerShown: false,

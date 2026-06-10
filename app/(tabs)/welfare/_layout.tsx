@@ -12,9 +12,9 @@ export default function WelfareLayout() {
      
      }}>
       <Stack.Screen name="index" options={{ title: 'Welfare Space' }} />
-      <Stack.Screen name="screens/concern" options={{ title: 'Report a Concern' }} />
-      <Stack.Screen name="screens/concerns" options={{ title: 'Reported Concerns' }} />
-      <Stack.Screen name="screens/concern/[concern_id]" options={{ headerShown: false, title: 'Concern Details' }} />
+      <Stack.Screen name="concern" options={{ title: 'Report a Concern' }} />
+       <Stack.Screen name="emergency" options={{ title: 'Emergency Contact' }} />
+       <Stack.Screen name="counselor" options={{ title: 'Talk to A Counsellor' }} />
       <Stack.Screen name="quotes" options={{ headerShown: false }} />
     </Stack>
   );
