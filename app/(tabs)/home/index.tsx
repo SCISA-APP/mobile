@@ -1,16 +1,16 @@
-// app/(tabs)/home/index.tsx  (or wherever your HomeScreen lives)
-import { announcements, occasions } from '@/assets/data';
+import { occasions } from '@/assets/data/events';
+import { feeds } from '@/assets/data/feeds';
 import colors from '@/constants/colors';
-import { useAuth } from '@/context/AuthContext';
 import EventCard from '@/components/cards/EventCard';
+import FeedCard from '@/components/cards/FeedCard';
+import HomeHeader from '@/components/headers/HomeHeader';
 import HostelHubbBanner from '@/components/carousel/HostelHubbBanner';
-import { AnnouncementItem } from '@/types/models/announcement';
 import { EventItem } from '@/types/models/event';
+import { FeedItem } from '@/types/models/feed';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Bell } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -23,22 +23,19 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const NAVY      = '#002259';
-const NAVY_MID  = '#003080';
-const ACCENT_RED = '#CC2200';
+const NAVY     = '#002259';
+const NAVY_MID = '#003080';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-const firstName = (s?: string | null) => s?.trim().split(' ')[0] ?? 'Student';
+// ── Date helpers ──────────────────────────────────────────────────────────────
+const today = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+const parseDate = (s: string) => new Date(s);
 
-// ── Feature hero card ("Next up") ─────────────────────────────────────────────
+// ── Hero card ─────────────────────────────────────────────────────────────────
 function HeroCard({ item, onPress }: { item: EventItem; onPress: () => void }) {
   return (
     <Animated.View entering={FadeInDown.duration(380).springify()} style={styles.heroWrap}>
@@ -69,30 +66,26 @@ function HeroCard({ item, onPress }: { item: EventItem; onPress: () => void }) {
   );
 }
 
-// ── Feed card ─────────────────────────────────────────────────────────────────
-function FeedCard({ item, index, onPress }: {
-  item: AnnouncementItem; index: number; onPress: () => void;
+// ── Past event card ───────────────────────────────────────────────────────────
+function PastEventCard({ item, index, onPress }: {
+  item: EventItem; index: number; onPress: () => void;
 }) {
   return (
-    <Animated.View entering={FadeInDown.delay(index * 70).duration(360).springify()}>
-      <TouchableOpacity style={styles.feedCard} onPress={onPress} activeOpacity={0.85}>
-        <View style={styles.feedBorder} />
-        <View style={styles.feedContent}>
-          {item.image && (
-            <Image source={{ uri: item.image }} style={styles.feedThumb} resizeMode="cover" />
-          )}
-          <View style={styles.feedText}>
-            <Text style={styles.feedTitle} numberOfLines={2}>{item.title}</Text>
-            <Text style={styles.feedDesc} numberOfLines={2}>{item.description}</Text>
-            <View style={styles.feedFooter}>
-              <Text style={styles.feedDate}>{item.date ?? 'Today'}</Text>
-              <View style={styles.feedCta}>
-                <Text style={styles.feedCtaText}>Read</Text>
-                <Ionicons name="arrow-forward" size={11} color={NAVY_MID} />
-              </View>
-            </View>
+    <Animated.View entering={FadeInDown.delay(index * 70).duration(340).springify()}>
+      <TouchableOpacity style={styles.pastCard} onPress={onPress} activeOpacity={0.85}>
+        {item.image
+          ? <Image source={{ uri: item.image }} style={styles.pastImage} resizeMode="cover" />
+          : <View style={[styles.pastImage, { backgroundColor: NAVY_MID }]} />}
+        <LinearGradient
+          colors={['transparent', 'rgba(0,21,64,0.85)']}
+          style={styles.pastOverlay}
+        >
+          <View style={styles.pastChip}>
+            <Text style={styles.pastChipText}>Past</Text>
           </View>
-        </View>
+          <Text style={styles.pastTitle} numberOfLines={2}>{item.title}</Text>
+          <Text style={styles.pastDate}>{item.date}</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -110,15 +103,37 @@ function SectionHeader({ title, sub }: { title: string; sub?: string }) {
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { studentUser } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1500);
   }, []);
+
+  // ── Partition events by date ──
+  const { nextUp, upcoming, past } = useMemo(() => {
+    const now = today();
+    const future = occasions
+      .filter(e => parseDate(e.date) >= now)
+      .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
+
+    const past = occasions
+      .filter(e => parseDate(e.date) < now)
+      .sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()); // latest past first
+
+    return {
+      nextUp: future[0] ?? null,        // closest upcoming
+      upcoming: future.slice(1),        // rest of future (exclude nextUp)
+      past,
+    };
+  }, []);
+
+  // ── Feeds sorted latest first ──
+  const sortedFeeds = useMemo(
+    () => [...feeds].sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()),
+    [],
+  );
 
   const goEvent = (item: EventItem) =>
     router.push({
@@ -132,11 +147,11 @@ export default function HomeScreen() {
       },
     } as any);
 
-  const goPost = (item: AnnouncementItem) =>
+  const goFeed = (item: FeedItem) =>
     router.push({
-      pathname: '/(standalone)/post/[post_id]',
+      pathname: '/(standalone)/feed/[feed_id]',
       params: {
-        post_id: item.id.toString(),
+        feed_id: item.id.toString(),
         title: item.title,
         description: item.description,
         image: item.image,
@@ -147,91 +162,71 @@ export default function HomeScreen() {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor={NAVY} />
+      <HomeHeader />
 
-      {/* ── Sticky header ── */}
-      <LinearGradient
-        colors={[NAVY, NAVY_MID]}
-        style={[styles.header, { paddingTop: insets.top + 12 }]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <View style={styles.decor1} />
-        <View style={styles.decor2} />
-
-        <View style={styles.headerRow}>
-          <View style={styles.headerLeft}>
-            <Image
-              source={require('@/assets/images/logo.jpeg')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.greeting}>{getGreeting()} 👋</Text>
-              <Text style={styles.greetingName}>{firstName(studentUser?.fullName)}</Text>
-              {studentUser?.program && (
-                <Text style={styles.programTag} numberOfLines={1}>
-                  {studentUser.program}  ·  Level {studentUser.year}
-                </Text>
-              )}
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.notifBtn}
-            onPress={() => router.push('/(standalone)/notification')}
-            activeOpacity={0.8}
-          >
-            <Bell size={20} color="#fff" strokeWidth={2} />
-            <View style={styles.notifDot} />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-
-      {/* ── Scrollable body ── */}
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={NAVY_MID}
-            colors={[NAVY_MID]}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh}
+            tintColor={NAVY_MID} colors={[NAVY_MID]} />
         }
       >
-
-
-        {/* ── Hero card ── */}
-        {occasions.length > 0 && (
+        {/* ── Next Up ── */}
+        {nextUp && (
           <>
             <SectionHeader title="Next Up" sub="Coming soon to SCISA" />
-            <HeroCard item={occasions[0]} onPress={() => goEvent(occasions[0])} />
+            <HeroCard item={nextUp} onPress={() => goEvent(nextUp)} />
           </>
         )}
 
-        {/* ── Upcoming events ── */}
-        <SectionHeader title="Upcoming Events" sub={`${occasions.length} scheduled`} />
-        <FlatList
-          horizontal
-          data={occasions}
-          keyExtractor={(e) => String(e.id)}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.eventList}
-          renderItem={({ item }) => (
-            <EventCard item={item} onPress={() => goEvent(item)} />
-          )}
-        />
+        {/* ── Upcoming Events ── */}
+        {upcoming.length > 0 && (
+          <>
+            <SectionHeader title="Upcoming Events" sub={`${upcoming.length} scheduled`} />
+            <FlatList
+              horizontal
+              data={upcoming}
+              keyExtractor={(e) => String(e.id)}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.eventList}
+              renderItem={({ item }) => (
+                <EventCard item={item} onPress={() => goEvent(item)} />
+              )}
+            />
+          </>
+        )}
 
-        {/* ── HostelHubb promo ── */}
+        {/* ── Student Resources ── */}
         <SectionHeader title="Student Resources" sub="Recommended for you" />
         <HostelHubbBanner />
 
-        {/* ── Announcements ── */}
-        <SectionHeader title="Announcements" sub="Latest from SCISA" />
-        {announcements.map((item, i) => (
-          <FeedCard key={item.id} item={item} index={i} onPress={() => goPost(item)} />
-        ))}
+        {/* ── News & Feeds ── */}
+        {sortedFeeds.length > 0 && (
+          <>
+            <SectionHeader title="News & Updates" sub="What's happening at SCISA" />
+            {sortedFeeds.map((item, i) => (
+              <FeedCard key={item.id} item={item} index={i} onPress={() => goFeed(item)} />
+            ))}
+          </>
+        )}
+
+        {/* ── Past Events ── */}
+        {past.length > 0 && (
+          <>
+            <SectionHeader title="Past Events" sub="Recently concluded" />
+            <FlatList
+              horizontal
+              data={past}
+              keyExtractor={(e) => String(e.id)}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.eventList}
+              renderItem={({ item, index }) => (
+                <PastEventCard item={item} index={index} onPress={() => goEvent(item)} />
+              )}
+            />
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -240,48 +235,13 @@ export default function HomeScreen() {
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F2F4F7' },
-
-  // Header
-  header: { paddingHorizontal: 20, paddingBottom: 20, overflow: 'hidden', zIndex: 10 },
-  decor1: {
-    position: 'absolute', width: 200, height: 200, borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.05)', top: -60, right: -40,
-  },
-  decor2: {
-    position: 'absolute', width: 120, height: 120, borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.04)', bottom: -30, left: -20,
-  },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  logo: {
-    width: 46, height: 46, borderRadius: 23,
-    borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)',
-  },
-  greeting: { fontSize: 12, color: 'rgba(255,255,255,0.6)' },
-  greetingName: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  programTag: { fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 },
-  notifBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  notifDot: {
-    position: 'absolute', top: 8, right: 8,
-    width: 8, height: 8, borderRadius: 4,
-    backgroundColor: ACCENT_RED, borderWidth: 1.5, borderColor: NAVY,
-  },
-
   scroll: { paddingBottom: 120 },
 
-  // Section header
   sectionHeader: { marginHorizontal: 20, marginTop: 6, marginBottom: 10 },
-  sectionTitle: {
-    fontSize: 16, fontWeight: '800',
-    color: colors.text.primary, letterSpacing: -0.2,
-  },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text.primary, letterSpacing: -0.2 },
   sectionSub: { fontSize: 12, color: colors.gray[500], marginTop: 1 },
 
-  // Hero card
+  // Hero
   heroWrap: { marginHorizontal: 16, marginBottom: 20 },
   heroCard: {
     height: 210, borderRadius: 20, overflow: 'hidden',
@@ -297,36 +257,28 @@ const styles = StyleSheet.create({
   },
   heroChipText: { fontSize: 11, color: '#fff', fontWeight: '600' },
   heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16 },
-  heroLabel: {
-    fontSize: 9, fontWeight: '800',
-    color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 4,
-  },
+  heroLabel: { fontSize: 9, fontWeight: '800', color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 4 },
   heroTitle: { fontSize: 19, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
   heroDesc: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 4, lineHeight: 17 },
   heroCta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 10 },
   heroCtaText: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.85)' },
 
-  // Event list
-  eventList: { paddingHorizontal: 16, gap: 12, paddingBottom: 20 },
+  // Past event card
+  pastCard: {
+    width: 160, height: 130, borderRadius: 16, overflow: 'hidden',
+    shadowColor: NAVY, shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
+  },
+  pastImage: { width: '100%', height: '100%', position: 'absolute' },
+  pastOverlay: { flex: 1, justifyContent: 'flex-end', padding: 10 },
+  pastChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2, marginBottom: 5,
+  },
+  pastChipText: { fontSize: 9, color: 'rgba(255,255,255,0.75)', fontWeight: '700', letterSpacing: 0.8 },
+  pastTitle: { fontSize: 12, fontWeight: '700', color: '#fff', lineHeight: 16 },
+  pastDate: { fontSize: 10, color: 'rgba(255,255,255,0.55)', marginTop: 2 },
 
-  // Feed cards
-  feedCard: {
-    flexDirection: 'row', backgroundColor: '#fff',
-    marginHorizontal: 16, marginBottom: 10, borderRadius: 16, overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 5, elevation: 2,
-  },
-  feedBorder: { width: 3, backgroundColor: NAVY_MID },
-  feedContent: { flex: 1, flexDirection: 'row', padding: 12, gap: 10 },
-  feedThumb: { width: 70, height: 70, borderRadius: 10 },
-  feedText: { flex: 1 },
-  feedTitle: {
-    fontSize: 14, fontWeight: '700',
-    color: colors.text.primary, lineHeight: 20, marginBottom: 3,
-  },
-  feedDesc: { fontSize: 12, color: colors.gray[500], lineHeight: 17, marginBottom: 7 },
-  feedFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  feedDate: { fontSize: 11, color: colors.gray[400] },
-  feedCta: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  feedCtaText: { fontSize: 11, fontWeight: '700', color: NAVY_MID },
+  eventList: { paddingHorizontal: 16, gap: 12, paddingBottom: 20 },
 });

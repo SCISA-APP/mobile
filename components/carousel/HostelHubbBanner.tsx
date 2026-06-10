@@ -5,7 +5,7 @@ import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 // ── config — swap these for real store URLs ───────────────────────────────────
 const APP_STORE_URL = 'https://apps.apple.com/app/hostelhubb';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.hostelhubb';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.Hostelhubb.Hostelhubb';
 
 const HH_RED       = '#80040e';   // HostelHubb brand red
 const HH_RED_DARK  = '#5a0209';   // deeper anchor for gradient start

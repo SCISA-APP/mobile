@@ -149,7 +149,6 @@ export default function ProfileScreen() {
 
         <SectionCard title="Account">
           <MenuItem icon="person-outline" label="Edit Profile" sublabel="Update your personal information" onPress={() => {}} />
-          <MenuItem icon="lock-closed-outline" label="Change Password" sublabel="Keep your account secure" onPress={() => router.push('/(auth)/forgotPassword')} />
           <MenuItem icon="notifications-outline" label="Notifications" sublabel="Manage alerts and reminders" onPress={() => router.push('/(standalone)/notification')} last />
         </SectionCard>
 
@@ -160,7 +159,6 @@ export default function ProfileScreen() {
         </SectionCard>
 
         <SectionCard title="App">
-          <MenuItem icon="help-circle-outline" label="Help & Support" tint={colors.info} onPress={() => {}} />
           <MenuItem icon="shield-checkmark-outline" label="Privacy Policy" tint={colors.info} onPress={() => {}} last />
         </SectionCard>
 
