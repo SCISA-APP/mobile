@@ -18,7 +18,7 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Label>Welfare</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="intership/index">
+      <NativeTabs.Trigger name="internship/index">
         <NativeTabs.Trigger.Icon sf={{ default: 'cart', selected: 'cart.fill' }} />
         <NativeTabs.Trigger.Label>Internship</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
