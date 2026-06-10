@@ -45,10 +45,10 @@ function HeroCard({ item, onPress }: { item: EventItem; onPress: () => void }) {
     <Animated.View entering={FadeInDown.duration(380).springify()} style={styles.heroWrap}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.88} style={styles.heroCard}>
         {item.image
-          ? <Image source={{ uri: item.image }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
-          : <View style={[StyleSheet.absoluteFillObject, { backgroundColor: NAVY_MID }]} />}
+          ? <Image source={{ uri: item.image }} style={styles.heroImage} resizeMode="cover" />
+          : <View style={[styles.heroImage, { backgroundColor: NAVY_MID }]} />}
 
-        {/* Frosted date chip — navy, no red */}
+        {/* Frosted date chip */}
         <View style={styles.heroChip}>
           <Ionicons name="calendar-outline" size={11} color="rgba(255,255,255,0.85)" />
           <Text style={styles.heroChipText}>{item.date}</Text>
@@ -114,10 +114,9 @@ function EventCard({ item, onPress }: { item: EventItem; onPress: () => void }) 
       <View style={styles.eventImgWrap}>
         {item.image
           ? <Animated.Image entering={FadeIn.duration(350)} source={{ uri: item.image }}
-              style={StyleSheet.absoluteFillObject} resizeMode="cover" />
-          : <View style={[StyleSheet.absoluteFillObject, { backgroundColor: colors.gray[200] }]} />}
+              style={styles.eventImg} resizeMode="cover" />
+          : <View style={[styles.eventImg, { backgroundColor: colors.gray[200] }]} />}
         <LinearGradient colors={['transparent', 'rgba(0,21,64,0.75)']} style={StyleSheet.absoluteFillObject} />
-        {/* Navy pill — not red */}
         <View style={styles.eventDatePill}>
           <Text style={styles.eventDateText}>{item.date}</Text>
         </View>
@@ -239,15 +238,19 @@ export default function HomeScreen() {
             tintColor={NAVY_MID} colors={[NAVY_MID]} />
         }
       >
-        {/* At-a-glance stats */}
+        {/* At-a-glance stats — student-specific context */}
         <View style={styles.glanceRow}>
+          <StatChip
+            value={studentUser?.year ? `${studentUser.year}` : '—'}
+            label="Level"
+            icon="layers-outline"
+          />
+          <View style={styles.glanceDivider} />
+          <StatChip value="2025/26" label="Year" icon="school-outline" />
+          <View style={styles.glanceDivider} />
+          <StatChip value="Sem 2" label="Semester" icon="time-outline" />
+          <View style={styles.glanceDivider} />
           <StatChip value={String(occasions.length)} label="Events" icon="calendar-outline" />
-          <View style={styles.glanceDivider} />
-          <StatChip value={String(announcements.length)} label="Notices" icon="newspaper-outline" />
-          <View style={styles.glanceDivider} />
-          <StatChip value="Sem 2" label="2025 / 26" icon="school-outline" />
-          <View style={styles.glanceDivider} />
-          <StatChip value="6" label="Depts" icon="grid-outline" />
         </View>
 
         {/* Hero card */}
@@ -352,6 +355,7 @@ const styles = StyleSheet.create({
     shadowColor: NAVY, shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2, shadowRadius: 14, elevation: 7,
   },
+  heroImage: { width: '100%', height: 210, position: 'absolute' },
   heroChip: {
     position: 'absolute', top: 14, left: 14,
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -391,6 +395,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.09, shadowRadius: 8, elevation: 4,
   },
   eventImgWrap: { height: 130 },
+  eventImg: { width: '100%', height: 130 },
   eventDatePill: {
     position: 'absolute', bottom: 8, left: 10,
     backgroundColor: `${NAVY}CC`, borderRadius: 8,
