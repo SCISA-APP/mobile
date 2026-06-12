@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     width: '100%',
-    height: 240,
+    height: 440,
     resizeMode: 'cover',
   },
   body: {

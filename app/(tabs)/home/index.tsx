@@ -1,163 +1,146 @@
-import { occasions } from '@/assets/data/events';
-import { feeds } from '@/assets/data/feeds';
-import colors from '@/constants/colors';
 import EventCard from '@/components/cards/EventCard';
 import FeedCard from '@/components/cards/FeedCard';
+import HeroCard from '@/components/cards/HeroCard';
+import PastEventCard from '@/components/cards/PastEventCard';
 import HomeHeader from '@/components/headers/HomeHeader';
+import SectionHeader from '@/components/Section/SectionHeader';
 import HostelHubbBanner from '@/components/carousel/HostelHubbBanner';
+import { fetchEvents, fetchFeeds } from '@/api/article';
 import { EventItem } from '@/types/models/event';
 import { FeedItem } from '@/types/models/feed';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
-  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const NAVY     = '#002259';
 const NAVY_MID = '#003080';
 
-// ── Date helpers ──────────────────────────────────────────────────────────────
-const today = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-const parseDate = (s: string) => new Date(s);
-
-// ── Hero card ─────────────────────────────────────────────────────────────────
-function HeroCard({ item, onPress }: { item: EventItem; onPress: () => void }) {
-  return (
-    <Animated.View entering={FadeInDown.duration(380).springify()} style={styles.heroWrap}>
-      <TouchableOpacity onPress={onPress} activeOpacity={0.88} style={styles.heroCard}>
-        {item.image
-          ? <Image source={{ uri: item.image }} style={styles.heroImage} resizeMode="cover" />
-          : <View style={[styles.heroImage, { backgroundColor: NAVY_MID }]} />}
-
-        <View style={styles.heroChip}>
-          <Ionicons name="calendar-outline" size={11} color="rgba(255,255,255,0.85)" />
-          <Text style={styles.heroChipText}>{item.date}</Text>
-        </View>
-
-        <LinearGradient
-          colors={['transparent', 'rgba(0,21,64,0.92)']}
-          style={styles.heroOverlay}
-        >
-          <Text style={styles.heroLabel}>NEXT UP</Text>
-          <Text style={styles.heroTitle}>{item.title}</Text>
-          <Text style={styles.heroDesc} numberOfLines={2}>{item.description}</Text>
-          <View style={styles.heroCta}>
-            <Text style={styles.heroCtaText}>View details</Text>
-            <Ionicons name="arrow-forward-circle-outline" size={17} color="rgba(255,255,255,0.8)" />
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-}
-
-// ── Past event card ───────────────────────────────────────────────────────────
-function PastEventCard({ item, index, onPress }: {
-  item: EventItem; index: number; onPress: () => void;
-}) {
-  return (
-    <Animated.View entering={FadeInDown.delay(index * 70).duration(340).springify()}>
-      <TouchableOpacity style={styles.pastCard} onPress={onPress} activeOpacity={0.85}>
-        {item.image
-          ? <Image source={{ uri: item.image }} style={styles.pastImage} resizeMode="cover" />
-          : <View style={[styles.pastImage, { backgroundColor: NAVY_MID }]} />}
-        <LinearGradient
-          colors={['transparent', 'rgba(0,21,64,0.85)']}
-          style={styles.pastOverlay}
-        >
-          <View style={styles.pastChip}>
-            <Text style={styles.pastChipText}>Past</Text>
-          </View>
-          <Text style={styles.pastTitle} numberOfLines={2}>{item.title}</Text>
-          <Text style={styles.pastDate}>{item.date}</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-}
-
-// ── Section header ────────────────────────────────────────────────────────────
-function SectionHeader({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {sub && <Text style={styles.sectionSub}>{sub}</Text>}
-    </View>
-  );
-}
-
-// ── Screen ────────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading]       = useState(true);
+  const [occasions, setOccasions]   = useState<EventItem[]>([]);
+  const [feeds, setFeeds]           = useState<FeedItem[]>([]);
+
+  const loadData = async () => {
+    try {
+      const [eventsData, feedsData] = await Promise.all([fetchEvents(), fetchFeeds()]);
+      console.log('[HomeScreen] Events loaded:', eventsData);
+      console.log('[HomeScreen] Feeds loaded:', feedsData);
+      setOccasions(eventsData);
+      setFeeds(feedsData);
+    } catch (err) {
+      console.error('[HomeScreen] Failed to load data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
+    loadData().finally(() => setRefreshing(false));
   }, []);
 
-  // ── Partition events by date ──
-  const { nextUp, upcoming, past } = useMemo(() => {
-    const now = today();
-    const future = occasions
-      .filter(e => parseDate(e.date) >= now)
-      .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
+  const { nextUp, ongoing, upcoming, past } = useMemo(() => {
+    const now = new Date();
+
+    const effectiveEnd = (e: EventItem) => new Date(e.end_date ?? e.date);
+    const isMultiDay   = (e: EventItem) => !!e.end_date && e.end_date !== e.start_date;
+    const hasStarted   = (e: EventItem) => new Date(e.start_date) <= now;
+    const isOngoing    = (e: EventItem) => isMultiDay(e) && hasStarted(e) && effectiveEnd(e) >= now;
+    const isNotStarted = (e: EventItem) => new Date(e.start_date) > now;
 
     const past = occasions
-      .filter(e => parseDate(e.date) < now)
-      .sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()); // latest past first
+      .filter(e => effectiveEnd(e) < now)
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
-    return {
-      nextUp: future[0] ?? null,        // closest upcoming
-      upcoming: future.slice(1),        // rest of future (exclude nextUp)
-      past,
-    };
-  }, []);
+    const active = occasions.filter(e => effectiveEnd(e) >= now);
 
-  // ── Feeds sorted latest first ──
-  const sortedFeeds = useMemo(
-    () => [...feeds].sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime()),
-    [],
-  );
+    const notStarted = active
+      .filter(isNotStarted)
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
 
-  const goEvent = (item: EventItem) =>
-    router.push({
-      pathname: '/(standalone)/event/[event_id]',
-      params: {
-        event_id: item.id.toString(),
-        title: item.title,
-        description: item.description,
-        image: item.image,
-        date: item.date,
-      },
-    } as any);
+    // Ongoing = active multi-day events that have already started
+    const ongoingList = active
+      .filter(isOngoing)
+      .sort((a, b) => new Date(a.end_date ?? a.date).getTime() - new Date(b.end_date ?? b.date).getTime()); // soonest ending first
+
+    let heroPool: EventItem[];
+
+    if (notStarted.length > 0) {
+      heroPool = notStarted.sort((a, b) => {
+        const timeDiff = new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        if (timeDiff !== 0) return timeDiff;
+        const aMulti = isMultiDay(a) ? 1 : 0;
+        const bMulti = isMultiDay(b) ? 1 : 0;
+        return aMulti - bMulti;
+      });
+    } else if (ongoingList.length > 0) {
+      // No upcoming events — fall back to ongoing as hero, remove it from ongoing section
+      heroPool = ongoingList;
+    } else {
+      heroPool = [];
+    }
+
+    const nextUp = heroPool[0] ?? null;
+
+    // Ongoing section: all ongoing EXCEPT the one used as hero fallback
+    const ongoing = notStarted.length > 0
+      ? ongoingList                                          // hero is from notStarted, show all ongoing
+      : ongoingList.filter(e => e.id !== nextUp?.id);       // hero is an ongoing, exclude it
+
+    // Upcoming: not-started events excluding the hero
+    const upcoming = notStarted
+      .filter(e => e.id !== nextUp?.id)
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+
+    return { nextUp, ongoing, upcoming, past };
+  }, [occasions]);
+
+ const goEvent = (item: EventItem) =>
+  router.push({
+    pathname: '/(standalone)/event/[event_id]',
+    params: {
+      event_id:    item.id.toString(),
+      title:       item.title,
+      description: item.description,
+      image:       item.image ?? '',
+      date:        item.date,
+      start_date:  item.start_date,
+      end_date:    item.end_date ?? '',
+    },
+  } as any);
 
   const goFeed = (item: FeedItem) =>
     router.push({
       pathname: '/(standalone)/feed/[feed_id]',
       params: {
-        feed_id: item.id.toString(),
-        title: item.title,
+        feed_id:     item.id.toString(),
+        title:       item.title,
         description: item.description,
-        image: item.image,
-        date: item.date,
+        image:       item.image ?? '',
+        date:        item.date,
       },
     } as any);
+
+  if (loading) {
+    return (
+      <View style={[styles.root, styles.loadingRoot]}>
+        <StatusBar barStyle="light-content" backgroundColor={NAVY} />
+        <ActivityIndicator size="large" color={NAVY_MID} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -168,8 +151,12 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh}
-            tintColor={NAVY_MID} colors={[NAVY_MID]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={NAVY_MID}
+            colors={[NAVY_MID]}
+          />
         }
       >
         {/* ── Next Up ── */}
@@ -177,6 +164,23 @@ export default function HomeScreen() {
           <>
             <SectionHeader title="Next Up" sub="Coming soon to SCISA" />
             <HeroCard item={nextUp} onPress={() => goEvent(nextUp)} />
+          </>
+        )}
+
+        {/* ── Ongoing Events ── */}
+        {ongoing.length > 0 && (
+          <>
+            <SectionHeader title="Ongoing" sub="Happening right now" />
+            <FlatList
+              horizontal
+              data={ongoing}
+              keyExtractor={(e) => String(e.id)}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.eventList}
+              renderItem={({ item }) => (
+                <EventCard item={item} onPress={() => goEvent(item)} />
+              )}
+            />
           </>
         )}
 
@@ -201,11 +205,11 @@ export default function HomeScreen() {
         <SectionHeader title="Student Resources" sub="Recommended for you" />
         <HostelHubbBanner />
 
-        {/* ── News & Feeds ── */}
-        {sortedFeeds.length > 0 && (
+        {/* ── News & Updates ── */}
+        {feeds.length > 0 && (
           <>
             <SectionHeader title="News & Updates" sub="What's happening at SCISA" />
-            {sortedFeeds.map((item, i) => (
+            {feeds.map((item, i) => (
               <FeedCard key={item.id} item={item} index={i} onPress={() => goFeed(item)} />
             ))}
           </>
@@ -232,53 +236,9 @@ export default function HomeScreen() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F2F4F7' },
-  scroll: { paddingBottom: 120 },
-
-  sectionHeader: { marginHorizontal: 20, marginTop: 6, marginBottom: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text.primary, letterSpacing: -0.2 },
-  sectionSub: { fontSize: 12, color: colors.gray[500], marginTop: 1 },
-
-  // Hero
-  heroWrap: { marginHorizontal: 16, marginBottom: 20 },
-  heroCard: {
-    height: 210, borderRadius: 20, overflow: 'hidden',
-    shadowColor: NAVY, shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2, shadowRadius: 14, elevation: 7,
-  },
-  heroImage: { width: '100%', height: 210, position: 'absolute' },
-  heroChip: {
-    position: 'absolute', top: 14, left: 14,
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(0,34,89,0.55)',
-    borderRadius: 20, paddingHorizontal: 10, paddingVertical: 5,
-  },
-  heroChipText: { fontSize: 11, color: '#fff', fontWeight: '600' },
-  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16 },
-  heroLabel: { fontSize: 9, fontWeight: '800', color: 'rgba(255,255,255,0.55)', letterSpacing: 1.5, marginBottom: 4 },
-  heroTitle: { fontSize: 19, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
-  heroDesc: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 4, lineHeight: 17 },
-  heroCta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 10 },
-  heroCtaText: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.85)' },
-
-  // Past event card
-  pastCard: {
-    width: 160, height: 130, borderRadius: 16, overflow: 'hidden',
-    shadowColor: NAVY, shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
-  },
-  pastImage: { width: '100%', height: '100%', position: 'absolute' },
-  pastOverlay: { flex: 1, justifyContent: 'flex-end', padding: 10 },
-  pastChip: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2, marginBottom: 5,
-  },
-  pastChipText: { fontSize: 9, color: 'rgba(255,255,255,0.75)', fontWeight: '700', letterSpacing: 0.8 },
-  pastTitle: { fontSize: 12, fontWeight: '700', color: '#fff', lineHeight: 16 },
-  pastDate: { fontSize: 10, color: 'rgba(255,255,255,0.55)', marginTop: 2 },
-
-  eventList: { paddingHorizontal: 16, gap: 12, paddingBottom: 20 },
+  root:        { flex: 1, backgroundColor: '#F2F4F7' },
+  loadingRoot: { justifyContent: 'center', alignItems: 'center' },
+  scroll:      { paddingBottom: 120 },
+  eventList:   { paddingHorizontal: 16, gap: 12, paddingBottom: 20 },
 });

@@ -1,6 +1,7 @@
 import Header from '@/components/headers/header';
 import { ThemedText } from '@/components/themed-text';
 import colors from '@/constants/colors';
+import { supabase } from '@/supabaseConfig';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -29,20 +30,48 @@ const CATEGORIES = [
 const ConcernScreen = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('General');
+  const [category, setCategory] = useState('Other');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
       Alert.alert('Missing Fields', 'Please fill in both the title and description.');
       return;
     }
-    Alert.alert(
-      'Report Submitted',
-      'Your report has been received. We will follow up and do our best to ensure the matter is addressed.',
-      [{ text: 'Got it' }]
-    );
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('concerns').insert({
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        is_anonymous: isAnonymous,
+      });
+
+      if (error) {
+        console.log(error);
+        Alert.alert('Error', 'Something went wrong while submitting your report. Please try again.');
+        return;
+      }
+
+      Alert.alert(
+        'Report Submitted',
+        'Your report has been received. We will follow up and do our best to ensure the matter is addressed.',
+        [{ text: 'Got it' }]
+      );
+
+      setTitle('');
+      setDescription('');
+      setCategory('Other');
+      setIsAnonymous(false);
+    } catch (err) {
+      console.log(err);
+      Alert.alert('Error', 'Something went wrong while submitting your report. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -77,7 +106,7 @@ const ConcernScreen = () => {
           </View>
 
           {/* Description field */}
-
+          <View style={styles.fieldGroup}>
             <CustomInput
               placeholder="Describe your concern in detail..."
               icon="document-text-outline"
@@ -86,7 +115,7 @@ const ConcernScreen = () => {
               multiline
               numberOfLines={6}
             />
-
+          </View>
 
           {/* Category picker */}
           <View style={styles.fieldGroup}>
@@ -156,12 +185,18 @@ const ConcernScreen = () => {
 
         {/* Submit button */}
         <TouchableOpacity
-          style={[styles.submitButton, (!title || !description) && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            (!title || !description || submitting) && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
           activeOpacity={0.85}
+          disabled={!title || !description || submitting}
         >
           <Ionicons name="paper-plane-outline" size={18} color="#fff" style={styles.submitIcon} />
-          <Text style={styles.submitText}>Submit Concern</Text>
+          <Text style={styles.submitText}>
+            {submitting ? 'Submitting...' : 'Submit Concern'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -179,8 +214,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
-
-  // Banner
   banner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -201,15 +234,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: colors.gray[700] ?? '#444',
   },
-
-  // Card
   card: {
     backgroundColor: '#ffffff',
     borderColor: colors.gray[200] ?? '#E5E5E5',
     marginBottom: 20,
   },
-
-  // Field group
   fieldGroup: {
     marginBottom: 20,
   },
@@ -221,8 +250,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-
-  // Category
   categoryButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -268,15 +295,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-
-  // Divider
   divider: {
     height: 1,
     backgroundColor: colors.gray[100] ?? '#F0F0F0',
     marginBottom: 20,
   },
-
-  // Toggle
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -296,8 +319,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: colors.gray[500] ?? '#888',
   },
-
-  // Submit
   submitButton: {
     backgroundColor: colors.primary,
     borderRadius: 14,
@@ -324,8 +345,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
-
-  // Footnote
   footnote: {
     marginTop: 16,
     textAlign: 'center',

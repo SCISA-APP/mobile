@@ -1,12 +1,11 @@
-import { announcements } from '@/assets/data/announcements';
-import { AnnouncementItem } from '@/types/models/announcement';
+import { supabase } from '@/supabaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Bell } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
-  Image,
   StatusBar,
   StyleSheet,
   Text,
@@ -18,14 +17,34 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const NAVY     = '#002259';
 const NAVY_MID = '#003080';
 
+interface NotificationItem {
+  id: string;
+  title: string | null;
+  message: string;
+  is_read: boolean;
+  for_all: boolean;
+  action_link: string | null;
+  created_at: string;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
-// Sort by date descending — assumes item.date is a parseable string like "2025-06-10"
-// If your dates are formatted differently, swap in your own comparator
-const byLatest = (a: AnnouncementItem, b: AnnouncementItem) =>
-  new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime();
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+};
 
 // ── Card ──────────────────────────────────────────────────────────────────────
-function NotifCard({ item, index }: { item: AnnouncementItem; index: number }) {
+function NotifCard({ item, index }: { item: NotificationItem; index: number }) {
   return (
     <Animated.View entering={FadeInDown.delay(index * 60).duration(340).springify()}>
       <View style={styles.card}>
@@ -39,16 +58,12 @@ function NotifCard({ item, index }: { item: AnnouncementItem; index: number }) {
             <View style={styles.metaRow}>
               <Text style={styles.metaSource}>SCISA</Text>
               <Text style={styles.metaDot}>·</Text>
-              <Text style={styles.metaDate}>{item.date ?? 'Today'}</Text>
+              <Text style={styles.metaDate}>{formatDate(item.created_at)}</Text>
             </View>
 
-            <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
-            <Text style={styles.cardDesc} numberOfLines={4}>{item.description}</Text>
+            <Text style={styles.cardTitle} numberOfLines={2}>{item.title ?? 'Notification'}</Text>
+            <Text style={styles.cardDesc} numberOfLines={4}>{item.message}</Text>
           </View>
-
-          {item.image && (
-            <Image source={{ uri: item.image }} style={styles.thumb} resizeMode="cover" />
-          )}
         </View>
       </View>
     </Animated.View>
@@ -59,8 +74,32 @@ function NotifCard({ item, index }: { item: AnnouncementItem; index: number }) {
 export default function NotificationScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const notifications = [...announcements].sort(byLatest);
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('for_all', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+      setNotifications(data || []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
@@ -91,15 +130,17 @@ export default function NotificationScreen() {
       {/* ── List ── */}
       <FlatList
         data={notifications}
-        keyExtractor={(n) => String(n.id)}
+        keyExtractor={(n) => n.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Bell size={36} color={NAVY_MID} strokeWidth={1.5} />
-            <Text style={styles.emptyText}>You're all caught up!</Text>
-          </View>
+          !loading ? (
+            <View style={styles.empty}>
+              <Bell size={36} color={NAVY_MID} strokeWidth={1.5} />
+              <Text style={styles.emptyText}>You're all caught up!</Text>
+            </View>
+          ) : null
         }
         renderItem={({ item, index }) => <NotifCard item={item} index={index} />}
       />
@@ -146,7 +187,6 @@ const styles = StyleSheet.create({
   metaDate: { fontSize: 10, color: '#999' },
   cardTitle: { fontSize: 13, fontWeight: '700', color: '#111', lineHeight: 18, marginBottom: 3 },
   cardDesc: { fontSize: 12, color: '#666', lineHeight: 17 },
-  thumb: { width: 60, height: 60, borderRadius: 10, alignSelf: 'center' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80, gap: 12 },
   emptyText: { fontSize: 15, color: '#999', fontWeight: '600' },
 });

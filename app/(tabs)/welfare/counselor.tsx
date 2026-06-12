@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/supabaseConfig';
 import colors from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,34 +11,46 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const COUNSELLORS = [
-  {
-    id: '1',
-    name: 'Dr. Abena Owusu',
-    role: 'University Counselling Centre',
-    phone: '+233 XX XXX XXXX',
-    availability: 'Mon – Fri, 8 AM – 5 PM',
-  },
-  {
-    id: '2',
-    name: 'Mr. Kofi Asante',
-    role: 'College of Science Counsellor',
-    phone: '+233 XX XXX XXXX',
-    availability: 'Mon, Wed & Fri, 9 AM – 3 PM',
-  },
-  {
-    id: '3',
-    name: 'SCISA Welfare Officer',
-    role: 'Student welfare & peer support',
-    phone: '+233 XX XXX XXXX',
-    availability: 'Reachable during working hours',
-  },
-];
+interface Counsellor {
+  id: string;
+  name: string;
+  role: string;
+  availability: string;
+  phone: string;
+  image: string;
+}
 
 export default function CounsellorScreen() {
+  const [counsellors, setCounsellors] = useState<Counsellor[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCounsellors();
+  }, []);
+
+  const fetchCounsellors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('counselors')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+      setCounsellors(data || []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -66,13 +80,11 @@ export default function CounsellorScreen() {
         </View>
 
         <View style={styles.card}>
-          {COUNSELLORS.map((c, index) => (
+          {counsellors.map((c, index) => (
             <View key={c.id}>
               <View style={styles.row}>
                 <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {c.name.split(' ').slice(-1)[0][0]}
-                  </Text>
+                  <Image source={{ uri: c.image }} style={styles.avatarImage} />
                 </View>
                 <View style={styles.info}>
                   <Text style={styles.name}>{c.name}</Text>
@@ -90,7 +102,7 @@ export default function CounsellorScreen() {
                   <Ionicons name="call" size={16} color="#7C3AED" />
                 </TouchableOpacity>
               </View>
-              {index < COUNSELLORS.length - 1 && <View style={styles.divider} />}
+              {index < counsellors.length - 1 && <View style={styles.divider} />}
             </View>
           ))}
         </View>
@@ -146,13 +158,14 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: '#EDE9FE',
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    overflow: 'hidden',
   },
-  avatarText: { fontSize: 18, fontWeight: '700', color: '#7C3AED' },
+  avatarImage: { width: 44, height: 44, borderRadius: 22 },
   info: { flex: 1 },
   name: { fontSize: 14, fontWeight: '700', color: colors.text.primary },
   role: { fontSize: 12, color: colors.gray[500], marginTop: 2 },
   availRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  availability: { fontSize: 11, color: colors.gray[400] },
+  availability: { fontSize: 11, color: colors.gray[900] },
   callBtn: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: '#EDE9FE',
