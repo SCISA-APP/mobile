@@ -2,6 +2,7 @@ import EventCard from '@/components/cards/EventCard';
 import FeedCard from '@/components/cards/FeedCard';
 import HeroCard from '@/components/cards/HeroCard';
 import PastEventCard from '@/components/cards/PastEventCard';
+import ExecutiveSectionCards from '@/components/cards/ExecutiveSectionCards';
 import HomeHeader from '@/components/headers/HomeHeader';
 import SectionHeader from '@/components/Section/SectionHeader';
 import HostelHubbBanner from '@/components/carousel/HostelHubbBanner';
@@ -33,8 +34,6 @@ export default function HomeScreen() {
   const loadData = async () => {
     try {
       const [eventsData, feedsData] = await Promise.all([fetchEvents(), fetchFeeds()]);
-      console.log('[HomeScreen] Events loaded:', eventsData);
-      console.log('[HomeScreen] Feeds loaded:', feedsData);
       setOccasions(eventsData);
       setFeeds(feedsData);
     } catch (err) {
@@ -204,6 +203,8 @@ export default function HomeScreen() {
         {/* ── Student Resources ── */}
         <SectionHeader title="Student Resources" sub="Recommended for you" />
         <HostelHubbBanner />
+        <SectionHeader title="Your Executives" sub="The people leading SCISA" />
+<ExecutiveSectionCards />
 
         {/* ── News & Updates ── */}
         {feeds.length > 0 && (
