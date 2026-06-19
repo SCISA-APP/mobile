@@ -1,23 +1,14 @@
-// /firebase/authMethods.ts
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+// /utils/authUtils/signUpWithEmailUtil.ts
+import { supabase } from "@/supabaseConfig";
 
-export const signUpWithEmail = async (
-  email: string,
-  password: string
-) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    
-    // Send verification email
-    if (userCredential.user) {
-      await sendEmailVerification(userCredential.user);
-    }
+export const signUpWithEmail = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
-    return userCredential.user;
-  } catch (error: any) {
-    console.error("Signup error:", error);
-    // Re-throw the original Firebase error so callers can inspect error.code
-    throw error;
-  }
+  if (error) throw error;
+  if (!data.user) throw new Error('Sign up failed: no user returned.');
+
+  return data.user;
 };

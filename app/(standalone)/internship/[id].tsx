@@ -1,7 +1,9 @@
 import colors from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   Linking,
   ScrollView,
@@ -12,14 +14,49 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LISTINGS } from '@/assets/data/listings';
+import { Listing } from '@/assets/data/listings';
+import { supabase } from '@/supabaseConfig';
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const listing = LISTINGS.find((l) => l.id === id);
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    supabase
+      .from('internship_listings')
+      .select('*')
+      .eq('id', id)
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) setListing(data as Listing);
+        setLoading(false);
+      });
+  }, [id]);
+
+  const handleEmail = () => {
+    if (listing?.contact.email) {
+      Linking.openURL(`mailto:${listing.contact.email}?subject=Application: ${listing.role}`);
+    }
+  };
+
+  const handlePhone = () => {
+    if (listing?.contact.phone) {
+      Linking.openURL(`tel:${listing.contact.phone}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.notFound}>
+        <ActivityIndicator size="large" color="#003080" />
+      </View>
+    );
+  }
 
   if (!listing) {
     return (
@@ -33,17 +70,6 @@ export default function ListingDetailScreen() {
     );
   }
 
-  const handleEmail = () => {
-    if (listing.contact.email) {
-      Linking.openURL(`mailto:${listing.contact.email}?subject=Application: ${listing.role}`);
-    }
-  };
-
-  const handlePhone = () => {
-    if (listing.contact.phone) {
-      Linking.openURL(`tel:${listing.contact.phone}`);
-    }
-  };
 
   return (
     <View style={styles.root}>

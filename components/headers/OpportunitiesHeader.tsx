@@ -16,8 +16,8 @@ import colors from '@/constants/colors';
 
 const HEADER_COLOR = '#003080';
 
-const SCISA_EMAIL = 'executives@scisa.org';      // ← replace with real email
-const SCISA_PHONE = '+233 XX XXX XXXX';           // ← replace with real number
+const SCISA_EMAIL = 'thescisaexecutive@gmail.com';      // ← replace with real email
+const SCISA_PHONE = '+233 59 511 6541';           // ← replace with real number
 const LISTINGS_COUNT = 14;                         // ← pass as prop or import
 
 interface Props {

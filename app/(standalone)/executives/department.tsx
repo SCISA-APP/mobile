@@ -2,6 +2,7 @@ import ExecutiveCard from '@/components/cards/ExecutiveCard';
 import ExecutiveModal from '@/components/modals/ExecutiveModal';
 import { fetchDepartmentExecutives } from '@/api/executives';
 import { Executive } from '@/types/models/executives';
+import { sortExecutives } from '@/utils/sortExecutives';
 import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,7 +38,7 @@ export default function DepartmentExecutives() {
       return;
     }
     fetchDepartmentExecutives(program)
-      .then(setExecutives)
+      .then(data => setExecutives(sortExecutives(data)))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [program]);
@@ -79,9 +80,7 @@ export default function DepartmentExecutives() {
         <FlatList
           data={executives}
           keyExtractor={e => String(e.id)}
-          numColumns={2}
           contentContainerStyle={styles.list}
-          columnWrapperStyle={styles.row}
           renderItem={({ item }) => (
             <ExecutiveCard item={item} onPress={() => setSelected(item)} />
           )}
@@ -105,18 +104,12 @@ export default function DepartmentExecutives() {
 
 const styles = StyleSheet.create({
   root:        { flex: 1, backgroundColor: '#F2F4F7' },
-  header:      {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    overflow: 'hidden',
-  },
+  header:      { paddingHorizontal: 20, paddingBottom: 20, overflow: 'hidden' },
   headerDecor: {
     position: 'absolute', width: 180, height: 180, borderRadius: 90,
     backgroundColor: 'rgba(255,255,255,0.05)', top: -60, right: -30,
   },
-  headerRow:   {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-  },
+  headerRow:   { flexDirection: 'row', alignItems: 'center', gap: 12 },
   backBtn:     {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: 'rgba(255,255,255,0.12)',
@@ -126,7 +119,6 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '800', color: '#fff' },
   loader:      { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list:        { padding: 16, paddingBottom: 60 },
-  row:         { justifyContent: 'space-between', marginBottom: 12 },
   empty:       { flex: 1, alignItems: 'center', marginTop: 80, gap: 10 },
   emptyText:   { fontSize: 14, color: '#aaa', textAlign: 'center' },
 });

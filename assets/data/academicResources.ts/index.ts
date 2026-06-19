@@ -5,4 +5,7 @@ export * from "./Optometry"
 export * from "./foodSciences"
 export * from "./physics"
 export * from "./biochemistry"
+export * from "./environmentalScience"
+export * from "./chemistry"
 
+// mathematics, met, stats, enssa,chem, 

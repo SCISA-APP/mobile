@@ -1,15 +1,14 @@
 import colors from '@/constants/colors';
 import { useAuth } from '@/context/AuthContext';
-import { auth, db } from '@/firebaseConfig';
+import { supabase } from '@/supabaseConfig';
+import ProfileAccountActions from '@/components/buttons/ProfileAccountActions';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
+import AppVersionBadge from '@/components/ui/AppVersionBadge';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -20,6 +19,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HEADER_COLOR = '#003080';
+const NAVY = '#002259';
+const NAVY_MID = '#003080';
 
 interface StudentProfile {
   uid: string;
@@ -75,32 +76,36 @@ function MenuItem({ icon, label, sublabel, onPress, tint, last }: {
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { studentUser, clearStudentUser } = useAuth();
+  const { studentUser } = useAuth();
   const [profile, setProfile] = useState<StudentProfile | null>(studentUser as StudentProfile | null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const fetch_ = async () => {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
       setRefreshing(true);
       try {
-        const snap = await getDoc(doc(db, 'Student_Users', uid));
-        if (snap.exists()) setProfile({ uid, ...(snap.data() as Omit<StudentProfile, 'uid'>) });
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && data) {
+          setProfile({
+            uid: user.id,
+            fullName: data.full_name,
+            email: data.email,
+            program: data.program,
+            year: data.year,
+            permission: data.permission ?? 'student',
+          });
+        }
       } catch { /* fall back */ } finally { setRefreshing(false); }
     };
     fetch_();
   }, []);
-
-  const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: async () => {
-        try { await signOut(auth); await clearStudentUser(); router.replace('/(auth)/login'); }
-        catch { Alert.alert('Error', 'Something went wrong.'); }
-      }},
-    ]);
-  };
 
   const permissionLabel = profile?.permission
     ? profile.permission.charAt(0).toUpperCase() + profile.permission.slice(1)
@@ -109,12 +114,9 @@ export default function ProfileScreen() {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor={HEADER_COLOR} />
-
-      {/* Bleeds behind the status bar so rubber-band over-scroll is blue */}
       <View style={[styles.safeAreaFill, { height: insets.top }]} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* ── Gradient header ── */}
         <LinearGradient colors={[HEADER_COLOR, '#002259']} style={[styles.header, { paddingTop: insets.top + 20 }]}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
           <View style={styles.decorCircle1} />
@@ -130,25 +132,23 @@ export default function ProfileScreen() {
 
           <View style={styles.statsRow}>
             <View style={styles.statPill}>
-              <Text style={styles.statValue}>{profile?.year ?? '—'}</Text>
               <Text style={styles.statLabel}>Level</Text>
+              <Text style={styles.statValue}>{profile?.year ?? '—'}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statPill}>
-              <Text style={styles.statValue}>{permissionLabel}</Text>
               <Text style={styles.statLabel}>Role</Text>
+                <Text style={styles.statValue}>{permissionLabel}</Text>
             </View>
           </View>
         </LinearGradient>
 
-        {/* ── Programme banner ── */}
         <View style={styles.programBanner}>
           <Ionicons name="school-outline" size={18} color={colors.primary} />
           <Text style={styles.programBannerText} numberOfLines={1}>{profile?.program ?? '—'}</Text>
         </View>
 
         <SectionCard title="Account">
-          <MenuItem icon="person-outline" label="Edit Profile" sublabel="Update your personal information" onPress={() => {}} />
           <MenuItem icon="notifications-outline" label="Notifications" sublabel="Manage alerts and reminders" onPress={() => router.push('/(standalone)/notification')} last />
         </SectionCard>
 
@@ -158,16 +158,14 @@ export default function ProfileScreen() {
           <MenuItem icon="grid-outline" label="Timetable" tint="#7C3AED" onPress={() => router.push('/(standalone)/academics/timetable')} last />
         </SectionCard>
 
-        <SectionCard title="App">
-          <MenuItem icon="shield-checkmark-outline" label="Privacy Policy" tint={colors.info} onPress={() => {}} last />
+        <SectionCard title="Executives">
+          <MenuItem icon="school-outline" label="College Executives" sublabel="Leadership of the college" tint={NAVY_MID} onPress={() => router.push('/(standalone)/executives/college')} />
+          <MenuItem icon="people-outline" label="Department Executives" sublabel="Your department's leadership" tint={NAVY_MID} onPress={() => router.push('/(standalone)/executives/department')} last />
         </SectionCard>
 
-        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} activeOpacity={0.8}>
-          <Ionicons name="log-out-outline" size={20} color={colors.error} />
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
+        <ProfileAccountActions />
 
-        <Text style={styles.version}>SCISA • v1.0.0</Text>
+      <AppVersionBadge />
       </ScrollView>
     </View>
   );
@@ -175,7 +173,6 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.gray[100] },
-  // Sits at position absolute top-0 so over-scroll rubber-band reveals brand colour
   safeAreaFill: { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: HEADER_COLOR, zIndex: 0 },
   scroll: { paddingBottom: 120 },
 
@@ -201,7 +198,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
   statDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.2)' },
 
-  programBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.white, marginHorizontal: 16, marginTop: -1, marginBottom: 20, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3 },
+  programBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.white, marginHorizontal: 16, marginTop: -20, marginBottom: 20, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3 },
   programBannerText: { fontSize: 14, fontWeight: '600', color: colors.text.primary, flex: 1 },
 
   sectionCard: { backgroundColor: colors.white, marginHorizontal: 16, borderRadius: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, overflow: 'hidden' },
@@ -213,7 +210,5 @@ const styles = StyleSheet.create({
   menuLabel: { fontSize: 15, fontWeight: '500', color: colors.text.primary },
   menuSublabel: { fontSize: 12, color: colors.gray[500], marginTop: 1 },
 
-  signOutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginHorizontal: 16, marginTop: 8, paddingVertical: 15, borderRadius: 16, backgroundColor: `${colors.error}12`, borderWidth: 1, borderColor: `${colors.error}30` },
-  signOutText: { fontSize: 15, fontWeight: '600', color: colors.error },
   version: { textAlign: 'center', fontSize: 12, color: colors.gray[400], marginTop: 20 },
 });

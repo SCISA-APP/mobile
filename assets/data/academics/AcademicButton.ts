@@ -6,12 +6,7 @@ export type AcademicButton = {
 
 export const academicsButtonsData: AcademicButton[] = [
   {
-    title: 'Timetable',
-    image: require('../../../assets/images/timetable.jpg'),
-    route: '/(standalone)/academics/timetable',
-  },
-  {
-    title: '',
+    title: 'Academic Resources',
     image: require('../../../assets/images/academic_resources.png'),
     route: '/(standalone)/academics/academicResources',
   },
@@ -24,6 +19,11 @@ export const academicsButtonsData: AcademicButton[] = [
     title: 'Exam Arrangements',
     image: require('../../../assets/images/sitting_arrangement.jpeg'),
     route: '/(standalone)/academics/sittingArrangement',
+  },
+    {
+    title: 'Timetable',
+    image: require('../../../assets/images/timetable.jpg'),
+    route: '/(standalone)/academics/timetable',
   },
 ];
 

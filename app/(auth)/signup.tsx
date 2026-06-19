@@ -1,45 +1,33 @@
 import CustomButton from '@/components/buttons/CustomButton';
 import CustomDropdown from '@/components/inputs/CustomDropdown';
 import CustomInput from '@/components/inputs/CustomInput';
+import { programs, years } from '@/assets/data/programYearData';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/supabaseConfig';
 import { addStudentUser } from '@/utils/authUtils/addStudentUser';
 import { signUpWithEmail } from '@/utils/authUtils/signUpWithEmailUtil';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    Image,
-    ImageStyle,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    View,
-    ViewStyle,
+  Alert,
+  Image,
+  ImageStyle,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
 } from 'react-native';
 import SignUpGif from '../../assets/images/SignUp.gif';
 import colors from '../../constants/colors';
-
-const programs = [
-  'Computer Science',
-  'Physics',
-  'Actuarial Science',
-  'Chemistry',
-  'Environmental Science',
-  'Biological Science',
-  'Biochemistry',
-  'Mathematics',
-  'Optometry',
-  'Meteorological and Climate Sciences',
-  'Food Science and Technology',
-  'Statistics',
-];
-
-const years = [100, 200, 300, 400, 500, 600];
+import SignUpSuccessModal from '@/components/modals/SignUpSuccessModal';
 
 const SignUp = () => {
   const router = useRouter();
+  const { setIsSigningUp } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -47,6 +35,7 @@ const SignUp = () => {
   const [program, setProgram] = useState<string | number>('');
   const [year, setYear] = useState<string | number>('');
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !program || !year) {
@@ -57,12 +46,13 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      // 1. Create Firebase Auth account and send verification email
+      // Block AuthGuard BEFORE Supabase fires onAuthStateChange
+      setIsSigningUp(true);
+
       const user = await signUpWithEmail(email, password);
 
-      // 2. Write student profile to Firestore
       await addStudentUser({
-        uid: user.uid,
+        uid: user.id,
         fullName,
         email,
         program: String(program),
@@ -70,94 +60,109 @@ const SignUp = () => {
         permission: 'student',
       });
 
-      // 3. Let the user know to verify their email before logging in
-      Alert.alert(
-        'Account Created',
-        'A verification email has been sent to your inbox. Please verify your email before logging in.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
-      );
+      setShowSuccessModal(true);
     } catch (error: any) {
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          Alert.alert('Email Taken', 'An account with this email already exists.');
-          break;
-        case 'auth/weak-password':
-          Alert.alert('Weak Password', 'Password must be at least 6 characters.');
-          break;
-        case 'auth/invalid-email':
-          Alert.alert('Invalid Email', 'Please enter a valid email address.');
-          break;
-        default:
-          Alert.alert('Sign Up Failed', error.message || 'Something went wrong.');
+      setIsSigningUp(false);
+      const message = error.message || '';
+      if (message.includes('already registered') || message.includes('already exists')) {
+        Alert.alert('Email Taken', 'An account with this email already exists.');
+      } else if (message.includes('Password should be')) {
+        Alert.alert('Weak Password', 'Password must be at least 6 characters.');
+      } else if (message.includes('Invalid email')) {
+        Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      } else {
+        Alert.alert('Sign Up Failed', message || 'Something went wrong.');
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleModalClose = async () => {
+    setShowSuccessModal(false);
+
+    // Sign out FIRST — this clears the Supabase session so AuthGuard
+    // sees no session when we lower the flag and navigate to login.
+    // Without this, lowering isSigningUp with a live session immediately
+    // triggers the `session && inAuthGroup` branch → redirect to tabs.
+    await supabase.auth.signOut();
+
+    // Now safe to lower the flag: session is null, AuthGuard stays idle
+    setIsSigningUp(false);
+
+    router.replace('/(auth)/login');
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <View style={styles.inner}>
-        <Image source={SignUpGif} style={styles.gif} resizeMode="contain" />
+    <>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.inner}>
+          <Image source={SignUpGif} style={styles.gif} resizeMode="contain" />
 
-        <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.title}>Create Account</Text>
 
-        <View style={styles.inputContainer}>
-          <CustomInput
-            placeholder="Full Name"
-            icon="person-outline"
-            value={fullName}
-            onChangeText={setFullName}
+          <View style={styles.inputContainer}>
+            <CustomInput
+              placeholder="Full Name (As on your Student Card)"
+              icon="person-outline"
+              value={fullName}
+              onChangeText={setFullName}
+            />
+            <CustomInput
+              placeholder="Email Address"
+              icon="mail-outline"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <CustomInput
+              placeholder="Password"
+              icon="lock-closed-outline"
+              secure
+              value={password}
+              onChangeText={setPassword}
+            />
+          </View>
+
+          <View style={{ width: '100%', zIndex: 20 }}>
+            <CustomDropdown
+              placeholder="Program"
+              data={programs}
+              value={program}
+              onValueChange={setProgram}
+              icon="school-outline"
+            />
+          </View>
+
+          <View style={{ width: '100%', marginBottom: 20, zIndex: 10 }}>
+            <CustomDropdown
+              placeholder="Year / Level"
+              data={years}
+              value={year}
+              onValueChange={setYear}
+              icon="calendar-outline"
+            />
+          </View>
+
+          <CustomButton
+            label={loading ? 'Creating account...' : 'Sign Up'}
+            onPress={handleSignUp}
           />
-          <CustomInput
-            placeholder="Email Address"
-            icon="mail-outline"
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <CustomInput
-            placeholder="Password"
-            icon="lock-closed-outline"
-            secure
-            value={password}
-            onChangeText={setPassword}
-          />
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+              <Text style={styles.loginLink}>Login</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+      </KeyboardAvoidingView>
 
-        <View style={{ width: '100%', zIndex: 20 }}>
-          <CustomDropdown
-            placeholder="Program"
-            data={programs}
-            value={program}
-            onValueChange={setProgram}
-            icon="school-outline"
-          />
-        </View>
-
-        <View style={{ width: '100%', marginBottom: 20, zIndex: 10 }}>
-          <CustomDropdown
-            placeholder="Year / Level"
-            data={years}
-            value={year}
-            onValueChange={setYear}
-            icon="calendar-outline"
-          />
-        </View>
-
-        <CustomButton label={loading ? 'Creating account...' : 'Sign Up'} onPress={handleSignUp} />
-
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-            <Text style={styles.loginLink}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+      <SignUpSuccessModal visible={showSuccessModal} onClose={handleModalClose} />
+    </>
   );
 };
 

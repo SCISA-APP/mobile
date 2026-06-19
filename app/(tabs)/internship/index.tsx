@@ -1,8 +1,9 @@
 import colors from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -14,41 +15,116 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ListingCard } from '@/components/cards/ListingCard';
-import { DEPARTMENTS, Department, LISTINGS, Listing } from '@/assets/data/listings';
+import { DEPARTMENTS, Department, Listing } from '@/assets/data/listings';
 import { OpportunitiesHeader } from '@/components/headers/OpportunitiesHeader';
+import { supabase } from '@/supabaseConfig';
 
 const HEADER_COLOR = '#003080';
 const ALL_DEPT = 'All' as const;
+const PAGE_SIZE = 10;
 type FilterDept = Department | typeof ALL_DEPT;
 
 export default function InternshipsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
   const [activeDept, setActiveDept] = useState<FilterDept>(ALL_DEPT);
   const [search, setSearch] = useState('');
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
+  const pageRef = useRef(0);
+  const searchRef = useRef('');
+  const deptRef = useRef<FilterDept>(ALL_DEPT);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchListings = useCallback(async (reset = false) => {
+    if (loading) return;
+    setLoading(true);
+
+    const from = reset ? 0 : pageRef.current * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    let query = supabase
+      .from('internship_listings')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (deptRef.current !== ALL_DEPT) {
+      query = query.eq('department', deptRef.current);
+    }
+
+    if (searchRef.current.trim()) {
+      const q = searchRef.current.trim();
+      query = query.or(
+        `role.ilike.%${q}%,company.ilike.%${q}%,location.ilike.%${q}%`
+      );
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching listings:', error);
+      setLoading(false);
+      return;
+    }
+
+    const results = (data as Listing[]) || [];
+
+    setListings((prev) => (reset ? results : [...prev, ...results]));
+    setHasMore(results.length === PAGE_SIZE);
+    if (!reset) pageRef.current += 1;
+    else pageRef.current = 1;
+
+    setLoading(false);
   }, []);
 
-  const filtered = useMemo<Listing[]>(() => {
-    const q = search.toLowerCase();
-    return LISTINGS.filter((l) => {
-      const matchDept = activeDept === ALL_DEPT || l.department === activeDept;
-      const matchSearch =
-        !q ||
-        l.role.toLowerCase().includes(q) ||
-        l.company.toLowerCase().includes(q) ||
-        l.location.toLowerCase().includes(q);
-      return matchDept && matchSearch;
-    });
-  }, [activeDept, search]);
+  // Reset and refetch when dept or search changes
+  const resetFetch = useCallback(() => {
+    pageRef.current = 0;
+    setListings([]);
+    setHasMore(true);
+    fetchListings(true);
+  }, [fetchListings]);
+
+  useEffect(() => {
+    resetFetch();
+  }, []);
+
+  const handleDeptChange = (dept: FilterDept) => {
+    setActiveDept(dept);
+    deptRef.current = dept;
+    resetFetch();
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearch(text);
+    searchRef.current = text;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      resetFetch();
+    }, 400);
+  };
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    pageRef.current = 0;
+    await fetchListings(true);
+    setRefreshing(false);
+  }, [fetchListings]);
+
+  const handleEndReached = () => {
+    if (!loading && hasMore) {
+      fetchListings(false);
+    }
+  };
 
   return (
     <View style={styles.root}>
-      <OpportunitiesHeader listingsCount={LISTINGS.length} />
+      <OpportunitiesHeader listingsCount={listings.length} />
 
       <View style={styles.searchWrap}>
         <Ionicons name="search-outline" size={17} color={colors.gray[400]} style={{ marginRight: 8 }} />
@@ -57,11 +133,11 @@ export default function InternshipsScreen() {
           placeholder="Search roles, companies, locations…"
           placeholderTextColor={colors.gray[400]}
           value={search}
-          onChangeText={setSearch}
+          onChangeText={handleSearchChange}
           returnKeyType="search"
         />
         {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch('')}>
+          <TouchableOpacity onPress={() => handleSearchChange('')}>
             <Ionicons name="close-circle" size={17} color={colors.gray[400]} />
           </TouchableOpacity>
         )}
@@ -73,7 +149,7 @@ export default function InternshipsScreen() {
             <TouchableOpacity
               key={dept}
               style={[styles.tab, activeDept === dept && styles.tabActive]}
-              onPress={() => setActiveDept(dept)}
+              onPress={() => handleDeptChange(dept)}
             >
               <Text style={[styles.tabText, activeDept === dept && styles.tabTextActive]} numberOfLines={1}>
                 {dept === ALL_DEPT ? 'All' : dept.replace(' Science', ' Sci.')}
@@ -84,22 +160,26 @@ export default function InternshipsScreen() {
       </View>
 
       <FlatList
-        data={filtered}
+        data={listings}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.3}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
+            onRefresh={handleRefresh}
             colors={[HEADER_COLOR]}
             tintColor={HEADER_COLOR}
           />
         }
         ListHeaderComponent={
-          <Text style={styles.resultCount}>
-            {filtered.length} {filtered.length === 1 ? 'listing' : 'listings'}
-          </Text>
+          !loading || listings.length > 0 ? (
+            <Text style={styles.resultCount}>
+              {listings.length} {listings.length === 1 ? 'listing' : 'listings'}
+            </Text>
+          ) : null
         }
         renderItem={({ item }) => (
           <ListingCard
@@ -107,12 +187,25 @@ export default function InternshipsScreen() {
             onPress={() => router.push(`/internship/${item.id.trim()}`)}
           />
         )}
+        ListFooterComponent={
+          loading ? (
+            <ActivityIndicator
+              size="small"
+              color={HEADER_COLOR}
+              style={{ paddingVertical: 20 }}
+            />
+          ) : !hasMore && listings.length > 0 ? (
+            <Text style={styles.endText}>No more listings</Text>
+          ) : null
+        }
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="briefcase-outline" size={52} color={colors.gray[300]} />
-            <Text style={styles.emptyTitle}>No listings found</Text>
-            <Text style={styles.emptySub}>Try adjusting your search or department filter</Text>
-          </View>
+          !loading ? (
+            <View style={styles.empty}>
+              <Ionicons name="briefcase-outline" size={52} color={colors.gray[300]} />
+              <Text style={styles.emptyTitle}>No listings found</Text>
+              <Text style={styles.emptySub}>Try adjusting your search or department filter</Text>
+            </View>
+          ) : null
         }
       />
     </View>
@@ -159,6 +252,10 @@ const styles = StyleSheet.create({
     fontSize: 11, color: colors.gray[400], fontWeight: '600',
     marginHorizontal: 20, marginBottom: 8,
     textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+  endText: {
+    textAlign: 'center', fontSize: 12,
+    color: colors.gray[400], paddingVertical: 16,
   },
 
   empty: { alignItems: 'center', paddingVertical: 80, gap: 8 },

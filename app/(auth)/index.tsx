@@ -8,7 +8,7 @@ import colors from '../../constants/colors';
 
 const SplashScreen: React.FC = () => {
   const router = useRouter();
-  const { firebaseUser, isLoading } = useAuth();
+  const { session, isLoading } = useAuth();
 
   useEffect(() => {
     if (isLoading) return; // Wait for Firebase to resolve auth state
@@ -17,7 +17,7 @@ const SplashScreen: React.FC = () => {
       // Brief splash delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      if (firebaseUser) {
+      if (session) {
         // Already signed in — go straight to the app
         router.replace('/(tabs)/home');
         return;
@@ -34,7 +34,7 @@ const SplashScreen: React.FC = () => {
     };
 
     navigate();
-  }, [isLoading, firebaseUser]);
+  }, [isLoading, session]);
 
   return (
     <View style={styles.container}>

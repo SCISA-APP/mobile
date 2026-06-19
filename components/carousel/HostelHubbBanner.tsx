@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // ── config — swap these for real store URLs ───────────────────────────────────
-const APP_STORE_URL = 'https://apps.apple.com/app/hostelhubb';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/hostelhubb/id6738483533';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.Hostelhubb.Hostelhubb';
 
 const HH_RED       = '#80040e';   // HostelHubb brand red

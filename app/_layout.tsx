@@ -9,28 +9,25 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-/**
- * Watches auth state and redirects to the correct route group.
- * Lives inside AuthProvider so it can read context.
- */
 function AuthGuard() {
-  const { firebaseUser, isLoading } = useAuth();
+  const { session, isLoading, isSigningUp } = useAuth(); // ← consume isSigningUp
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return; // Wait until Firebase has resolved
+    if (isLoading) return;
+
+    // ⛔ Don't redirect while the sign-up success modal is showing
+    if (isSigningUp) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (!firebaseUser && !inAuthGroup) {
-      // Signed out but trying to access a protected screen
+    if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (firebaseUser && inAuthGroup) {
-      // Signed in but sitting on an auth screen
+    } else if (session && inAuthGroup) {
       router.replace('/(tabs)/home');
     }
-  }, [firebaseUser, isLoading, segments]);
+  }, [session, isLoading, isSigningUp, segments]);
 
   return null;
 }

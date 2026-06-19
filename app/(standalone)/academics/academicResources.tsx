@@ -42,9 +42,16 @@ export default function AcademicResources() {
         if (!storedUser) return;
         const user = JSON.parse(storedUser);
         const program = user.program?.toLowerCase();
-        const department = Object.values(academicData).find(
-          (dept: any) => dept.department.toLowerCase() === program
-        ) as DepartmentData | undefined;
+
+        //testing phase for a department
+        const department =   Object.values(academicData).find(
+          (dept: any) => dept.department === 'Chemistry'
+          ) as DepartmentData | undefined;
+
+        // const department = Object.values(academicData).find(
+        //   (dept: any) => dept.department.toLowerCase() === program
+        // ) as DepartmentData | undefined;
+
         if (department) setProgramData(department);
       } catch (error) {
         console.error('Error loading user program:', error);

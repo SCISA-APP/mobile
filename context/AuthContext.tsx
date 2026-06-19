@@ -1,12 +1,13 @@
-import { auth } from '@/firebaseConfig';
+import { supabase } from '@/supabaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { Session } from '@supabase/supabase-js';
 import {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
 } from 'react';
 
 const STUDENT_USER_KEY = '@student_user';
@@ -21,57 +22,57 @@ interface StudentUser {
 }
 
 interface AuthContextValue {
-  /** Firebase auth user — null if signed out, undefined while loading */
-  firebaseUser: User | null | undefined;
-  /** Cached Firestore profile stored in AsyncStorage */
+  session: Session | null | undefined;
   studentUser: StudentUser | null;
-  /** True while the initial auth state is being resolved */
   isLoading: boolean;
-  /** Call after login to cache the student profile locally */
+  isSigningUp: boolean;              // ← NEW: true while success modal is visible
+  setIsSigningUp: (v: boolean) => void; // ← NEW
   cacheStudentUser: (data: StudentUser) => Promise<void>;
-  /** Clears local cache — call after sign-out */
   clearStudentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
-  firebaseUser: undefined,
+  session: undefined,
   studentUser: null,
   isLoading: true,
+  isSigningUp: false,
+  setIsSigningUp: () => {},
   cacheStudentUser: async () => {},
   clearStudentUser: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [firebaseUser, setFirebaseUser] = useState<User | null | undefined>(undefined);
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [studentUser, setStudentUser] = useState<StudentUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   useEffect(() => {
-    // Load cached student profile from AsyncStorage immediately so we can
-    // show the right screen even before the Firebase listener fires.
     AsyncStorage.getItem(STUDENT_USER_KEY).then((raw) => {
       if (raw) {
         try {
           setStudentUser(JSON.parse(raw));
         } catch {
-          // corrupted data — ignore
+          // corrupted — ignore
         }
       }
     });
 
-    // Firebase auth state listener — persisted across restarts thanks to
-    // getReactNativePersistence configured in firebaseConfig.ts.
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setFirebaseUser(user);
-      if (!user) {
-        // Signed out — clear local cache
-        setStudentUser(null);
-        AsyncStorage.removeItem(STUDENT_USER_KEY);
-      }
+    supabase.auth.getSession().then(({ data }) => {
+      console.log('RESTORED SESSION:', data.session);
+      setSession(data.session);
       setIsLoading(false);
     });
 
-    return unsubscribe;
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (!session) {
+        setStudentUser(null);
+        AsyncStorage.removeItem(STUDENT_USER_KEY);
+      }
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   const cacheStudentUser = async (data: StudentUser) => {
@@ -86,7 +87,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ firebaseUser, studentUser, isLoading, cacheStudentUser, clearStudentUser }}
+      value={{
+        session,
+        studentUser,
+        isLoading,
+        isSigningUp,
+        setIsSigningUp,
+        cacheStudentUser,
+        clearStudentUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
