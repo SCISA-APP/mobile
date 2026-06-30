@@ -29,7 +29,7 @@ import SignUpSuccessModal from '@/components/modals/SignUpSuccessModal';
 // and malformed/incomplete TLDs (e.g. "user@school.comf" still passes
 // this regex since "comf" is a legal-looking TLD string; see note below
 // on why we *also* keep a known-TLD check for cases like this).
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;  
 
 // Common, well-known TLDs. Not exhaustive, but it catches the typo
 // pattern you're describing (.comf, .con, .cmo, etc.) when the typo'd
