@@ -41,7 +41,7 @@ export default function HomeHeader() {
             resizeMode="contain"
           />
           <View style={{ flex: 1 }}>
-            <Text style={styles.greeting}>{getGreeting()} 👋</Text>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
             <Text style={styles.greetingName}>{firstName(studentUser?.fullName)}</Text>
             {studentUser?.program && (
               <Text style={styles.programTag} numberOfLines={1}>

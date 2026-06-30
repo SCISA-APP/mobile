@@ -25,6 +25,33 @@ import SignUpGif from '../../assets/images/SignUp.gif';
 import colors from '../../constants/colors';
 import SignUpSuccessModal from '@/components/modals/SignUpSuccessModal';
 
+// Practical email validator — catches missing '@', missing domain,
+// and malformed/incomplete TLDs (e.g. "user@school.comf" still passes
+// this regex since "comf" is a legal-looking TLD string; see note below
+// on why we *also* keep a known-TLD check for cases like this).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+// Common, well-known TLDs. Not exhaustive, but it catches the typo
+// pattern you're describing (.comf, .con, .cmo, etc.) when the typo'd
+// TLD isn't itself a real one.
+const COMMON_TLDS = new Set([
+  'com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'co', 'io',
+  'ca', 'us', 'uk', 'info', 'biz', 'me', 'app', 'dev',
+]);
+
+const isValidEmail = (value: string) => {
+  const trimmed = value.trim();
+
+  if (!EMAIL_REGEX.test(trimmed)) return false;
+
+  // Extra check on the TLD specifically, so "school.comf" is rejected
+  // even though it matches the general shape of a valid email.
+  const domainPart = trimmed.split('@')[1] ?? '';
+  const tld = domainPart.split('.').pop()?.toLowerCase() ?? '';
+
+  return COMMON_TLDS.has(tld);
+};
+
 const SignUp = () => {
   const router = useRouter();
   const { setIsSigningUp } = useAuth();
@@ -40,6 +67,14 @@ const SignUp = () => {
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !program || !year) {
       Alert.alert('Missing Information', 'Please fill in all fields.');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      Alert.alert(
+        'Invalid Email',
+        'Please enter a valid email address (e.g. name@example.com).'
+      );
       return;
     }
 
@@ -115,6 +150,7 @@ const SignUp = () => {
               placeholder="Email Address"
               icon="mail-outline"
               keyboardType="email-address"
+              autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
             />

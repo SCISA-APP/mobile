@@ -44,13 +44,13 @@ export default function AcademicResources() {
         const program = user.program?.toLowerCase();
 
         //testing phase for a department
-        const department =   Object.values(academicData).find(
-          (dept: any) => dept.department === 'Chemistry'
-          ) as DepartmentData | undefined;
+        // const department =   Object.values(academicData).find(
+        //   (dept: any) => dept.department === 'Statistics'
+        //   ) as DepartmentData | undefined;
 
-        // const department = Object.values(academicData).find(
-        //   (dept: any) => dept.department.toLowerCase() === program
-        // ) as DepartmentData | undefined;
+        const department = Object.values(academicData).find(
+          (dept: any) => dept.department.toLowerCase() === program
+        ) as DepartmentData | undefined;
 
         if (department) setProgramData(department);
       } catch (error) {

@@ -7,5 +7,7 @@ export * from "./physics"
 export * from "./biochemistry"
 export * from "./environmentalScience"
 export * from "./chemistry"
+export * from "./maths"
+export * from "./statistics"
 
 // mathematics, met, stats, enssa,chem, 
